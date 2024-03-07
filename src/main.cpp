@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     set_qt_environment();
 
     QGuiApplication app(argc, argv);
-
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     app.setApplicationName(APPLICATION_NAME);
     app.setApplicationVersion(APPLICATION_VERSION);
     app.setDesktopFileName(DESKTOP_FILE_NAME);

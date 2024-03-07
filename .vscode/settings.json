@@ -87,6 +87,7 @@
         "complex": "cpp",
         "qstandardpaths": "cpp",
         "valarray": "cpp",
-        "qvector": "cpp"
+        "qvector": "cpp",
+        "*.inc": "cpp"
     }
 }
