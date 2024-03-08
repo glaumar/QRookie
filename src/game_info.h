@@ -1,7 +1,7 @@
 #ifndef QROOKIE_GAME_INFO
 #define QROOKIE_GAME_INFO
-#include <QCryptographicHash>
 #include <QString>
+#include <QObject>
 
 struct GameInfo {
     QString name;

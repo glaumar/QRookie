@@ -1,21 +1,18 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader 1.0
+import VrpDownloader
 
 Window {
     visible: true
     width: 1280
     height: 720
     title: qsTr("QRookie")
+    Component.onCompleted: {
+        vrp.updateMetadata();
+    }
 
     GridView {
-        // ScrollBar.vertical: ScrollBar {
-        //     parent: lv.parent
-        //     anchors.top: lv.top
-        //     anchors.left: lv.right
-        //     anchors.bottom: lv.bottom
-        // }
 
         id: games_view
 
@@ -31,6 +28,28 @@ Window {
             size: modelData.size
             last_updated: modelData.last_updated
             thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
+            onDownloadClicked: {
+                vrp.download(modelData.release_name);
+            }
+
+            // Connections {
+            //     target: vrp
+            //     onDownloadProgressChanged: function(release_name, progress, speed) {
+            //         if (modelData.release_name === release_name && !isNaN(progress)) {
+            //             console.log("Download progress changed: " + progress.toFixed(2) + "%");
+            //         }
+            //     }
+            //     onDownloadSucceeded: {
+            //         if (modelData.release_name === release_name) {
+            //             console.log("Download succeeded");
+            //         }
+            //     }
+            //     onDecompressSucceeded : {
+            //         if (modelData.release_name === release_name) {
+            //             console.log("Decompress succeeded");
+            //         }
+            //     }
+            // }
         }
 
     }
@@ -38,15 +57,11 @@ Window {
     VrpDownloader {
         id: vrp
 
-        Component.onCompleted: {
-            vrp.updateMetadata();
-            console.log(Qt.application.font.pointSize)
-            vrp.onMetadataUpdated.connect(function() {
-                console.log("Metadata updated");
-            });
-            vrp.onMetadataUpdateFailed.connect(function() {
-                console.log("Metadata update failed");
-            });
+        onMetadataUpdated: {
+            console.log("Metadata updated");
+        }
+        onMetadataUpdateFailed: {
+            console.log("Metadata update failed");
         }
     }
 

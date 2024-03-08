@@ -8,9 +8,14 @@ Rectangle {
     property var size
     property var last_updated
     property var thumbnail_path
+    // property bool downloaded
+    // property bool installed
+    // property bool decompressed
+
+    signal downloadClicked
 
     radius: 5
-    border.color: "lightgrey"
+    border.color: "grey"
     border.width: 2
     layer.enabled: true
 
@@ -66,6 +71,9 @@ Rectangle {
 
             width: parent.width
             text: qsTr("Downlad")
+            onClicked: {
+                downloadClicked();
+            }
         }
 
     }

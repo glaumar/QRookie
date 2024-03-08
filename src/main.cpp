@@ -8,18 +8,12 @@
 #include "import_qml_components_plugins.h"
 #include "import_qml_plugins.h"
 #include "qrookie.h"
-
-//TODO:delete
 #include "vrp_downloader.h"
-#include "game_info.h"
 
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     set_qt_environment();
 
     QGuiApplication app(argc, argv);
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     app.setApplicationName(APPLICATION_NAME);
     app.setApplicationVersion(APPLICATION_VERSION);
     app.setDesktopFileName(DESKTOP_FILE_NAME);
@@ -32,8 +26,7 @@ int main(int argc, char *argv[])
         &QQmlApplicationEngine::objectCreated,
         &app,
         [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl)
-                QCoreApplication::exit(-1);
+            if (!obj && url == objUrl) QCoreApplication::exit(-1);
         },
         Qt::QueuedConnection);
 
@@ -45,10 +38,6 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }
-
-    //TODO:delete
-    // VrpDownloader vrp_downloader;
-    // vrp_downloader.updateMetadata();
 
     return app.exec();
 }
