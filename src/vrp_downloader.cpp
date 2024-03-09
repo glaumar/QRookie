@@ -10,8 +10,7 @@
 #include "qrookie.h"
 #include "rclone_result.h"
 
-VrpDownloader::VrpDownloader(QObject* parent)
-    : QObject(parent), ready_to_download_(true) {
+VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
     RcloneInitialize();
 
     // Create cache and data directories
@@ -42,6 +41,22 @@ VrpDownloader::VrpDownloader(QObject* parent)
             &QTimer::timeout,
             this,
             &VrpDownloader::checkDownloadStatus);
+
+    connect(this, &VrpDownloader::downloadFailed, [this](QString release_name) {
+        qDebug() << "Download failed" << release_name;
+        downloads_queue_.pop_front();
+        emit downloadsQueueChanged();
+        if (!downloads_queue_.isEmpty()) downloadNext();
+    });
+
+    connect(this,
+            &VrpDownloader::downloadSucceeded,
+            [this](QString release_name) {
+                qDebug() << "Download finished: " << release_name;
+                downloads_queue_.pop_front();
+                emit downloadsQueueChanged();
+                if (!downloads_queue_.isEmpty()) downloadNext();
+            });
 }
 
 VrpDownloader::~VrpDownloader() {
@@ -143,7 +158,7 @@ void VrpDownloader::parseMetadata() {
             game_info.last_updated = parts[4];
             game_info.size = parts[5];
 
-            games_info_.append(QVariant::fromValue(game_info));
+            games_info_.append(game_info);
         }
     }
 
@@ -163,16 +178,26 @@ QString VrpDownloader::getGameId(const QString& release_name) const {
     return hash.result().toHex();
 }
 
-void VrpDownloader::download(const QString& release_name) {
-    if (!ready_to_download_) {
-        // TODO: add to queue
-        qWarning() << "Not ready to download";
+void VrpDownloader::download(const GameInfo& game) {
+    if (downloads_queue_.contains(game)) {
+        qDebug() << "Already in queue: " << game.release_name;
+    } else {
+        downloads_queue_.append(game);
+        emit downloadsQueueChanged();
+        qDebug() << "Queued: " << game.release_name;
+        if (downloads_queue_.size() == 1) downloadNext();
+    }
+
+    return;
+}
+void VrpDownloader::downloadNext() {
+    if (downloads_queue_.isEmpty()) {
+        qDebug() << "Queue is empty";
         return;
     }
 
-    qDebug() << "Downloading: " << release_name;
-    current_release_name_ = release_name;
-    QString id = getGameId(release_name);
+    qDebug() << "Downloading: " << downloads_queue_[0].release_name;
+    QString id = getGameId(downloads_queue_[0].release_name);
 
     // https://rclone.org/rc/#sync-copy
     QString rc_method("sync/copy");
@@ -203,7 +228,7 @@ void VrpDownloader::download(const QString& release_name) {
     if (result.isSuccessful()) {
         download_status_timer_.start(1000);
     } else {
-        emit downloadFailed(release_name);
+        emit downloadFailed(downloads_queue_[0].release_name);
         qWarning() << "Download game failed :"
                    << "\n\tgame: " << id << "\n\tstatus: " << result.status()
                    << "\n\toutput: " << result.output();
@@ -220,7 +245,6 @@ void VrpDownloader::checkDownloadStatus() {
     bool is_finished = doc_job.object()["finished"].toBool();
 
     if (!is_finished) {
-        ready_to_download_ = false;
         QString group = doc_job.object()["group"].toString();
 
         // https://rclone.org/rc/#core-stats
@@ -232,15 +256,14 @@ void VrpDownloader::checkDownloadStatus() {
         double transferred = group_stats_doc.object()["bytes"].toDouble();
         double total = group_stats_doc.object()["totalBytes"].toDouble();
         double speed = group_stats_doc.object()["speed"].toDouble();
-        emit downloadProgressChanged(current_release_name_,
-                                   transferred / total * 100,
-                                   speed);
+        emit downloadProgressChanged(downloads_queue_[0].release_name,
+                                     transferred / total * 100,
+                                     speed);
     } else {
-        ready_to_download_ = true;
         download_status_timer_.stop();
-        qDebug() << "Download finished: " << current_release_name_;
-        emit downloadSucceeded(current_release_name_);
-        decompressGame(current_release_name_);
+        auto release_name = downloads_queue_[0].release_name;
+        emit downloadSucceeded(release_name);
+        decompressGame(release_name);
     }
 }
 

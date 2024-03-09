@@ -1,9 +1,12 @@
 #ifndef QROOKIE_GAME_INFO
 #define QROOKIE_GAME_INFO
-#include <QString>
 #include <QObject>
+#include <QString>
 
 struct GameInfo {
+    bool operator==(const GameInfo& other) const {
+        return name == other.name && release_name == other.release_name;
+    }
     QString name;
     QString release_name;
     QString package_name;
@@ -19,5 +22,4 @@ struct GameInfo {
     Q_PROPERTY(QString last_updated MEMBER last_updated)
     Q_PROPERTY(QString size MEMBER size)
 };
-
 #endif /* QROOKIE_GAME_INFO */

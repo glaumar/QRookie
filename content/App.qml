@@ -3,66 +3,119 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
 
-Window {
+ApplicationWindow {
+    id: app
+
+    property SystemPalette globalPalette
+
     visible: true
     width: 1280
-    height: 720
+    height: 800
     title: qsTr("QRookie")
     Component.onCompleted: {
         vrp.updateMetadata();
     }
 
-    GridView {
+    VrpDownloader {
+        id: vrp
 
-        id: games_view
+        // onMetadataUpdated: {
+        //     console.log("Metadata updated");
+        // }
+        // onMetadataUpdateFailed: {
+        //     console.log("Metadata update failed");
+        // }
+    }
 
+    StackLayout {
+        currentIndex: bar.currentIndex
         anchors.fill: parent
-        model: vrp.gamesInfo
-        cellWidth: 360
-        cellHeight: 280 + Qt.application.font.pixelSize * 5
+        anchors.leftMargin: 10
+        anchors.topMargin: 10
 
-        delegate: GameDelegate {
-            width: games_view.cellWidth - 20
-            height: games_view.cellHeight - 20
-            name: modelData.name
-            size: modelData.size
-            last_updated: modelData.last_updated
-            thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
-            onDownloadClicked: {
-                vrp.download(modelData.release_name);
+        GridView {
+            id: games_tab
+
+            snapMode: GridView.SnapToRow
+            model: vrp.gamesInfo
+            cellWidth: 315
+            cellHeight: 255 + Qt.application.font.pixelSize * 7
+
+            ScrollBar.vertical: ScrollBar {
+                visible: true
             }
 
-            // Connections {
-            //     target: vrp
-            //     onDownloadProgressChanged: function(release_name, progress, speed) {
-            //         if (modelData.release_name === release_name && !isNaN(progress)) {
-            //             console.log("Download progress changed: " + progress.toFixed(2) + "%");
-            //         }
-            //     }
-            //     onDownloadSucceeded: {
-            //         if (modelData.release_name === release_name) {
-            //             console.log("Download succeeded");
-            //         }
-            //     }
-            //     onDecompressSucceeded : {
-            //         if (modelData.release_name === release_name) {
-            //             console.log("Decompress succeeded");
-            //         }
-            //     }
-            // }
+            delegate: GameDelegate {
+                id: gameDelegate
+
+                width: games_tab.cellWidth - 20
+                height: games_tab.cellHeight - 20
+                name: modelData.name
+                size: modelData.size
+                last_updated: modelData.last_updated
+                thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
+                onDownloadClicked: {
+                    vrp.download(modelData); 
+                }
+            }
+
+        }
+
+        ListView {
+            id: downloads_tab
+
+            spacing: 15
+            snapMode: GridView.SnapToRow
+            model: vrp.downloadsQueue
+
+            delegate: DownloadDelegate {
+                width: 640
+                height: 160
+                name: modelData.name
+                size: modelData.size
+                last_updated: modelData.last_updated
+                thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
+            }
+
+            ScrollBar.vertical: ScrollBar {
+                visible: true
+            }
+
+        }
+
+        Item {
+            id: deviceTab
+        }
+
+        Item {
+            id: settingsTab
         }
 
     }
 
-    VrpDownloader {
-        id: vrp
+    globalPalette: SystemPalette {
+        colorGroup: SystemPalette.Active
+    }
 
-        onMetadataUpdated: {
-            console.log("Metadata updated");
+    header: TabBar {
+        id: bar
+
+        TabButton {
+            text: qsTr("Games")
         }
-        onMetadataUpdateFailed: {
-            console.log("Metadata update failed");
+
+        TabButton {
+            text: qsTr("Downloads")
         }
+
+        TabButton {
+            text: qsTr("Devices")
+        }
+
+        TabButton {
+            text: qsTr("Settings")
+        }
+
     }
 
 }

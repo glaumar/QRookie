@@ -90,6 +90,7 @@
         "qvector": "cpp",
         "*.inc": "cpp",
         "qsharedpointer": "cpp",
-        "qjsondocument": "cpp"
+        "qjsondocument": "cpp",
+        "typeindex": "cpp"
     }
 }
