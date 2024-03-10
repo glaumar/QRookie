@@ -11,10 +11,13 @@
 
 class VrpDownloader : public QObject {
     Q_OBJECT
+    Q_ENUMS(Status)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
     Q_PROPERTY(QVariantList downloadsQueue READ downloadsQueue NOTIFY
                    downloadsQueueChanged)
+    Q_PROPERTY(QVariantList downloadedQueue READ downloadedQueue NOTIFY
+                   downloadedQueueChanged)
 
    public:
     enum Status {
@@ -28,7 +31,6 @@ class VrpDownloader : public QObject {
         Installed,
         Error
     };
-    Q_ENUM(Status)
 
     VrpDownloader(QObject* parent = nullptr);
     ~VrpDownloader();
@@ -62,11 +64,22 @@ class VrpDownloader : public QObject {
         return list;
     }
 
+    QVariantList downloadedQueue() const {
+        QVariantList list;
+        for (const auto& game_info : downloaded_queue_) {
+            list.append(QVariant::fromValue(game_info));
+        }
+
+        return list;
+    }
+
    signals:
     void metadataUpdated();
     void metadataUpdateFailed();
     void gamesInfoChanged();
     void downloadsQueueChanged();
+    void downloadedQueueChanged();
+    void statusChanged(QString release_name, Status status);
     void downloadFailed(QString release_name);
     void downloadProgressChanged(QString release_name,
                                  double progress,
@@ -89,10 +102,9 @@ class VrpDownloader : public QObject {
     QString data_path_;
     QVector<GameInfo> games_info_;
     QVector<GameInfo> downloads_queue_;
+    QVector<GameInfo> downloaded_queue_;
     QTimer download_status_timer_;
     int current_job_id_;
-    // QString current_release_name_;
-    // bool ready_to_download_;
 };
 
 #endif /* QROOKIE_VRP_DOWNLOADER */

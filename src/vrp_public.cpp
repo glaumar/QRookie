@@ -58,14 +58,14 @@ void VrpPublic::parseJson(const QByteArray &json) {
 
     QJsonDocument doc = QJsonDocument::fromJson(json);
     if (doc.isNull()) {
-        qDebug() << "Parsing vrp-public.json Error: invalid json :" << json;
+        qDebug() << "Parsing vrp-public.json Error: invalid json: " << json;
         emit failed();
         return;
     }
 
     QJsonObject obj = doc.object();
     if (obj.isEmpty()) {
-        qDebug() << "Parsing vrp-public.json Error: empty json :" << json;
+        qDebug() << "Parsing vrp-public.json Error: empty json: " << json;
         emit failed();
         return;
     }

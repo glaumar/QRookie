@@ -52,6 +52,7 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
     connect(this,
             &VrpDownloader::downloadSucceeded,
             [this](QString release_name) {
+                emit downloadProgressChanged(release_name, 1.0, 0.0);
                 qDebug() << "Download finished: " << release_name;
                 downloads_queue_.pop_front();
                 emit downloadsQueueChanged();
@@ -210,8 +211,6 @@ void VrpDownloader::downloadNext() {
                 "TPSLimit": 1.0,
                 "TPSLimitBurst": 3,
                 "MultiThreadStreams": 0,
-                "Progress": true,
-                "ProgressTerminalTitle":true,
                 "UserAgent": "rclone/v1.65.2"
         }
     })")
@@ -240,6 +239,7 @@ void VrpDownloader::checkDownloadStatus() {
     RcloneResult job_status =
         RcloneRPC(QString("job/status"),
                   QString(R"({"jobid":%1})").arg(current_job_id_));
+    //TODO: check if job_status is successful
     QJsonDocument doc_job =
         QJsonDocument::fromJson(job_status.output().toLocal8Bit());
     bool is_finished = doc_job.object()["finished"].toBool();
@@ -257,7 +257,7 @@ void VrpDownloader::checkDownloadStatus() {
         double total = group_stats_doc.object()["totalBytes"].toDouble();
         double speed = group_stats_doc.object()["speed"].toDouble();
         emit downloadProgressChanged(downloads_queue_[0].release_name,
-                                     transferred / total * 100,
+                                     transferred / total,
                                      speed);
     } else {
         download_status_timer_.stop();

@@ -18,13 +18,6 @@ ApplicationWindow {
 
     VrpDownloader {
         id: vrp
-
-        // onMetadataUpdated: {
-        //     console.log("Metadata updated");
-        // }
-        // onMetadataUpdateFailed: {
-        //     console.log("Metadata update failed");
-        // }
     }
 
     StackLayout {
@@ -55,41 +48,24 @@ ApplicationWindow {
                 last_updated: modelData.last_updated
                 thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
                 onDownloadClicked: {
-                    vrp.download(modelData); 
+                    vrp.download(modelData);
                 }
             }
 
         }
 
-        ListView {
+        Downloads {
             id: downloads_tab
-
-            spacing: 15
-            snapMode: GridView.SnapToRow
-            model: vrp.downloadsQueue
-
-            delegate: DownloadDelegate {
-                width: 640
-                height: 160
-                name: modelData.name
-                size: modelData.size
-                last_updated: modelData.last_updated
-                thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
-            }
-
-            ScrollBar.vertical: ScrollBar {
-                visible: true
-            }
-
+            vrp: vrp
         }
 
         Item {
             id: deviceTab
         }
 
-        Item {
-            id: settingsTab
-        }
+        // Item {
+        //     id: settingsTab
+        // }
 
     }
 
@@ -110,10 +86,6 @@ ApplicationWindow {
 
         TabButton {
             text: qsTr("Devices")
-        }
-
-        TabButton {
-            text: qsTr("Settings")
         }
 
     }
