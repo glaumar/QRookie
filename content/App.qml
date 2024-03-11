@@ -7,6 +7,7 @@ ApplicationWindow {
     id: app
 
     property SystemPalette globalPalette
+    property VrpDownloader vrp
 
     visible: true
     width: 1280
@@ -16,11 +17,11 @@ ApplicationWindow {
         vrp.updateMetadata();
     }
 
-    VrpDownloader {
-        id: vrp
-    }
-
     StackLayout {
+        // Item {
+        //     id: settings_tab
+        // }
+
         currentIndex: bar.currentIndex
         anchors.fill: parent
         anchors.leftMargin: 10
@@ -56,21 +57,19 @@ ApplicationWindow {
 
         Downloads {
             id: downloads_tab
-            vrp: vrp
         }
 
         Item {
-            id: deviceTab
+            id: device_tab
         }
-
-        // Item {
-        //     id: settingsTab
-        // }
 
     }
 
     globalPalette: SystemPalette {
         colorGroup: SystemPalette.Active
+    }
+
+    vrp: VrpDownloader {
     }
 
     header: TabBar {

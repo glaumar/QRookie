@@ -10,6 +10,7 @@ qt6_add_qml_module(content
         GameDelegate.qml
         Downloads.qml
         DownloadDelegate.qml
+        LocalDelegate.qml
     RESOURCES
         fonts/fonts.txt
 )

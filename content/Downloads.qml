@@ -1,9 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Layouts
 
 RowLayout {
-    property var vrp: vrp
     Layout.margins: 10
 
     ListView {
@@ -12,11 +11,24 @@ RowLayout {
         Layout.fillHeight: true
         implicitWidth: 600
         spacing: 20
-        snapMode: ListView.SnapToItem 
-        model: vrp.downloadsQueue
+        snapMode: ListView.SnapToItem
+        model: app.vrp.downloadsQueue
+        headerPositioning: ListView.PullBackHeader
 
-        header: Text {
-            text: "Downloading"
+        Text {
+            anchors.centerIn: downloading_list
+            text: qsTr("Empty")
+            font.bold: true
+            font.pointSize: Qt.application.font.pointSize * 2
+            color: app.globalPalette.text
+            visible: downloading_list.count <= 0
+        }
+
+        header: Label {
+            text: qsTr("Downloading")
+            font.bold: true
+            font.pointSize: Qt.application.font.pointSize * 2
+            color: app.globalPalette.text
         }
 
         delegate: DownloadDelegate {
@@ -24,47 +36,65 @@ RowLayout {
             height: 160
             name: modelData.name
             size: modelData.size
-            thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
+            thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
             progress: 0
+            status: app.vrp.getStatus(modelData)
+            Component.onCompleted: {
+                status = vrp.getStatus(modelData);
+            }
 
             Connections {
-                target: vrp
+                target: app.vrp
                 onDownloadProgressChanged: function(release_name, progress_, speed_) {
                     if (modelData.release_name === release_name)
                         progress = progress_;
 
                 }
+                onStatusChanged: function(release_name, status_) {
+                    if (modelData.release_name === release_name)
+                        status = status_;
+
+                }
             }
 
         }
+
     }
 
     ListView {
+        id: local_list
+
         Layout.fillHeight: true
         implicitWidth: 600
-
         spacing: 20
-        snapMode: ListView.SnapToItem 
-        model: vrp.downloadsQueue
+        snapMode: ListView.SnapToItem
+        model: app.vrp.localQueue
+        headerPositioning: ListView.PullBackHeader
 
-        delegate: DownloadDelegate {
+        Text {
+            anchors.centerIn: local_list
+            text: qsTr("Empty")
+            font.bold: true
+            font.pointSize: Qt.application.font.pointSize * 2
+            color: app.globalPalette.text
+            visible: local_list.count <= 0
+        }
+
+        header: Label {
+            text: qsTr("Local")
+            font.bold: true
+            font.pointSize: Qt.application.font.pointSize * 2
+            color: app.globalPalette.text
+        }
+
+        delegate: LocalDelegate {
             width: 640
             height: 160
             name: modelData.name
             size: modelData.size
-            thumbnail_path: "file://" + vrp.getGameThumbnailPath(modelData.package_name)
-            progress: 0
-
-            Connections {
-                target: vrp
-                onDownloadProgressChanged: function(release_name, progress_, speed_) {
-                    if (modelData.release_name === release_name)
-                        progress = progress_;
-
-                }
-            }
-
+            thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
         }
+
     }
 
 }

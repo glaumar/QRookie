@@ -16,20 +16,21 @@ class VrpDownloader : public QObject {
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
     Q_PROPERTY(QVariantList downloadsQueue READ downloadsQueue NOTIFY
                    downloadsQueueChanged)
-    Q_PROPERTY(QVariantList downloadedQueue READ downloadedQueue NOTIFY
-                   downloadedQueueChanged)
+    Q_PROPERTY(QVariantList localQueue READ localQueue NOTIFY localQueueChanged)
 
    public:
     enum Status {
-        Updatable,
-        Downloadable,
+        // Updatable,
+        // Downloadable,
         Queued,
         Downloading,
         Decompressing,
-        Installable,
-        Installing,
-        Installed,
-        Error
+        Local,
+        // Installable,
+        // Installing,
+        // Installed,
+        Error,
+        Unknown
     };
 
     VrpDownloader(QObject* parent = nullptr);
@@ -38,13 +39,23 @@ class VrpDownloader : public QObject {
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE void download(const GameInfo& game);
-    Q_INVOKABLE bool isDownloading(const QString& release_name) const {
-        return !downloads_queue_.empty() &&
-               downloads_queue_.first().release_name == release_name;
+    Q_INVOKABLE Status getStatus(const GameInfo& game);
+    Q_INVOKABLE bool isQueued(const GameInfo& game) const {
+        return !downloading_queue_.empty() && downloading_queue_.contains(game);
     }
-    Q_INVOKABLE bool isQueued(const QString& release_name) const {
-        return !downloads_queue_.empty() && downloads_queue_.contains(GameInfo{
-                                                .release_name = release_name});
+    Q_INVOKABLE bool isDownloading(const GameInfo& game) const {
+        return !downloading_queue_.empty() &&
+               downloading_queue_.first().release_name == game.release_name;
+    }
+    Q_INVOKABLE bool isDecompressing(const GameInfo& game) const {
+        return !decompressing_queue_.empty() &&
+               decompressing_queue_.contains(game);
+    }
+    Q_INVOKABLE bool isLocal(const GameInfo& game) const {
+        return local_queue_.contains(game);
+    }
+    Q_INVOKABLE bool isFailed(const GameInfo& game) const {
+        return failed_queue_.contains(game);
     }
 
     QVariantList gamesInfo() const {
@@ -57,16 +68,24 @@ class VrpDownloader : public QObject {
 
     QVariantList downloadsQueue() const {
         QVariantList list;
-        for (const auto& game_info : downloads_queue_) {
+        for (const auto& game_info : decompressing_queue_) {
+            list.append(QVariant::fromValue(game_info));
+        }
+
+        for (const auto& game_info : downloading_queue_) {
+            list.append(QVariant::fromValue(game_info));
+        }
+
+        for (const auto& game_info : failed_queue_) {
             list.append(QVariant::fromValue(game_info));
         }
 
         return list;
     }
 
-    QVariantList downloadedQueue() const {
+    QVariantList localQueue() const {
         QVariantList list;
-        for (const auto& game_info : downloaded_queue_) {
+        for (const auto& game_info : local_queue_) {
             list.append(QVariant::fromValue(game_info));
         }
 
@@ -78,15 +97,15 @@ class VrpDownloader : public QObject {
     void metadataUpdateFailed();
     void gamesInfoChanged();
     void downloadsQueueChanged();
-    void downloadedQueueChanged();
+    void localQueueChanged();
     void statusChanged(QString release_name, Status status);
-    void downloadFailed(QString release_name);
+    void downloadFailed(GameInfo game);
     void downloadProgressChanged(QString release_name,
                                  double progress,
                                  double speed);
-    void downloadSucceeded(QString release_name);
-    void decompressFailed(QString release_name);
-    void decompressSucceeded(QString release_name);
+    void downloadSucceeded(GameInfo game);
+    void decompressFailed(GameInfo game);
+    void decompressSucceeded(GameInfo game);
 
    public slots:
     void checkDownloadStatus();
@@ -94,15 +113,17 @@ class VrpDownloader : public QObject {
    private:
     void downloadMetadata();
     void parseMetadata();
-    void decompressGame(const QString& release_name);
+    void decompressGame(const GameInfo& game);
     void downloadNext();
 
     VrpPublic vrp_public_;
     QString cache_path_;
     QString data_path_;
     QVector<GameInfo> games_info_;
-    QVector<GameInfo> downloads_queue_;
-    QVector<GameInfo> downloaded_queue_;
+    QVector<GameInfo> downloading_queue_;
+    QVector<GameInfo> decompressing_queue_;
+    QVector<GameInfo> local_queue_;
+    QVector<GameInfo> failed_queue_;
     QTimer download_status_timer_;
     int current_job_id_;
 };

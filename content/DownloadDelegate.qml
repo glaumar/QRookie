@@ -2,6 +2,7 @@ import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpDownloader
 
 Rectangle {
     id: game_info
@@ -10,6 +11,7 @@ Rectangle {
     property var size
     property var thumbnail_path
     property var progress
+    property var status
 
     radius: 5
     layer.enabled: true
@@ -44,6 +46,7 @@ Rectangle {
         anchors.left: thumbnail.right
         anchors.top: parent.top
         text: name
+        width: parent.width - thumbnail.width - 30
         font.bold: true
         wrapMode: Text.WordWrap
         height: font.pixelSize * 2
@@ -71,18 +74,36 @@ Rectangle {
     }
 
     Text {
+        id: status_lalel
         anchors.margins: 10
         anchors.right: progress_bar.right
         anchors.bottom: progress_bar.top
         text: {
-            if (isNaN(progress) || progress <= 1e-36) {
+            if (status === VrpDownloader.Queued) {
+                progress_bar.indeterminate = false;
                 return qsTr("Queued");
+            } else if (status === VrpDownloader.Decompressing) {
+                progress_bar.indeterminate = true;
+                return qsTr("Decompressing");
+            } else if (status === VrpDownloader.Downloading) {
+                if (isNaN(progress) || progress <= 1e-36) {
+                    progress_bar.indeterminate = true;
+                    return qsTr("Starting Downloading");
+                } else {
+                    progress_bar.indeterminate = false;
+                    let downloaded = progress * size;
+                    let downloaded_unit = downloaded < 1024 ? "MB" : "GB";
+                    downloaded = downloaded < 1024 ? downloaded : downloaded / 1024;
+                    let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
+                    return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
+                }
+            } else if (status === VrpDownloader.Error) {
+                progress_bar.indeterminate = false;
+                status_lalel.color = "red"
+                return qsTr("Error");
             } else {
-                let downloaded = progress * size;
-                let downloaded_unit = downloaded < 1024? "MB": "GB";
-                downloaded = downloaded < 1024? downloaded: downloaded / 1024;
-                let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-                return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
+                progress_bar.indeterminate = false;
+                return qsTr("Unknown Status");
             }
         }
         color: app.globalPalette.text
@@ -94,5 +115,4 @@ Rectangle {
         verticalOffset: 6
         color: app.globalPalette.shadow
     }
-
 }
