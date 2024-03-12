@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QROOKIE_VRP_DOWNLOADER
 #define QROOKIE_VRP_DOWNLOADER
 
@@ -115,6 +116,8 @@ class VrpDownloader : public QObject {
     void parseMetadata();
     void decompressGame(const GameInfo& game);
     void downloadNext();
+    bool saveLocalQueue();
+    bool loadLocalQueue();
 
     VrpPublic vrp_public_;
     QString cache_path_;

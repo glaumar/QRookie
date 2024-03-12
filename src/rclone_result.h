@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QROOKIE_RCLONE_RESULT
 #define QROOKIE_RCLONE_RESULT
 

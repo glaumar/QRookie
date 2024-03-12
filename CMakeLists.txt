@@ -6,7 +6,7 @@ option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(qrookieApp
+project(qrookie
     VERSION 0.1.0
     DESCRIPTION "VRP Rookie Sideloader for linux (unofficial)"
     HOMEPAGE_URL https://github.com/glaumar/QRookie
@@ -29,24 +29,24 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 configure_file(src/qrookie.h.in qrookie.h)
 
-qt_add_executable(qrookieApp src/main.cpp
+qt_add_executable(qrookie src/main.cpp
                              src/vrp_public.cpp src/vrp_public.h
                              src/vrp_downloader.cpp src/vrp_downloader.h
                              src/game_info.h
                              src/librclone_wrapper.h
                              src/rclone_result.h)
 
-qt_add_resources(qrookieApp "configuration"
+qt_add_resources(qrookie "configuration"
     PREFIX "/"
     FILES
         qtquickcontrols2.conf
 )
 
 # librclone
-target_include_directories(qrookieApp PRIVATE "third/rclone/")
-target_link_directories(qrookieApp PRIVATE "third/rclone/")
+target_include_directories(qrookie PRIVATE "third/rclone/")
+target_link_directories(qrookie PRIVATE "third/rclone/")
 
-target_link_libraries(qrookieApp PRIVATE
+target_link_libraries(qrookie PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
@@ -55,18 +55,10 @@ target_link_libraries(qrookieApp PRIVATE
     librclone.a
 )
 
-if (BUILD_QDS_COMPONENTS)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/qmlcomponents)
-endif()
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
-if (LINK_INSIGHT)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/insight)
-endif ()
-
 include(GNUInstallDirs)
-install(TARGETS qrookieApp
+install(TARGETS qrookie
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef QROOKIE_VRP_PUBLIC
 #define QROOKIE_VRP_PUBLIC
 

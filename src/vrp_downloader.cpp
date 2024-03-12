@@ -1,6 +1,7 @@
 #include "vrp_downloader.h"
 
 #include <QDir>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
@@ -74,14 +75,19 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
         emit downloadsQueueChanged();
         emit localQueueChanged();
     });
+
+    connect(this, &VrpDownloader::localQueueChanged, [this]() {
+        saveLocalQueue();
+    });
+
+    loadLocalQueue();
 }
 
 VrpDownloader::~VrpDownloader() {
     RcloneFinalize();
 
+    saveLocalQueue();
     // TODO: cleanup cache
-
-    // TODO: save local_queue_ to a file
 }
 
 VrpDownloader::Status VrpDownloader::getStatus(const GameInfo& game) {
@@ -354,5 +360,57 @@ QString VrpDownloader::getGameThumbnailPath(const QString& package_name) {
     } else {
         // TODO: return a default image
         return data_path_ + "/.meta/thumbnails/jp.co.avex.anicastmaker.jpg";
+    }
+}
+
+bool VrpDownloader::saveLocalQueue() {
+    QJsonArray jsonArray;
+    for (const auto& game : local_queue_) {
+        QJsonObject jsonObject;
+        jsonObject["name"] = game.name;
+        jsonObject["release_name"] = game.release_name;
+        jsonObject["package_name"] = game.package_name;
+        jsonObject["version_code"] = game.version_code;
+        jsonObject["last_updated"] = game.last_updated;
+        jsonObject["size"] = game.size;
+        jsonArray.append(jsonObject);
+    }
+
+    QJsonDocument jsonDoc(jsonArray);
+    QFile file(data_path_ + "/local_queue.json");
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(jsonDoc.toJson());
+        return true;
+    } else {
+        qWarning("saveLocalQueue: Failed to open file for writing.");
+        return false;
+    }
+}
+
+bool VrpDownloader::loadLocalQueue() {
+    QFile file(data_path_ + "/local_queue.json");
+    if (!file.exists()) {
+        qWarning() << "local_queue.json not found";
+        return false;
+    }
+
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray data = file.readAll();
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+        QJsonArray jsonArray = jsonDoc.array();
+        for (const auto& value : jsonArray) {
+            GameInfo game;
+            game.name = value.toObject()["name"].toString();
+            game.release_name = value.toObject()["release_name"].toString();
+            game.package_name = value.toObject()["package_name"].toString();
+            game.version_code = value.toObject()["version_code"].toString();
+            game.last_updated = value.toObject()["last_updated"].toString();
+            game.size = value.toObject()["size"].toString();
+            local_queue_.append(game);
+        }
+        return true;
+    } else {
+        qWarning("loadLocalQueue: Failed to open file for reading.");
+        return false;
     }
 }

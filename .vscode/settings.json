@@ -91,6 +91,7 @@
         "*.inc": "cpp",
         "qsharedpointer": "cpp",
         "qjsondocument": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "qjsonarray": "cpp"
     }
 }
