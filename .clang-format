@@ -4,8 +4,8 @@ BasedOnStyle:  Google
 IndentWidth:     4
 
 # force arguments and parameters to one-line-each if the statement overflows
-BinPackArguments: false
-BinPackParameters: false
-AllowAllArgumentsOnNextLine: false
-ExperimentalAutoDetectBinPacking: false
-AllowAllParametersOfDeclarationOnNextLine: false
+# BinPackArguments: false
+# BinPackParameters: false
+# AllowAllArgumentsOnNextLine: false
+# ExperimentalAutoDetectBinPacking: false
+# AllowAllParametersOfDeclarationOnNextLine: false

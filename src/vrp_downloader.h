@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QTimer>
 #include <QVariant>
+#include "device_manager.h"
 
 #include "game_info.h"
 #include "vrp_public.h"
@@ -129,6 +130,7 @@ class VrpDownloader : public QObject {
     QVector<GameInfo> failed_queue_;
     QTimer download_status_timer_;
     int current_job_id_;
+    DeviceManager device_manager_;
 };
 
 #endif /* QROOKIE_VRP_DOWNLOADER */
