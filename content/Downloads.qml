@@ -39,22 +39,25 @@ RowLayout {
             thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
             progress: 0
             status: app.vrp.getStatus(modelData)
-            Component.onCompleted: {
-                status = vrp.getStatus(modelData);
-            }
 
             Connections {
-                target: app.vrp
-                onDownloadProgressChanged: function(release_name, progress_, speed_) {
+                function onDownloadProgressChanged(release_name, progress_, speed_) {
                     if (modelData.release_name === release_name)
                         progress = progress_;
 
                 }
-                onStatusChanged: function(release_name, status_) {
+
+                function onStatusChanged(release_name, status_) {
                     if (modelData.release_name === release_name)
                         status = status_;
 
                 }
+
+                // function onConnectedDeviceChanged() {
+                //     status = app.vrp.getStatus(modelData);
+                // }
+
+                target: app.vrp
             }
 
         }

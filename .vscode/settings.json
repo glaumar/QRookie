@@ -92,6 +92,11 @@
         "qsharedpointer": "cpp",
         "qjsondocument": "cpp",
         "typeindex": "cpp",
-        "qjsonarray": "cpp"
+        "qjsonarray": "cpp",
+        "qregularexpression": "cpp",
+        "qqmlapplicationengine": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "qcryptographichash": "cpp"
     }
 }

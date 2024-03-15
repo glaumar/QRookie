@@ -5,7 +5,7 @@
 
 struct GameInfo {
     bool operator==(const GameInfo& other) const {
-        return name == other.name && release_name == other.release_name;
+        return release_name == other.release_name;
     }
     QString name;
     QString release_name;

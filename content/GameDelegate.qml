@@ -1,16 +1,92 @@
+import QCoro
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpDownloader
 
 Rectangle {
     property var name
+    property var release_name
     property var size
     property var last_updated
     property var thumbnail_path
+    property var version_code
+    property var package_name
+    property var progress
+    property var status
 
-    signal downloadClicked()
-
+    onProgressChanged: {
+        if (status === VrpDownloader.Downloading && !isNaN(progress)) {
+            progress_bar.value = progress;
+            progress_bar.indeterminate = false;
+            let downloaded = progress * size;
+            let downloaded_unit = downloaded < 1024 ? "MB" : "GB";
+            downloaded = downloaded < 1024 ? downloaded : downloaded / 1024;
+            let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
+            action_button.text = downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
+        }
+    }
+    onStatusChanged: function() {
+        progress_bar.value = 0;
+        progress_bar.indeterminate = false;
+        progress_bar.visible = false;
+        action_button.enabled = false;
+        switch (status) {
+        case VrpDownloader.UpdatableRemotely:
+            action_button.text = qsTr("Download and Install");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.Downloadable:
+            action_button.text = qsTr("Download");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.Queued:
+            action_button.text = qsTr("Queued");
+            break;
+        case VrpDownloader.Downloading:
+            if (isNaN(progress) || progress <= 1e-36) {
+                action_button.text = qsTr("Starting Downloading");
+                progress_bar.indeterminate = true;
+                progress_bar.visible = true;
+            }
+            break;
+        case VrpDownloader.Decompressing:
+            action_button.text = qsTr("Decompressing");
+            progress_bar.indeterminate = true;
+            progress_bar.visible = true;
+            break;
+        case VrpDownloader.Local:
+            action_button.text = qsTr("No Connected Device");
+            progress_bar.value = 1;
+            progress_bar.visible = true;
+            break;
+        case VrpDownloader.UpdatableLocally:
+            action_button.text = qsTr("Update");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.Installable:
+            action_button.text = qsTr("Install");
+            action_button.enabled = true;
+            progress_bar.visible = true;
+            progress_bar.value = 1;
+            break;
+        case VrpDownloader.Installing:
+            action_button.text = qsTr("Installing");
+            progress_bar.indeterminate = true;
+            progress_bar.visible = true;
+            break;
+        case VrpDownloader.Installed:
+            action_button.text = qsTr("Installed");
+            progress_bar.value = 1;
+            progress_bar.visible = true;
+            break;
+        case VrpDownloader.Error:
+            action_button.text = qsTr("Error, Click to Try Again");
+            action_button.enabled = true;
+            break;
+        }
+    }
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
@@ -56,7 +132,7 @@ Rectangle {
         Text {
             anchors.right: parent.right
             text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-            font.pointSize: Qt.application.font.pointSize * 0.9
+            // font.pointSize: Qt.application.font.pointSize * 0.9
             color: app.globalPalette.text
         }
 
@@ -70,16 +146,30 @@ Rectangle {
     }
 
     Button {
-        id: download
+        id: action_button
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
+        anchors.bottom: progress_bar.top
+        anchors.bottomMargin: 5
         text: qsTr("Downlad")
         width: game_info.width
         onClicked: {
-            downloadClicked();
+            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally)
+                app.vrp.installQml(modelData).then(function(isSuccess) {
+                console.log("Install status:", isSuccess);
+            });
+            else
+                app.vrp.download(modelData);
         }
+    }
+
+    ProgressBar {
+        id: progress_bar
+
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - 2
+        value: (isNaN(progress) || progress <= 1e-36) ? 0 : progress
     }
 
     layer.effect: DropShadow {

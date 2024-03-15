@@ -11,6 +11,9 @@ const QString VrpPublic::VRP_PUBLIC_JSON_URL_FALLBACK =
     "https://vrpirates.wiki/downloads/vrp-public.json";
 
 void VrpPublic::update() {
+    // TODO: use QCoro::Task
+    // TODO: save vrp-public.json to local file
+    // TODO: load vrp-public.json from local file when update failed
     QNetworkRequest request(VRP_PUBLIC_JSON_URL);
     auto *reply = manager_.get(request);
     qDebug() << "Downloading vrp-public.json from " << VRP_PUBLIC_JSON_URL;

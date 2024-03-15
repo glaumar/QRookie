@@ -1,6 +1,7 @@
 #include "device_manager.h"
 
 #include <QCoroTask>
+#include <QDir>
 #include <QFile>
 #include <QProcess>
 #include <QRegularExpression>
@@ -9,7 +10,6 @@
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent) {
     connect(&update_serials_timer_, &QTimer::timeout, this,
             &DeviceManager::updateSerials);
-    autoUpdateSerials();  // TODO: delete this line
     startServer();
 }
 
@@ -79,20 +79,52 @@ QCoro::Task<void> DeviceManager::updateSerials() {
 
     if (serials_ != serials) {
         serials_ = serials;
-        bool r =
-            co_await installApk("2G0YC1ZF7G0GS3",
-                                "/home/glaumar/.local/share/QRookie/Death "
-                                "Horizon- Reloaded (MR-Fix) v175+0.9.5.1 -VRP/",
-                                "com.mrf.dreamdev.deathhorizon.quest");
-        qDebug() << "install result:" << r;
         emit serialsChanged();
     }
 }
 
-QCoro::Task<QVector<QPair<QString, long>>> DeviceManager::deviceApps(
-    QString serial) {
+QCoro::Task<QVector<AppInfo>> DeviceManager::installedApps(
+    const QString& serial) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
-        co_return QVector<QPair<QString, long>>();
+        co_return QVector<AppInfo>();
+    }
+    QProcess basicProcess;
+    auto adb = qCoro(basicProcess);
+    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
+                      "--show-versioncode", "-3"});
+
+    co_await adb.waitForFinished();
+
+    if (basicProcess.exitStatus() != QProcess::NormalExit ||
+        basicProcess.exitCode() != 0) {
+        qWarning() << "Failed to get apps for device" << serial;
+        co_return QVector<AppInfo>();
+    }
+
+    /* EXAMPLE OUTPUT:
+        package:com.facebook.arvr.quillplayer versionCode:135
+        package:com.oculus.mobile_mrc_setup versionCode:1637173263
+    */
+    QString output = basicProcess.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
+    QVector<AppInfo> apps;
+    for (const QString& line : lines) {
+        auto match = re.match(line);
+        if (match.hasMatch()) {
+            QString package_name = match.captured(1);
+            QString version_code = match.captured(2);
+            apps.append({package_name, version_code.toLongLong()});
+        }
+    }
+    co_return apps;
+}
+
+QCoro::Task<QVariantList> DeviceManager::deviceApps(
+    const QString& serial) const {
+    if (serials_.isEmpty() || !serials_.contains(serial)) {
+        co_return QVariantList{};
     }
 
     QProcess basicProcess;
@@ -105,7 +137,7 @@ QCoro::Task<QVector<QPair<QString, long>>> DeviceManager::deviceApps(
     if (basicProcess.exitStatus() != QProcess::NormalExit ||
         basicProcess.exitCode() != 0) {
         qWarning() << "Failed to get apps for device" << serial;
-        co_return QVector<QPair<QString, long>>();
+        co_return QVariantList{};
     }
 
     /* EXAMPLE OUTPUT:
@@ -116,19 +148,51 @@ QCoro::Task<QVector<QPair<QString, long>>> DeviceManager::deviceApps(
     QStringList lines = output.split("\n");
     lines.removeAll("");
     QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
-    QVector<QPair<QString, long>> apps;
+    QVariantList apps;
     for (const QString& line : lines) {
         auto match = re.match(line);
         if (match.hasMatch()) {
             QString package_name = match.captured(1);
             QString version_code = match.captured(2);
-            apps.append({package_name, version_code.toLong()});
+            QVariantMap app{{"packageName", package_name},
+                            {"versionCode", version_code.toLongLong()}};
+            apps << app;
         }
     }
     co_return apps;
 }
 
-QCoro::Task<QString> DeviceManager::deviceModel(QString serial) {
+QCoro::Task<QVariantMap> DeviceManager::deviceApp(
+    const QString& serial, const QString& package_name) const {
+    if (serials_.isEmpty() || !serials_.contains(serial)) {
+        co_return QVariantMap{{"packageName", ""}, {"versionCode", 0}};
+    }
+
+    QProcess basicProcess;
+    auto adb = qCoro(basicProcess);
+    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
+                      "--show-versioncode", package_name});
+
+    co_await adb.waitForFinished();
+
+    if (basicProcess.exitStatus() != QProcess::NormalExit ||
+        basicProcess.exitCode() != 0) {
+        qWarning() << "Failed to get app" << package_name << "for device"
+                   << serial;
+        co_return QVariantMap{{"packageName", ""}, {"versionCode", 0}};
+    }
+
+    QString output = basicProcess.readAllStandardOutput();
+    auto first_line = output.section('\n', 0, 0);
+    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
+    auto match = re.match(first_line);
+    QString local_package_name = match.captured(1);
+    QString local_version_code = match.captured(2);
+    co_return QVariantMap{{"packageName", local_package_name},
+                          {"versionCode", local_version_code.toLongLong()}};
+}
+
+QCoro::Task<QString> DeviceManager::deviceModel(const QString& serial) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
         co_return QString("");
     }
@@ -151,9 +215,10 @@ QCoro::Task<QString> DeviceManager::deviceModel(QString serial) {
     }
 }
 
-QCoro::Task<QPair<long, long>> DeviceManager::spaceUsage(QString serial) {
+QCoro::Task<QPair<long long, long long>> DeviceManager::deviceSpaceUsage(
+    const QString& serial) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
-        co_return QPair<long, long>(0, 0);
+        co_return QPair<long long, long long>(0, 0);
     }
 
     QProcess basicProcess;
@@ -166,7 +231,8 @@ QCoro::Task<QPair<long, long>> DeviceManager::spaceUsage(QString serial) {
     if (basicProcess.exitStatus() != QProcess::NormalExit ||
         basicProcess.exitCode() != 0) {
         qWarning() << "Failed to get space usage for device" << serial;
-        co_return QPair<long, long>(0, 0);
+        co_return QPair<long long, long long>(0, 0);
+
     } else {
         /* EXAMPLE OUTPUT:
             Filesystem     1K-blocks     Used Available Use% Mounted on
@@ -179,23 +245,71 @@ QCoro::Task<QPair<long, long>> DeviceManager::spaceUsage(QString serial) {
 
         if (lines.isEmpty()) {
             qWarning() << "Failed to get space usage for device" << serial;
-            co_return QPair<long, long>(0, 0);
+            co_return QPair<long long, long long>(0, 0);
         }
 
         QString line = lines.first();
         QStringList parts = line.split(QRegularExpression("\\s+"));
         if (parts.size() < 4) {
             qWarning() << "Failed to get space usage for device" << serial;
-            co_return QPair<long, long>(0, 0);
+            co_return QPair<long long, long long>(0, 0);
         }
-        long total_space = parts[1].toLong();
-        long free_space = parts[3].toLong();
-        co_return QPair<long, long>(total_space, free_space);
+        long long total_space = parts[1].toLongLong();
+        long long free_space = parts[3].toLongLong();
+        co_return QPair<long long, long long>(total_space, free_space);
+        ;
     }
 }
 
-QCoro::Task<bool> DeviceManager::installApk(QString serial, QString path,
-                                            QString package_name) {
+QCoro::Task<QVariantMap> DeviceManager::spaceUsage(
+    const QString& serial) const {
+    if (serials_.isEmpty() || !serials_.contains(serial)) {
+        co_return QVariantMap{{"totalSpace", 0}, {"freeSpace", 0}};
+    }
+
+    QProcess basicProcess;
+    auto adb = qCoro(basicProcess);
+
+    adb.start("adb", {"-s", serial, "shell", "df", "/sdcard"});
+
+    co_await adb.waitForFinished();
+
+    if (basicProcess.exitStatus() != QProcess::NormalExit ||
+        basicProcess.exitCode() != 0) {
+        qWarning() << "Failed to get space usage for device" << serial;
+        co_return QVariantMap{{"totalSpace", 0}, {"freeSpace", 0}};
+
+    } else {
+        /* EXAMPLE OUTPUT:
+            Filesystem     1K-blocks     Used Available Use% Mounted on
+            /dev/fuse      107584204 83476996  23959752  78% /storage/emulated
+        */
+        QString output = basicProcess.readAllStandardOutput();
+        QStringList lines = output.split("\n");
+        lines.removeFirst();
+        lines.removeAll("");
+
+        if (lines.isEmpty()) {
+            qWarning() << "Failed to get space usage for device" << serial;
+            co_return QVariantMap{{"totalSpace", 0}, {"freeSpace", 0}};
+        }
+
+        QString line = lines.first();
+        QStringList parts = line.split(QRegularExpression("\\s+"));
+        if (parts.size() < 4) {
+            qWarning() << "Failed to get space usage for device" << serial;
+            co_return QVariantMap{{"totalSpace", 0}, {"freeSpace", 0}};
+        }
+        long long total_space = parts[1].toLongLong();
+        long long free_space = parts[3].toLongLong();
+        co_return QVariantMap{{"totalSpace", total_space},
+                              {"freeSpace", free_space}};
+    }
+}
+
+QCoro::Task<bool> DeviceManager::installApk(const QString serial,
+                                            const QString path,
+                                            const QString package_name) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
         co_return false;
     }
@@ -209,6 +323,7 @@ QCoro::Task<bool> DeviceManager::installApk(QString serial, QString path,
     }
     auto adb = qCoro(basicProcess);
     adb.start("adb", {"-s", serial, "install", "-r", apk_path});
+
     co_await adb.waitForFinished();
 
     if (basicProcess.exitStatus() != QProcess::NormalExit ||
@@ -218,15 +333,26 @@ QCoro::Task<bool> DeviceManager::installApk(QString serial, QString path,
         co_return false;
     }
 
-    if (QFile::exists(path + "/" + package_name)) {
+    QString obb_path = path + "/" + package_name;
+    QDir obb_dir(obb_path);
+    if (!package_name.isEmpty() && obb_dir.exists()) {
+        qDebug() << "Pushing obb file for" << package_name << "on device"
+                 << serial;
         adb.start("adb", {"-s", serial, "shell", "rm", "-rf",
                           "/sdcard/Android/obb/" + package_name});
         co_await adb.waitForFinished();
         adb.start("adb", {"-s", serial, "shell", "mkdir",
                           "/sdcard/Android/obb/" + package_name});
         co_await adb.waitForFinished();
-        adb.start("adb", {"-s", serial, "push", path + "/" + package_name + "/",
-                          "/sdcard/Android/obb/"});
+
+        QStringList obb_files =
+            obb_dir.entryList(QStringList() << "*.obb", QDir::Files);
+        for (const QString& obb_file : obb_files) {
+            adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file,
+                              "/sdcard/Android/obb/" + package_name + "/"});
+            co_await adb.waitForFinished();
+        }
+
         co_await adb.waitForFinished();
         if (basicProcess.exitStatus() != QProcess::NormalExit ||
             basicProcess.exitCode() != 0) {

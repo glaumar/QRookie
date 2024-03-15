@@ -1,6 +1,8 @@
+#include <QCoroQml>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
+#include "device_manager.h"
 #include "qrookie.h"
 #include "vrp_downloader.h"
 
@@ -11,12 +13,12 @@ int main(int argc, char *argv[]) {
     app.setDesktopFileName(DESKTOP_FILE_NAME);
 
     qmlRegisterType<VrpDownloader>("VrpDownloader", 1, 0, "VrpDownloader");
+    QCoro::Qml::registerTypes();
+
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
     QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreated,
-        &app,
+        &engine, &QQmlApplicationEngine::objectCreated, &app,
         [url](QObject *obj, const QUrl &objUrl) {
             if (!obj && url == objUrl) QCoreApplication::exit(-1);
         },

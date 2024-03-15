@@ -37,6 +37,7 @@ qt_add_executable(${APP_BINARY_NAME} src/main.cpp
                              src/vrp_downloader.cpp src/vrp_downloader.h
                              src/device_manager.cpp src/device_manager.h
                              src/game_info.h
+                             src/app_info.h
                              src/librclone_wrapper.h
                              src/rclone_result.h)
 
