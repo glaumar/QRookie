@@ -1,5 +1,6 @@
 #include "vrp_downloader.h"
 
+#include <QCoroTimer>
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -27,51 +28,6 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
         dir.mkpath(data_path_);
     }
 
-    // vrp_public_ updated
-    connect(&vrp_public_, &VrpPublic::updated, this,
-            &VrpDownloader::downloadMetadata);
-
-    connect(&vrp_public_, &VrpPublic::failed, this,
-            &VrpDownloader::metadataUpdateFailed);
-
-    connect(&download_status_timer_, &QTimer::timeout, this,
-            &VrpDownloader::checkDownloadStatus);
-
-    connect(this, &VrpDownloader::downloadFailed, [this](GameInfo game) {
-        qDebug() << "Download failed" << game.release_name;
-        downloading_queue_.pop_front();
-        // emit downloadsQueueChanged();
-        failed_queue_.append(game);
-        emit statusChanged(game.release_name, Status::Error);
-        if (!downloading_queue_.isEmpty()) downloadNext();
-    });
-
-    connect(this, &VrpDownloader::downloadSucceeded, [this](GameInfo game) {
-        emit downloadProgressChanged(game.release_name, 1.0, 0.0);
-        qDebug() << "Download finished: " << game.release_name;
-        downloading_queue_.pop_front();
-        // emit downloadsQueueChanged();
-        if (!downloading_queue_.isEmpty()) downloadNext();
-    });
-
-    connect(this, &VrpDownloader::decompressFailed, [this](GameInfo game) {
-        qDebug() << "Decompression failed: " << game.release_name;
-        decompressing_queue_.removeAll(game);
-        failed_queue_.append(game);
-        // emit downloadsQueueChanged();
-        emit statusChanged(game.release_name, Status::Error);
-    });
-
-    connect(this, &VrpDownloader::decompressSucceeded, [this](GameInfo game) {
-        qDebug() << "Decompression finished: " << game.release_name;
-        decompressing_queue_.removeAll(game);
-        local_queue_.push_front(game);
-        emit downloadsQueueChanged();
-        emit localQueueChanged();
-        
-        emit statusChanged(game.release_name, getStatus(game));
-    });
-
     connect(this, &VrpDownloader::localQueueChanged,
             [this]() { saveLocalQueue(); });
 
@@ -96,8 +52,8 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
                 } else {
                     device_model_ =
                         co_await device_manager_.deviceModel(connectedDevice());
-                    auto usage = co_await device_manager_.deviceSpaceUsage(
-                        connectedDevice());
+                    auto usage =
+                        co_await device_manager_.spaceUsage(connectedDevice());
                     total_space_ = usage.first;
                     free_space_ = usage.second;
                 }
@@ -108,6 +64,8 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
     device_manager_.autoUpdateSerials();
 
     loadLocalQueue();
+
+    //TODO: parese local metadata
 }
 
 VrpDownloader::~VrpDownloader() {
@@ -145,15 +103,23 @@ VrpDownloader::Status VrpDownloader::getStatus(const GameInfo& game) {
     }
 }
 
-void VrpDownloader::updateMetadata() {
-    // TODO: uncomment this line
-    // vrp_public_.update();
+QCoro::Task<bool> VrpDownloader::updateMetadata() {
+    // TODO: uncomment
+    //  if (!co_await vrp_public_.update()) {
+    //      qWarning() << "Update metadata failed";
+    //      co_return false;
+    //  }
 
-    // For testing now
-    parseMetadata();
+    // TODO: uncomment
+    //  if (!co_await downloadMetadata()) {
+    //      qWarning() << "Update metadata failed";
+    //      co_return false;
+    //  }
+
+    co_return parseMetadata();
 }
 
-void VrpDownloader::downloadMetadata() {
+QCoro::Task<bool> VrpDownloader::downloadMetadata() {
     // https://rclone.org/rc/#operations-copyfile
     QString rc_method("operations/copyfile");
     QString rc_input = QString(R"({
@@ -173,47 +139,47 @@ void VrpDownloader::downloadMetadata() {
 
     RcloneResult result = RcloneRPC(rc_method, rc_input);
     if (result.isSuccessful()) {
-        auto p7za = QSharedPointer<QProcess>::create(this);
-        connect(p7za.data(), &QProcess::finished, this,
-                [this, p7za](int exitCode, QProcess::ExitStatus exitStatus) {
-                    if (exitStatus != QProcess::NormalExit ||
-                        p7za->exitCode() != 0) {
-                        qWarning("meta.7z decompression failed: %s\n %s",
-                                 p7za->readAllStandardOutput().data(),
-                                 p7za->readAllStandardError().data());
-                        emit metadataUpdateFailed();
-                    } else {
-                        qDebug() << "meta.7z decompression successful";
-                        parseMetadata();
-                    }
-                });
+        QProcess basic_process;
+        auto p7za = qCoro(basic_process);
 
         // Decompress meta.7z
-        p7za->start(
+        p7za.start(
             "7za",
             QStringList()
                 << "x" << QString("%1/meta.7z").arg(cache_path_)
                 << "-aoa"  // Overwrite All existing files without prompt.
                 << QString("-o%1").arg(data_path_)
                 << QString("-p%1").arg(vrp_public_.password()));
+
+        co_await p7za.waitForFinished();
+
+        if (basic_process.exitStatus() != QProcess::NormalExit ||
+            basic_process.exitCode() != 0) {
+            qWarning("meta.7z decompression failed: %s\n %s",
+                     basic_process.readAllStandardOutput().data(),
+                     basic_process.readAllStandardError().data());
+            co_return false;
+        } else {
+            qDebug() << "meta.7z decompression successful";
+            co_return true;
+        }
     } else {
         qWarning() << "Download Metadata failed :\n\t status :"
                    << result.status() << "\n\t output: " << result.output();
+        co_return false;
     }
 }
 
-void VrpDownloader::parseMetadata() {
+bool VrpDownloader::parseMetadata() {
     QFile file(data_path_ + "/VRP-GameList.txt");
     if (!file.exists()) {
         qWarning() << "VRP-GameList.txt not found";
-        emit metadataUpdateFailed();
-        return;
+        return false;
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "VRP-GameList.txt open failed";
-        emit metadataUpdateFailed();
-        return;
+        return false;
     }
 
     QTextStream in(&file);
@@ -243,11 +209,11 @@ void VrpDownloader::parseMetadata() {
 
     if (games_info_.isEmpty()) {
         qWarning() << "No games found in VRP-GameList.txt";
-        emit metadataUpdateFailed();
+        return false;
     } else {
         qDebug() << "Metadata updated";
-        emit metadataUpdated();
         emit gamesInfoChanged();
+        return true;
     }
 }
 
@@ -262,22 +228,26 @@ QString VrpDownloader::getLocalGamePath(const QString& release_name) const {
     return data_path_ + "/" + release_name;
 }
 
-void VrpDownloader::download(const GameInfo& game) {
+bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
     if (downloading_queue_.contains(game) ||
         decompressing_queue_.contains(game)) {
         qDebug() << "Already in queue: " << game.release_name;
-    } else if (local_queue_.contains(game)) {
-        qDebug() << "Already downloaded: " << game.release_name;
-        emit statusChanged(game.release_name, getStatus(game));
-    } else {
-        downloading_queue_.append(game);
-        emit downloadsQueueChanged();
-        qDebug() << "Queued: " << game.release_name;
-        emit statusChanged(game.release_name, Status::Queued);
-        if (downloading_queue_.size() == 1) downloadNext();
+        return false;
     }
 
-    return;
+    if (local_queue_.contains(game)) {
+        qDebug() << "Already downloaded: " << game.release_name;
+        emit statusChanged(game.release_name, getStatus(game));
+        return false;
+    }
+
+    downloading_queue_.append(game);
+    emit downloadsQueueChanged();
+    qDebug() << "Queued: " << game.release_name;
+    emit statusChanged(game.release_name, Status::Queued);
+
+    if (downloading_queue_.size() == 1) downloadQueuedGames();
+    return true;
 }
 
 QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
@@ -305,20 +275,24 @@ QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
     co_return result;
 }
 
-void VrpDownloader::downloadNext() {
+QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
     if (downloading_queue_.isEmpty()) {
         qDebug() << "Queue is empty";
-        return;
+        co_return;
     }
 
-    qDebug() << "Downloading: " << downloading_queue_[0].release_name;
-    emit statusChanged(downloading_queue_[0].release_name, Status::Downloading);
-    QString id = getGameId(downloading_queue_[0].release_name);
+    while (!downloading_queue_.isEmpty()) {
+        auto game = downloading_queue_.first();
 
-    // https://rclone.org/rc/#sync-copy
-    QString rc_method("sync/copy");
-    QString rc_input =
-        QString(R"({
+        qDebug() << "Downloading: " << game.release_name;
+        emit statusChanged(game.release_name, Status::Downloading);
+
+        QString id = getGameId(game.release_name);
+
+        // https://rclone.org/rc/#sync-copy
+        QString rc_method("sync/copy");
+        QString rc_input =
+            QString(R"({
         "srcFs": ":http,url='%1':/%2",
         "dstFs": "%3/%4",
         "_async": true,
@@ -330,25 +304,45 @@ void VrpDownloader::downloadNext() {
                 "UserAgent": "rclone/v1.65.2"
         }
     })")
-            .arg(QString("https://theapp.vrrookie.xyz/"), id, cache_path_,
-                 id);  // TODO:use vrp_public
+                .arg(QString("https://theapp.vrrookie.xyz/"), id, cache_path_,
+                     id);  // TODO:use vrp_public
 
-    RcloneResult result = RcloneRPC(rc_method, rc_input);
+        RcloneResult result = RcloneRPC(rc_method, rc_input);
+        QJsonDocument doc =
+            QJsonDocument::fromJson(result.output().toLocal8Bit());
+        current_job_id_ = doc.object()["jobid"].toInt();
 
-    QJsonDocument doc = QJsonDocument::fromJson(result.output().toLocal8Bit());
-    current_job_id_ = doc.object()["jobid"].toInt();
+        if (result.isSuccessful()) {
+            QTimer timer;
+            timer.start(1000);
+            while (true) {
+                if (checkDownloadStatus()) {
+                    timer.stop();
+                    break;
+                }
+                co_await timer;
+            }
 
-    if (result.isSuccessful()) {
-        download_status_timer_.start(1000);
-    } else {
-        emit downloadFailed(downloading_queue_[0]);
-        qWarning() << "Download game failed :"
-                   << "\n\tgame: " << id << "\n\tstatus: " << result.status()
-                   << "\n\toutput: " << result.output();
+            emit downloadProgressChanged(game.release_name, 1.0, 0.0);
+            qDebug() << "Download finished: " << game.release_name;
+            downloading_queue_.removeAll(game);
+            decompressGame(game);
+        } else {
+            qDebug() << "Download failed" << game.release_name;
+            downloading_queue_.removeAll(game);
+            // emit downloadsQueueChanged();
+            failed_queue_.append(game);
+            emit statusChanged(game.release_name, Status::Error);
+            qWarning() << "Download game failed :"
+                       << "\n\tgame: " << id
+                       << "\n\tstatus: " << result.status()
+                       << "\n\toutput: " << result.output();
+        }
     }
+    co_return;
 }
 
-void VrpDownloader::checkDownloadStatus() {
+bool VrpDownloader::checkDownloadStatus() {
     // https://rclone.org/rc/#job-status
     RcloneResult job_status = RcloneRPC(
         QString("job/status"), QString(R"({"jobid":%1})").arg(current_job_id_));
@@ -357,31 +351,29 @@ void VrpDownloader::checkDownloadStatus() {
         QJsonDocument::fromJson(job_status.output().toLocal8Bit());
     bool is_finished = doc_job.object()["finished"].toBool();
 
-    if (!is_finished) {
-        QString group = doc_job.object()["group"].toString();
-
-        // https://rclone.org/rc/#core-stats
-        RcloneResult group_stats = RcloneRPC(
-            QString("core/stats"), QString(R"({"group":"%1"})").arg(group));
-        QJsonDocument group_stats_doc =
-            QJsonDocument::fromJson(group_stats.output().toLocal8Bit());
-        double transferred = group_stats_doc.object()["bytes"].toDouble();
-        double total = group_stats_doc.object()["totalBytes"].toDouble();
-        double speed = group_stats_doc.object()["speed"].toDouble();
-        emit downloadProgressChanged(downloading_queue_[0].release_name,
-                                     transferred / total, speed);
-    } else {
-        download_status_timer_.stop();
-        auto game = downloading_queue_[0];
-        emit downloadSucceeded(game);
-        decompressGame(game);
+    if (is_finished) {
+        return true;
     }
+
+    QString group = doc_job.object()["group"].toString();
+
+    // https://rclone.org/rc/#core-stats
+    RcloneResult group_stats = RcloneRPC(
+        QString("core/stats"), QString(R"({"group":"%1"})").arg(group));
+    QJsonDocument group_stats_doc =
+        QJsonDocument::fromJson(group_stats.output().toLocal8Bit());
+    double transferred = group_stats_doc.object()["bytes"].toDouble();
+    double total = group_stats_doc.object()["totalBytes"].toDouble();
+    double speed = group_stats_doc.object()["speed"].toDouble();
+    emit downloadProgressChanged(downloading_queue_[0].release_name,
+                                 transferred / total, speed);
+    return false;
 }
 
-void VrpDownloader::decompressGame(const GameInfo& game) {
+QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
     if (decompressing_queue_.contains(game)) {
         qDebug() << "Already in decompressing queue: " << game.release_name;
-        return;
+        co_return false;
     }
 
     decompressing_queue_.append(game);
@@ -389,29 +381,42 @@ void VrpDownloader::decompressGame(const GameInfo& game) {
     qDebug() << "Decompressing: " << game.release_name;
     emit statusChanged(game.release_name, Status::Decompressing);
 
-    auto p7za = QSharedPointer<QProcess>::create(this);
-    connect(
-        p7za.data(), &QProcess::finished, this,
-        [this, p7za, game](int exitCode, QProcess::ExitStatus exitStatus) {
-            if (exitStatus != QProcess::NormalExit || p7za->exitCode() != 0) {
-                emit decompressFailed(game);
-                qWarning("Error: %s\n %s", p7za->readAllStandardOutput().data(),
-                         p7za->readAllStandardError().data());
-            } else {
-                emit decompressSucceeded(game);
-            }
-        });
-
+    QProcess basic_process;
+    auto p7za = qCoro(basic_process);
     // Decompress
-    p7za->start("7za",
-                QStringList()
-                    << "x"
-                    << QString("%1/%2/%2.7z.001")
-                           .arg(cache_path_, getGameId(game.release_name))
-                    << "-aoa"  // Overwrite All existing files without prompt.
-                    << QString("-o%1").arg(data_path_)
-                    << QString("-p%1").arg(
-                           QString("gL59VfgPxoHR")));  // TODO: use vrp_public
+    p7za.start("7za",
+               QStringList()
+                   << "x"
+                   << QString("%1/%2/%2.7z.001")
+                          .arg(cache_path_, getGameId(game.release_name))
+                   << "-aoa"  // Overwrite All existing files without prompt.
+                   << QString("-o%1").arg(data_path_)
+                   << QString("-p%1").arg(
+                          QString("gL59VfgPxoHR")));  // TODO: use vrp_public
+
+    co_await p7za.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        // emit decompressFailed(game);
+        qWarning("Error: %s\n %s", basic_process.readAllStandardOutput().data(),
+                 basic_process.readAllStandardError().data());
+        qDebug() << "Decompression failed: " << game.release_name;
+        decompressing_queue_.removeAll(game);
+        failed_queue_.append(game);
+        // emit downloadsQueueChanged();
+        emit statusChanged(game.release_name, Status::Error);
+        co_return false;
+    } else {
+        // emit decompressSucceeded(game);
+        qDebug() << "Decompression finished: " << game.release_name;
+        decompressing_queue_.removeAll(game);
+        local_queue_.push_front(game);
+        emit downloadsQueueChanged();
+        emit localQueueChanged();
+        emit statusChanged(game.release_name, getStatus(game));
+        co_return true;
+    }
 }
 
 QVariantList VrpDownloader::find(const QString& package_name) {

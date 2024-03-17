@@ -14,7 +14,10 @@ ApplicationWindow {
     height: 800
     title: qsTr("QRookie")
     Component.onCompleted: {
-        vrp.updateMetadata();
+        vrp.updateMetadataQml().then(function() {
+            //TODO: Add a loading screen
+            console.log("Metadata updated");
+        })
     }
 
     StackLayout {

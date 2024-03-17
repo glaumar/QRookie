@@ -48,12 +48,14 @@ class VrpDownloader : public QObject {
 
     VrpDownloader(QObject* parent = nullptr);
     ~VrpDownloader();
-    Q_INVOKABLE void updateMetadata();
+    QCoro::Task<bool> updateMetadata();
+    Q_INVOKABLE QCoro::QmlTask updateMetadataQml() { return updateMetadata(); }
     Q_INVOKABLE QVariantList find(const QString& package_name);
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
-    Q_INVOKABLE void download(const GameInfo& game);
+    Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
+
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {
         return install(game);
@@ -139,13 +141,9 @@ class VrpDownloader : public QObject {
     }
 
     QString connectedDevice() const { return connected_device_; }
-    QString deviceModel() const {
-        return device_model_;
-    }
+    QString deviceModel() const { return device_model_; }
     long long totalSpace() const { return total_space_; }
     long long freeSpace() const { return free_space_; }
-
-
 
     QVariantList gamesInfo() const;
     QVariantList downloadsQueue() const;
@@ -157,8 +155,6 @@ class VrpDownloader : public QObject {
     QVariantList deviceList() const;
 
    signals:
-    void metadataUpdated();
-    void metadataUpdateFailed();
     void gamesInfoChanged();
     void downloadsQueueChanged();
     void localQueueChanged();
@@ -168,24 +164,18 @@ class VrpDownloader : public QObject {
     void deviceModelChanged();
     void spaceUsageChanged();
     void statusChanged(QString release_name, Status status);
-    void downloadFailed(GameInfo game);
     void downloadProgressChanged(QString release_name, double progress,
                                  double speed);
-    void downloadSucceeded(GameInfo game);
-    void decompressFailed(GameInfo game);
-    void decompressSucceeded(GameInfo game);
-
-   public slots:
-    void checkDownloadStatus();
 
    private:
-    void downloadMetadata();
-    void parseMetadata();
-    void decompressGame(const GameInfo& game);
-    void downloadNext();
+    QCoro::Task<bool> downloadMetadata();
+    bool parseMetadata();
+    QCoro::Task<bool> decompressGame(const GameInfo game);
+    QCoro::Task<void> downloadQueuedGames();
     bool saveLocalQueue();
     bool loadLocalQueue();
     QCoro::Task<void> updateInstalledQueue();
+    bool checkDownloadStatus();
 
     VrpPublic vrp_public_;
     QString cache_path_;
@@ -197,7 +187,6 @@ class VrpDownloader : public QObject {
     QVector<GameInfo> failed_queue_;
     QVector<GameInfo> installing_queue_;
     QVector<AppInfo> installed_queue_;
-    QTimer download_status_timer_;
     int current_job_id_;
     DeviceManager device_manager_;
     QString connected_device_;

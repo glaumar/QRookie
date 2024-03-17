@@ -34,7 +34,7 @@ Rectangle {
         action_button.enabled = false;
         switch (status) {
         case VrpDownloader.UpdatableRemotely:
-            action_button.text = qsTr("Download and Install");
+            action_button.text = qsTr("Download and Update");
             action_button.enabled = true;
             break;
         case VrpDownloader.Downloadable:
@@ -159,7 +159,7 @@ Rectangle {
                 console.log("Install status:", isSuccess);
             });
             else
-                app.vrp.download(modelData);
+                app.vrp.addToDownloadQueue(modelData);
         }
     }
 

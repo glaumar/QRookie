@@ -1,56 +1,52 @@
 #include "vrp_public.h"
 
+#include <QCoroNetworkReply>
+#include <QCoroSignal>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-const QString VrpPublic::VRP_PUBLIC_JSON_URL =
-    "https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json";
-const QString VrpPublic::VRP_PUBLIC_JSON_URL_FALLBACK =
-    "https://vrpirates.wiki/downloads/vrp-public.json";
-
-void VrpPublic::update() {
-    // TODO: use QCoro::Task
+QCoro::Task<bool> VrpPublic::update() {
     // TODO: save vrp-public.json to local file
     // TODO: load vrp-public.json from local file when update failed
-    QNetworkRequest request(VRP_PUBLIC_JSON_URL);
-    auto *reply = manager_.get(request);
-    qDebug() << "Downloading vrp-public.json from " << VRP_PUBLIC_JSON_URL;
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            qDebug() << "Downloading vrp-public.json Error: "
-                     << reply->errorString();
+    static const QVector<QString> urls = {
+        "https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json",
+        "https://vrpirates.wiki/downloads/vrp-public.json"};
 
-            // try to download vrp-public.json from fallback url
-            QNetworkRequest request_fallback(VRP_PUBLIC_JSON_URL_FALLBACK);
-            auto reply_fallback = manager_.get(request_fallback);
-
-            qDebug() << "Downloading vrp-public.json from "
-                     << VRP_PUBLIC_JSON_URL_FALLBACK;
-
-            // I don't know why download from fallback url will cause ssl error
-            reply_fallback->ignoreSslErrors();
-
-            connect(reply_fallback,
-                    &QNetworkReply::finished,
-                    this,
-                    [this, reply_fallback]() {
-                        if (reply_fallback->error() != QNetworkReply::NoError) {
-                            qDebug() << "Downloading vrp-public.json Error: "
-                                     << reply_fallback->errorString();
-                            emit failed();
-                        } else {
-                            parseJson(reply_fallback->readAll());
-                        }
-                    });
-        } else {
-            parseJson(reply->readAll());
+    for (auto url : urls) {
+        qDebug() << "Downloading vrp-public.json from " << url;
+        auto [success, data] = co_await downloadJson(url);
+        if (!success) {
+            continue;
         }
-    });
+
+        auto [base_url, password] = parseJson(data);
+        if (!base_url.isEmpty() && !password.isEmpty()) {
+            base_url_ = base_url;
+            password_ = password;
+            co_return true;
+        }
+    }
 }
 
-void VrpPublic::parseJson(const QByteArray &json) {
+QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(
+    const QString url) {
+    QNetworkRequest request(url);
+    auto *reply = manager_.get(request);
+    reply->ignoreSslErrors();
+    co_await qCoro(reply, &QNetworkReply::finished);
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "Downloading json Error: " << reply->errorString();
+        co_return QPair<bool, QByteArray>(false, QByteArray());
+    }
+    auto data = reply->readAll();
+    delete reply;
+    co_return QPair<bool, QByteArray>(true, data);
+}
+
+QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json) {
     /*
     vrp-public.json example:
     {
@@ -62,23 +58,22 @@ void VrpPublic::parseJson(const QByteArray &json) {
     QJsonDocument doc = QJsonDocument::fromJson(json);
     if (doc.isNull()) {
         qDebug() << "Parsing vrp-public.json Error: invalid json: " << json;
-        emit failed();
-        return;
+
+        return QPair<QString, QString>("", "");
     }
 
     QJsonObject obj = doc.object();
     if (obj.isEmpty()) {
         qDebug() << "Parsing vrp-public.json Error: empty json: " << json;
-        emit failed();
-        return;
+        return QPair<QString, QString>("", "");
     }
 
-    base_url_ = obj["baseUri"].toString();
+    QString base_url = obj["baseUri"].toString();
     // password is base64 encoded
-    password_ =
+    QString password =
         QString(QByteArray::fromBase64(obj["password"].toString().toUtf8()));
 
-    qDebug() << "Parsed vrp-public.json: baseUri=" << base_url_
-             << ", password=" << password_;
-    emit updated();
+    qDebug() << "Parsed vrp-public.json: baseUri=" << base_url
+             << ", password=" << password;
+    return QPair<QString, QString>(base_url, password);
 }

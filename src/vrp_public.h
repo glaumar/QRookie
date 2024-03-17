@@ -4,8 +4,10 @@
 #define QROOKIE_VRP_PUBLIC
 
 #include <QByteArray>
+#include <QCoroTask>
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QPair>
 #include <QString>
 
 class VrpPublic : public QObject {
@@ -13,22 +15,17 @@ class VrpPublic : public QObject {
    public:
     VrpPublic(QObject *parent = nullptr)
         : QObject(parent), base_url_(""), password_(""), manager_(nullptr) {}
-    void update();
+    QCoro::Task<bool> update();
     QString baseUrl() const { return base_url_; }
     QString password() const { return password_; }
 
-   signals:
-    void updated();
-    void failed();
-
    private:
-    void parseJson(const QByteArray &json);
+    QCoro::Task<QPair<bool, QByteArray>> downloadJson(const QString url);
+    QPair<QString, QString> parseJson(const QByteArray &json);
 
     QString base_url_;
     QString password_;
     QNetworkAccessManager manager_;
-    static const QString VRP_PUBLIC_JSON_URL;
-    static const QString VRP_PUBLIC_JSON_URL_FALLBACK;
 };
 
 #endif /* QROOKIE_VRP_PUBLIC */

@@ -97,6 +97,9 @@
         "qqmlapplicationengine": "cpp",
         "set": "cpp",
         "unordered_set": "cpp",
-        "qcryptographichash": "cpp"
+        "qcryptographichash": "cpp",
+        "qjsonobject": "cpp",
+        "fstream": "cpp",
+        "ranges": "cpp"
     }
 }

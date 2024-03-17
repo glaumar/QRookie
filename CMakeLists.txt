@@ -22,7 +22,7 @@ set(APP_BINARY_NAME "qrookie")
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network)
-find_package(QCoro6 REQUIRED COMPONENTS Core Qml)
+find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 
 
 if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
@@ -60,6 +60,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Network
     QCoro6::Core
     QCoro6::Qml
+    QCoro6::Network
     librclone.a
 )
 
