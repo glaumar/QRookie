@@ -13,6 +13,7 @@ Rectangle {
 
     onStatusChanged: function() {
         action_button.enabled = false;
+        action_button.icon.source = "install";
         switch (status) {
         case VrpDownloader.UpdatableRemotely:
             action_button.text = qsTr("Download and Update");
@@ -21,10 +22,12 @@ Rectangle {
         case VrpDownloader.UpdatableLocally:
             action_button.text = qsTr("Update");
             action_button.enabled = true;
+            action_button.icon.source = "update";
             break;
         case VrpDownloader.Error:
             action_button.text = qsTr("Error, Click to Try Again");
             action_button.enabled = true;
+            action_button.icon.source = "error";
             break;
         case VrpDownloader.Queued:
             action_button.text = qsTr("Queued...");

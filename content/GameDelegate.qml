@@ -33,14 +33,17 @@ Rectangle {
         progress_bar.indeterminate = false;
         progress_bar.visible = false;
         action_button.enabled = false;
+        action_button.icon.source = "";
         switch (status) {
         case VrpDownloader.UpdatableRemotely:
             action_button.text = qsTr("Download and Update");
             action_button.enabled = true;
+            action_button.icon.source = "download";
             break;
         case VrpDownloader.Downloadable:
             action_button.text = qsTr("Download");
             action_button.enabled = true;
+            action_button.icon.source = "download";
             break;
         case VrpDownloader.Queued:
             action_button.text = qsTr("Queued");
@@ -50,6 +53,7 @@ Rectangle {
                 action_button.text = qsTr("Starting Downloading");
                 progress_bar.indeterminate = true;
                 progress_bar.visible = true;
+                action_button.icon.source = "download";
             }
             break;
         case VrpDownloader.Decompressing:
@@ -61,16 +65,19 @@ Rectangle {
             action_button.text = qsTr("No Connected Device");
             progress_bar.value = 1;
             progress_bar.visible = true;
+            action_button.icon.source = "install";
             break;
         case VrpDownloader.UpdatableLocally:
             action_button.text = qsTr("Update");
             action_button.enabled = true;
+            action_button.icon.source = "install";
             break;
         case VrpDownloader.Installable:
             action_button.text = qsTr("Install");
             action_button.enabled = true;
             progress_bar.visible = true;
             progress_bar.value = 1;
+            action_button.icon.source = "install";
             break;
         case VrpDownloader.Installing:
             action_button.text = qsTr("Installing");
@@ -81,10 +88,12 @@ Rectangle {
             action_button.text = qsTr("Installed");
             progress_bar.value = 1;
             progress_bar.visible = true;
+            action_button.icon.source = "install";
             break;
         case VrpDownloader.Error:
             action_button.text = qsTr("Error, Click to Try Again");
             action_button.enabled = true;
+            action_button.icon.source = "error";
             break;
         }
     }
@@ -155,13 +164,12 @@ Rectangle {
         text: qsTr("Downlad")
         width: game_info.width
         onClicked: {
-            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally) {
+            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally)
                 app.vrp.installQml(modelData);
-            } else if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error) {
+            else if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error)
                 app.vrp.addToDownloadQueue(modelData, true);
-            } else {
+            else
                 app.vrp.addToDownloadQueue(modelData, false);
-            }
         }
     }
 

@@ -298,7 +298,6 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
         emit statusChanged(game.release_name, Status::Downloading);
 
         QString id = getGameId(game.release_name);
-
         // https://rclone.org/rc/#sync-copy
         QString rc_method("sync/copy");
         QString rc_input =
@@ -320,13 +319,13 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
         RcloneResult result = RcloneRPC(rc_method, rc_input);
         QJsonDocument doc =
             QJsonDocument::fromJson(result.output().toLocal8Bit());
-        current_job_id_ = doc.object()["jobid"].toInt();
+        int job_id = doc.object()["jobid"].toInt();
 
         if (result.isSuccessful()) {
             QTimer timer;
             timer.start(1000);
             while (true) {
-                if (checkDownloadStatus()) {
+                if (checkDownloadStatus(job_id)) {
                     timer.stop();
                     break;
                 }
@@ -353,10 +352,10 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
     co_return;
 }
 
-bool VrpDownloader::checkDownloadStatus() {
+bool VrpDownloader::checkDownloadStatus(int job_id) {
     // https://rclone.org/rc/#job-status
     RcloneResult job_status = RcloneRPC(
-        QString("job/status"), QString(R"({"jobid":%1})").arg(current_job_id_));
+        QString("job/status"), QString(R"({"jobid":%1})").arg(job_id));
     // TODO: check if job_status is successful
     QJsonDocument doc_job =
         QJsonDocument::fromJson(job_status.output().toLocal8Bit());

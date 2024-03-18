@@ -180,7 +180,7 @@ class VrpDownloader : public QObject {
     bool saveLocalQueue();
     bool loadLocalQueue();
     QCoro::Task<void> updateInstalledQueue();
-    bool checkDownloadStatus();
+    bool checkDownloadStatus(int job_id);
 
     VrpPublic vrp_public_;
     QString cache_path_;
@@ -194,7 +194,7 @@ class VrpDownloader : public QObject {
     QVector<GameInfo> installing_queue_;
     QVector<AppInfo> installed_queue_;
     QVector<GameInfo> auto_install_queue_;
-    int current_job_id_;
+    // int current_job_id_;
     DeviceManager device_manager_;
     QString connected_device_;
     QString device_model_;

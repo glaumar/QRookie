@@ -8,12 +8,10 @@ ColumnLayout {
 
         color: app.globalPalette.base
         radius: 5
-        anchors.top: parent.top
         Layout.fillWidth: true
         Layout.rightMargin: 10
         Layout.bottomMargin: 10
         height: 40
-        z: 1
 
         TextField {
             anchors.fill: parent
@@ -28,22 +26,12 @@ ColumnLayout {
         id: games
 
         clip: true
-        anchors.top: toolbar.bottom
-        anchors.margins: 10
         Layout.fillWidth: true
         Layout.fillHeight: true
         snapMode: GridView.SnapToRow
         model: app.vrp.gamesInfo
         cellWidth: 315
         cellHeight: 255 + Qt.application.font.pixelSize * 7
-
-        populate: Transition {
-            NumberAnimation {
-                properties: "x"
-                duration: 100
-            }
-
-        }
 
         ScrollBar.vertical: ScrollBar {
             visible: true

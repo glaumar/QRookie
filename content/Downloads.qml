@@ -13,7 +13,6 @@ RowLayout {
         spacing: 20
         snapMode: ListView.SnapToItem
         model: app.vrp.downloadsQueue
-        headerPositioning: ListView.PullBackHeader
 
         Text {
             anchors.centerIn: downloading_list
@@ -72,7 +71,6 @@ RowLayout {
         spacing: 20
         snapMode: ListView.SnapToItem
         model: app.vrp.localQueue
-        headerPositioning: ListView.PullBackHeader
 
         Text {
             anchors.centerIn: local_list
@@ -102,6 +100,7 @@ RowLayout {
                 function onStatusChanged(release_name_, status_) {
                     if (modelData.release_name === release_name_)
                         status = status_;
+
                 }
 
                 function onInstalledQueueChanged() {

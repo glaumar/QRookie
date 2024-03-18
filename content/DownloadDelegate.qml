@@ -61,7 +61,7 @@ Rectangle {
         anchors.left: thumbnail.right
         anchors.bottom: parent.bottom
         value: progress
-        height: 10
+        // height: 10
         layer.enabled: true
 
         layer.effect: DropShadow {

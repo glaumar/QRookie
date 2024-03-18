@@ -15,9 +15,9 @@ Rectangle {
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
-
     onStatusChanged: function() {
         install_button.enabled = false;
+        install_button.icon.source = "install";
         switch (status) {
         case VrpDownloader.Local:
             install_button.text = qsTr("No Connected Device");
@@ -25,13 +25,14 @@ Rectangle {
         case VrpDownloader.UpdatableLocally:
             install_button.text = qsTr("Update");
             install_button.enabled = true;
+            install_button.icon.source = "update";
             break;
         case VrpDownloader.Installable:
             install_button.text = qsTr("Install");
             install_button.enabled = true;
             break;
         case VrpDownloader.Installing:
-            install_button.text = qsTr("Installing");
+            install_button.text = qsTr("Installing...");
             break;
         case VrpDownloader.Installed:
             install_button.text = qsTr("Reinstall");
@@ -40,6 +41,7 @@ Rectangle {
         case VrpDownloader.Error:
             install_button.text = qsTr("Error, Click to Try Again");
             install_button.enabled = true;
+            install_button.icon.source = "error";
             break;
         default:
             install_button.text = qsTr("Unknown Status");
@@ -103,10 +105,8 @@ Rectangle {
         anchors.left: thumbnail.right
         anchors.bottom: parent.bottom
         anchors.margins: 10
-        text: "dfsadf"
-        icon.source: "install"
         onClicked: {
-            app.vrp.installQml(modelData)
+            app.vrp.installQml(modelData);
         }
     }
 
@@ -118,7 +118,7 @@ Rectangle {
         anchors.margins: 10
         icon.source: "delete"
         onClicked: {
-            app.vrp.removeFromLocalQueue(modelData)
+            app.vrp.removeFromLocalQueue(modelData);
         }
     }
 
