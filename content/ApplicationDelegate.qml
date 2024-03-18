@@ -2,14 +2,47 @@ import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpDownloader
 
 Rectangle {
     property var name
-    property var thumbnail_path
+    property var thumbnailPath
+    property var gameInfo
+    property var releaseName
+    property var status: VrpDownloader.Unknown
 
-    // signal downloadClicked()
-    // signal uninstallClicked()
-
+    onStatusChanged: function() {
+        action_button.enabled = false;
+        switch (status) {
+        case VrpDownloader.UpdatableRemotely:
+            action_button.text = qsTr("Download and Update");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.UpdatableLocally:
+            action_button.text = qsTr("Update");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.Error:
+            action_button.text = qsTr("Error, Click to Try Again");
+            action_button.enabled = true;
+            break;
+        case VrpDownloader.Queued:
+            action_button.text = qsTr("Queued...");
+            break;
+        case VrpDownloader.Downloading:
+            action_button.text = qsTr("Downloading...");
+            break;
+        case VrpDownloader.Decompressing:
+            action_button.text = qsTr("Decompressing...");
+            break;
+        case VrpDownloader.Installing:
+            action_button.text = qsTr("Installing...");
+            break;
+        default:
+            action_button.text = qsTr("Installed");
+            break;
+        }
+    }
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
@@ -26,7 +59,7 @@ Rectangle {
 
             asynchronous: true
             width: parent.width
-            source: thumbnail_path
+            source: thumbnailPath
             fillMode: Image.PreserveAspectFit
             layer.enabled: true
 
@@ -61,7 +94,13 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         width: app_info.width
-        text: qsTr("Update")
+        text: qsTr("Installed")
+        onClicked: {
+            if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error)
+                app.vrp.addToDownloadQueue(gameInfo, true);
+            else if (status === VrpDownloader.UpdatableLocally)
+                app.vrp.installQml(gameInfo);
+        }
     }
 
     layer.effect: DropShadow {

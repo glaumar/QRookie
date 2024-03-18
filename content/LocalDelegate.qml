@@ -7,14 +7,45 @@ import VrpDownloader
 Rectangle {
     id: game_info
 
-    property var name
     property var size
-    property var thumbnail_path
+    property var releaseName
+    property var thumbnailPath
     property var status
 
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
+
+    onStatusChanged: function() {
+        install_button.enabled = false;
+        switch (status) {
+        case VrpDownloader.Local:
+            install_button.text = qsTr("No Connected Device");
+            break;
+        case VrpDownloader.UpdatableLocally:
+            install_button.text = qsTr("Update");
+            install_button.enabled = true;
+            break;
+        case VrpDownloader.Installable:
+            install_button.text = qsTr("Install");
+            install_button.enabled = true;
+            break;
+        case VrpDownloader.Installing:
+            install_button.text = qsTr("Installing");
+            break;
+        case VrpDownloader.Installed:
+            install_button.text = qsTr("Reinstall");
+            install_button.enabled = true;
+            break;
+        case VrpDownloader.Error:
+            install_button.text = qsTr("Error, Click to Try Again");
+            install_button.enabled = true;
+            break;
+        default:
+            install_button.text = qsTr("Unknown Status");
+            break;
+        }
+    }
 
     Image {
         id: thumbnail
@@ -24,7 +55,7 @@ Rectangle {
         anchors.margins: 10
         height: parent.height - 20
         asynchronous: true
-        source: thumbnail_path
+        source: thumbnailPath
         fillMode: Image.PreserveAspectFit
         layer.enabled: true
 
@@ -41,19 +72,55 @@ Rectangle {
     }
 
     Text {
+        id: name_text
+
         anchors.margins: 10
         anchors.left: thumbnail.right
         anchors.top: parent.top
-        text: name
+        text: releaseName
         width: parent.width - thumbnail.width - 30
         font.bold: true
         wrapMode: Text.WordWrap
-        height: font.pixelSize * 2
+        height: font.pixelSize * 2.5
         font.pointSize: Qt.application.font.pointSize * 1.3
         color: app.globalPalette.text
     }
 
+    Text {
+        id: size_text
 
+        anchors.margins: 10
+        anchors.top: name_text.bottom
+        anchors.left: thumbnail.right
+        text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
+        // font.pointSize: Qt.application.font.pointSize * 0.9
+        color: app.globalPalette.text
+    }
+
+    Button {
+        id: install_button
+
+        anchors.left: thumbnail.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        text: "dfsadf"
+        icon.source: "install"
+        onClicked: {
+            app.vrp.installQml(modelData)
+        }
+    }
+
+    Button {
+        id: delete_button
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        icon.source: "delete"
+        onClicked: {
+            app.vrp.removeFromLocalQueue(modelData)
+        }
+    }
 
     layer.effect: DropShadow {
         transparentBorder: true
@@ -61,4 +128,5 @@ Rectangle {
         verticalOffset: 6
         color: app.globalPalette.shadow
     }
+
 }

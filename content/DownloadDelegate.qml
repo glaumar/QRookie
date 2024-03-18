@@ -9,7 +9,7 @@ Rectangle {
 
     property var name
     property var size
-    property var thumbnail_path
+    property var thumbnailPath
     property var progress
     property var status
 
@@ -25,7 +25,7 @@ Rectangle {
         anchors.margins: 10
         height: parent.height - 20
         asynchronous: true
-        source: thumbnail_path
+        source: thumbnailPath
         fillMode: Image.PreserveAspectFit
         layer.enabled: true
 

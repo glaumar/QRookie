@@ -7,12 +7,12 @@ import VrpDownloader
 
 Rectangle {
     property var name
-    property var release_name
+    // property var releaseName
     property var size
-    property var last_updated
-    property var thumbnail_path
-    property var version_code
-    property var package_name
+    property var lastUpdated
+    property var thumbnailPath
+    // property var versionCode
+    // property var packageName
     property var progress
     property var status
 
@@ -28,6 +28,7 @@ Rectangle {
         }
     }
     onStatusChanged: function() {
+        //TODO: add icon for each status
         progress_bar.value = 0;
         progress_bar.indeterminate = false;
         progress_bar.visible = false;
@@ -103,7 +104,7 @@ Rectangle {
 
             asynchronous: true
             width: parent.width
-            source: thumbnail_path
+            source: thumbnailPath
             fillMode: Image.PreserveAspectFit
             layer.enabled: true
 
@@ -138,7 +139,7 @@ Rectangle {
 
         Text {
             anchors.right: parent.right
-            text: last_updated
+            text: lastUpdated
             font.pointSize: Qt.application.font.pointSize * 0.8
             color: app.globalPalette.text
         }
@@ -154,12 +155,13 @@ Rectangle {
         text: qsTr("Downlad")
         width: game_info.width
         onClicked: {
-            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally)
-                app.vrp.installQml(modelData).then(function(isSuccess) {
-                console.log("Install status:", isSuccess);
-            });
-            else
-                app.vrp.addToDownloadQueue(modelData);
+            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally) {
+                app.vrp.installQml(modelData);
+            } else if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error) {
+                app.vrp.addToDownloadQueue(modelData, true);
+            } else {
+                app.vrp.addToDownloadQueue(modelData, false);
+            }
         }
     }
 

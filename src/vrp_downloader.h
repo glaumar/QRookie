@@ -50,11 +50,15 @@ class VrpDownloader : public QObject {
     ~VrpDownloader();
     QCoro::Task<bool> updateMetadata();
     Q_INVOKABLE QCoro::QmlTask updateMetadataQml() { return updateMetadata(); }
+    Q_INVOKABLE void filterGamesByName(const QString& filter){
+        filter_ = filter;
+        emit gamesInfoChanged();
+    }
     Q_INVOKABLE QVariantList find(const QString& package_name);
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
-    Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
+    Q_INVOKABLE bool addToDownloadQueue(const GameInfo game, bool auto_install);
 
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {
@@ -149,6 +153,7 @@ class VrpDownloader : public QObject {
     QVariantList downloadsQueue() const;
 
     QVariantList localQueue() const;
+    Q_INVOKABLE bool removeFromLocalQueue(const GameInfo& game);
 
     QVariantList installedQueue() const;
 
@@ -181,12 +186,14 @@ class VrpDownloader : public QObject {
     QString cache_path_;
     QString data_path_;
     QVector<GameInfo> games_info_;
+    QString filter_;
     QVector<GameInfo> downloading_queue_;
     QVector<GameInfo> decompressing_queue_;
     QVector<GameInfo> local_queue_;
     QVector<GameInfo> failed_queue_;
     QVector<GameInfo> installing_queue_;
     QVector<AppInfo> installed_queue_;
+    QVector<GameInfo> auto_install_queue_;
     int current_job_id_;
     DeviceManager device_manager_;
     QString connected_device_;

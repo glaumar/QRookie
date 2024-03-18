@@ -2,6 +2,7 @@ import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpDownloader
 
 RowLayout {
     id: device_layout
@@ -114,7 +115,26 @@ RowLayout {
             width: apps_info.cellWidth - 20
             height: apps_info.cellHeight - 20
             name: modelData.package_name
-            thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            Component.onCompleted: {
+                let games_info = app.vrp.find(modelData.package_name);
+                if (games_info.length > 0) {
+                    gameInfo = games_info[0];
+                    releaseName = gameInfo.release_name;
+                    status = app.vrp.getStatus(gameInfo);
+                }
+            }
+
+            Connections {
+                function onStatusChanged(release_name_, status_) {
+                    if (releaseName === release_name_)
+                        status = status_;
+
+                }
+
+                target: app.vrp
+            }
+
         }
 
     }

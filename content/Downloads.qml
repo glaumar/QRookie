@@ -36,11 +36,15 @@ RowLayout {
             height: 160
             name: modelData.name
             size: modelData.size
-            thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
             progress: 0
             status: app.vrp.getStatus(modelData)
 
             Connections {
+                // function onConnectedDeviceChanged() {
+                //     status = app.vrp.getStatus(modelData);
+                // }
+
                 function onDownloadProgressChanged(release_name, progress_, speed_) {
                     if (modelData.release_name === release_name)
                         progress = progress_;
@@ -52,10 +56,6 @@ RowLayout {
                         status = status_;
 
                 }
-
-                // function onConnectedDeviceChanged() {
-                //     status = app.vrp.getStatus(modelData);
-                // }
 
                 target: app.vrp
             }
@@ -93,9 +93,24 @@ RowLayout {
         delegate: LocalDelegate {
             width: 640
             height: 160
-            name: modelData.name
+            releaseName: modelData.release_name
             size: modelData.size
-            thumbnail_path: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            status: app.vrp.getStatus(modelData)
+
+            Connections {
+                function onStatusChanged(release_name_, status_) {
+                    if (modelData.release_name === release_name_)
+                        status = status_;
+                }
+
+                function onInstalledQueueChanged() {
+                    status = app.vrp.getStatus(modelData);
+                }
+
+                target: app.vrp
+            }
+
         }
 
     }
