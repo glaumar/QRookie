@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName(APPLICATION_NAME);
     app.setApplicationVersion(APPLICATION_VERSION);
-    app.setDesktopFileName(DESKTOP_FILE_NAME);
+    app.setDesktopFileName(APPLICATION_ID);
 
     qmlRegisterType<VrpDownloader>("VrpDownloader", 1, 0, "VrpDownloader");
     QCoro::Qml::registerTypes();

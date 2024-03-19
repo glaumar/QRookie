@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(QRookie
     VERSION 0.1.0
-    DESCRIPTION "Download and install Quest games on linux (like VRP Rookie Sideloader but for linux)"
+    DESCRIPTION "Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader but for linux)"
     HOMEPAGE_URL https://github.com/glaumar/QRookie
     LANGUAGES CXX)
 
@@ -48,8 +48,11 @@ qt_add_resources(${APP_BINARY_NAME} "configuration"
 )
 
 # librclone
-target_include_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
-target_link_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
+if(EXISTS "${CMAKE_SOURCE_DIR}/third/rclone/")
+    target_include_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
+    target_link_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
+    message(STATUS "third/rclone/ exists")
+endif()
 target_link_libraries(${APP_BINARY_NAME} PRIVATE librclone.a)
 
 target_link_libraries(${APP_BINARY_NAME} PRIVATE
@@ -65,13 +68,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
-include(GNUInstallDirs)
-install(TARGETS ${APP_BINARY_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# make IDEs aware of the QML import path
-# set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
-#     "Path to the custom QML components defined by the project")
+install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
+install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
+install(FILES ${APPLICATION_ICON_BASE_NAME}.svg DESTINATION share/icons/hicolor/scalable/apps)
+install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)

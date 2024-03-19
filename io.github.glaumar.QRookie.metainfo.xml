@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>io.github.glaumar.QRookie</id>
+
+    <name>QRookie</name>
+    <summary>Download and install Quest games from ROOKIE Public Mirror</summary>
+
+    <metadata_license>FSFAP</metadata_license>
+    <project_license>GPL-3.0-or-later</project_license>
+
+    <url type="homepage">https://github.com/glaumar/QRookie</url>
+    <developer_name>Glaumar</developer_name>
+
+    <description>
+        <p>
+            Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader but for linux).
+        </p>
+    </description>
+    <content_rating type="oars-1.1" />
+    <releases>
+        <release date="2024-03-19" version="0.1.0" />
+    </releases>
+    <launchable type="desktop-id">io.github.glaumar.QRookie.desktop</launchable>
+    <!-- <screenshots>
+        <screenshot type="default">
+            <image>
+                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>
+                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot2.png</image>
+        </screenshot>
+        <screenshot>
+            <image>
+                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot3.png</image>
+        </screenshot>
+    </screenshots> -->
+</component>

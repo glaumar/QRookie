@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=QRookie
+Comment=Download and install Quest games from ROOKIE Public Mirror 
+Exec=qrookie
+Icon=io.github.glaumar.QRookie
+Terminal=false
+Categories=Game;Utility;

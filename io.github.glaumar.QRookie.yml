@@ -1,0 +1,70 @@
+app-id: io.github.glaumar.QRookie
+runtime: org.kde.Platform
+runtime-version: "6.6"
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang:
+    version: "23.08"
+
+command: qrookie
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=all
+  - --share=network
+  - --filesystem=xdg-config/fontconfig:ro
+build-options:
+  append-path: /usr/lib/sdk/golang/bin
+  build-args:
+    - --share=network
+modules:
+  - name: p7zip
+    buildsystem: simple
+    build-commands:
+      - install -pDm 0755 7za -t "$FLATPAK_DEST/bin/"
+    sources:
+      - type: archive
+        url: https://github.com/p7zip-project/p7zip/releases/download/v17.05/linux-cmake-p7zip.zip
+        sha256: ac5240801ef208b7e7018a353c0d699526f5a0367fb8be89ce89a7b2cafb7d4e
+
+  - name: android-tools
+    buildsystem: simple
+    build-commands:
+      - install -pDm 0755 adb -t "$FLATPAK_DEST/bin/"
+    sources:
+      - type: archive
+        url: https://dl.google.com/android/repository/platform-tools_r35.0.0-linux.zip
+        sha256: 62fc977c1b7622ef8dbd6fe1312987d9b139aa8a0b06e88573c1b60129399d49
+
+  - name: qcoro
+    buildsystem: cmake
+    sources:
+      - type: archive
+        url: https://github.com/danvratil/qcoro/archive/refs/tags/v0.10.0.tar.gz
+        sha256: b7c8f00273ad27d85814bf4ec93eb6922c75656800a61d11854d36355a4a1aec
+
+  - name: librclone
+    buildsystem: simple
+    build-commands:
+      - go -C . build --buildmode=c-archive -o librclone.a github.com/rclone/rclone/librclone
+      - install -pDm 0644 librclone.a -t "$FLATPAK_DEST/lib/"
+      - install -pDm 0644 librclone.h -t "$FLATPAK_DEST/include/"
+    sources:
+      - type: archive
+        url: https://github.com/rclone/rclone/archive/refs/tags/v1.65.2.tar.gz
+        sha256: 5ae6179908650429e8d366e4940b586a4bd4aa9ee90c23c423be35550dded346
+
+  - name: qrookie
+    buildsystem: cmake
+    sources:
+      - type: dir
+        path: .
+        skip:
+          - CMakeLists.txt.user
+          - build
+          - build-flatpak
+          - .flatpak-builder
+          - .VSCodeCounter
+          - .flatpak
+          - QRookie.flatpak
+          - export
