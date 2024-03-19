@@ -100,6 +100,7 @@
         "qcryptographichash": "cpp",
         "qjsonobject": "cpp",
         "fstream": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "qpair": "cpp"
     }
 }

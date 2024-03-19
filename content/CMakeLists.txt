@@ -14,4 +14,5 @@ qt6_add_qml_module(content
         ApplicationDelegate.qml
     RESOURCES
         fonts/fonts.txt
+        Image/matrix.png
 )

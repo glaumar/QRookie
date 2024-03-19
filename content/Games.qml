@@ -45,7 +45,13 @@ ColumnLayout {
             name: modelData.name
             size: modelData.size
             lastUpdated: modelData.last_updated
-            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+            thumbnailPath: {
+                let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                if (path === "")
+                    return "Image/matrix.png";
+                else
+                    return "file://" + path;
+            }
             progress: 0
             status: app.vrp.getStatus(modelData)
 

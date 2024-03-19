@@ -25,7 +25,6 @@ Rectangle {
         case VrpDownloader.UpdatableLocally:
             install_button.text = qsTr("Update");
             install_button.enabled = true;
-            install_button.icon.source = "update";
             break;
         case VrpDownloader.Installable:
             install_button.text = qsTr("Install");

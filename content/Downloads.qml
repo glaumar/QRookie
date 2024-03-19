@@ -35,7 +35,13 @@ RowLayout {
             height: 160
             name: modelData.name
             size: modelData.size
-            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+                        thumbnailPath: {
+                let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                if (path === "")
+                    return "Image/matrix.png";
+                else
+                    return "file://" + path;
+            }
             progress: 0
             status: app.vrp.getStatus(modelData)
 
@@ -93,7 +99,13 @@ RowLayout {
             height: 160
             releaseName: modelData.release_name
             size: modelData.size
-            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+                        thumbnailPath: {
+                let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                if (path === "")
+                    return "Image/matrix.png";
+                else
+                    return "file://" + path;
+            }
             status: app.vrp.getStatus(modelData)
 
             Connections {

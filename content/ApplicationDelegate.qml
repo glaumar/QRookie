@@ -22,7 +22,6 @@ Rectangle {
         case VrpDownloader.UpdatableLocally:
             action_button.text = qsTr("Update");
             action_button.enabled = true;
-            action_button.icon.source = "update";
             break;
         case VrpDownloader.Error:
             action_button.text = qsTr("Error, Click to Try Again");

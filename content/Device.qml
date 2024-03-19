@@ -115,7 +115,13 @@ RowLayout {
             width: apps_info.cellWidth - 20
             height: apps_info.cellHeight - 20
             name: modelData.package_name
-            thumbnailPath: "file://" + app.vrp.getGameThumbnailPath(modelData.package_name)
+                        thumbnailPath: {
+                let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                if (path === "")
+                    return "Image/matrix.png";
+                else
+                    return "file://" + path;
+            }
             Component.onCompleted: {
                 let games_info = app.vrp.find(modelData.package_name);
                 if (games_info.length > 0) {
