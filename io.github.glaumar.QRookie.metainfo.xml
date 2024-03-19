@@ -21,18 +21,18 @@
         <release date="2024-03-19" version="0.1.0" />
     </releases>
     <launchable type="desktop-id">io.github.glaumar.QRookie.desktop</launchable>
-    <!-- <screenshots>
+    <screenshots>
         <screenshot type="default">
             <image>
-                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot1.png</image>
+                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot1.png</image>
         </screenshot>
         <screenshot>
             <image>
-                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot2.png</image>
+                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot2.png</image>
         </screenshot>
         <screenshot>
             <image>
-                https://raw.githubusercontent.com/glaumar/PopTranslate/main/screenshots/Screenshot3.png</image>
+                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot3.png</image>
         </screenshot>
-    </screenshots> -->
+    </screenshots>
 </component>
