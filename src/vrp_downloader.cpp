@@ -65,7 +65,8 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
 
     loadLocalQueue();
 
-    // TODO: parese local metadata
+    // parese local metadata
+    parseMetadata();
 }
 
 VrpDownloader::~VrpDownloader() {
@@ -73,6 +74,7 @@ VrpDownloader::~VrpDownloader() {
 
     saveLocalQueue();
     // TODO: cleanup cache
+
 }
 
 VrpDownloader::Status VrpDownloader::getStatus(const GameInfo& game) {
@@ -104,19 +106,24 @@ VrpDownloader::Status VrpDownloader::getStatus(const GameInfo& game) {
 }
 
 QCoro::Task<bool> VrpDownloader::updateMetadata() {
-    // TODO: uncomment
-    //  if (!co_await vrp_public_.update()) {
-    //      qWarning() << "Update metadata failed";
-    //      co_return false;
-    //  }
+    if (!co_await vrp_public_.update()) {
+        qWarning() << "Update metadata failed";
+        co_return false;
+    }
 
-    // TODO: uncomment
-    //  if (!co_await downloadMetadata()) {
-    //      qWarning() << "Update metadata failed";
-    //      co_return false;
-    //  }
+    if (!co_await downloadMetadata()) {
+        qWarning() << "Update metadata failed";
+        co_return false;
+    }
 
-    co_return parseMetadata();
+    if(parseMetadata()){
+        qDebug() << "Update metadata successful";
+        co_return true;
+    } else {
+        qWarning() << "Update metadata failed";
+        co_return false;
+    }
+
 }
 
 QCoro::Task<bool> VrpDownloader::downloadMetadata() {
@@ -211,7 +218,7 @@ bool VrpDownloader::parseMetadata() {
         qWarning() << "No games found in VRP-GameList.txt";
         return false;
     } else {
-        qDebug() << "Metadata updated";
+        qDebug() << "Metadata parsed successfully";
         emit gamesInfoChanged();
         return true;
     }
@@ -354,8 +361,8 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
 
 bool VrpDownloader::checkDownloadStatus(int job_id) {
     // https://rclone.org/rc/#job-status
-    RcloneResult job_status = RcloneRPC(
-        QString("job/status"), QString(R"({"jobid":%1})").arg(job_id));
+    RcloneResult job_status = RcloneRPC(QString("job/status"),
+                                        QString(R"({"jobid":%1})").arg(job_id));
     // TODO: check if job_status is successful
     QJsonDocument doc_job =
         QJsonDocument::fromJson(job_status.output().toLocal8Bit());
@@ -469,8 +476,7 @@ QString VrpDownloader::getGameThumbnailPath(const QString& package_name) {
     if (QFile::exists(path)) {
         return path;
     } else {
-        // TODO: return a default image
-        return data_path_ + "/.meta/thumbnails/jp.co.avex.anicastmaker.jpg";
+        return "";
     }
 }
 

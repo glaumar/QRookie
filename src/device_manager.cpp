@@ -251,8 +251,9 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         co_await adb.waitForFinished();
 
         QStringList obb_files =
-            obb_dir.entryList(QStringList() << "*.obb", QDir::Files);
+            obb_dir.entryList(QStringList() << "*", QDir::Files);
         for (const QString& obb_file : obb_files) {
+            qDebug() << "Pushing" << obb_file << "to device" << serial;
             adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file,
                               "/sdcard/Android/obb/" + package_name + "/"});
             co_await adb.waitForFinished();
@@ -267,6 +268,9 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
             co_return false;
         }
     }
+
+    //TODO: support for install.txt
+    // https://vrpirates.wiki/en/Howto/Manual-Sideloading
 
     co_return true;
 }
