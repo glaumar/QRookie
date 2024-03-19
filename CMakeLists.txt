@@ -61,7 +61,6 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     QCoro6::Core
     QCoro6::Qml
     QCoro6::Network
-    librclone.a
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)

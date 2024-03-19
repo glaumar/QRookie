@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QROOKIE_APP_INFO
 #define QROOKIE_APP_INFO
 #include <QObject>

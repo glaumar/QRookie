@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QROOKIE_DEVICE_MANAGER
 #define QROOKIE_DEVICE_MANAGER
 #include <QCoroProcess>
