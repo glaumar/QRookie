@@ -568,9 +568,9 @@ QVariantList VrpDownloader::downloadsQueue() const {
         list.append(QVariant::fromValue(game_info));
     }
 
-    for (const auto& game_info : failed_queue_) {
-        list.append(QVariant::fromValue(game_info));
-    }
+    // for (const auto& game_info : failed_queue_) {
+    //     list.append(QVariant::fromValue(game_info));
+    // }
 
     return list;
 }
