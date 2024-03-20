@@ -5,7 +5,6 @@ sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.golang:
     version: "23.08"
-
 command: qrookie
 finish-args:
   - --socket=wayland
