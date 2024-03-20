@@ -3,7 +3,7 @@
     <id>io.github.glaumar.QRookie</id>
 
     <name>QRookie</name>
-    <summary>Download and install Quest games from ROOKIE Public Mirror</summary>
+    <summary>Download and install Quest games</summary>
 
     <metadata_license>FSFAP</metadata_license>
     <project_license>GPL-3.0-or-later</project_license>
@@ -13,12 +13,19 @@
 
     <description>
         <p>
-            Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader but for linux).
+            Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader
+            but for linux).
         </p>
     </description>
     <content_rating type="oars-1.1" />
     <releases>
         <release date="2024-03-20" version="0.1.1" />
+        <description>
+            <p>Release description</p>
+            <ul>
+                <li>Fix: adb connect error in flatpak</li>
+            </ul>
+        </description>
         <release date="2024-03-19" version="0.1.0" />
     </releases>
     <launchable type="desktop-id">io.github.glaumar.QRookie.desktop</launchable>
@@ -26,14 +33,19 @@
         <screenshot type="default">
             <image>
                 https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot1.png</image>
+            <caption>Games</caption>
+
         </screenshot>
         <screenshot>
             <image>
                 https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot2.png</image>
+            <caption>Downloads</caption>
+
         </screenshot>
         <screenshot>
             <image>
                 https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot3.png</image>
+            <caption>Devices</caption>
         </screenshot>
     </screenshots>
 </component>
