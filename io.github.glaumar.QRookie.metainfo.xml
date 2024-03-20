@@ -18,6 +18,7 @@
     </description>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-03-20" version="0.1.1" />
         <release date="2024-03-19" version="0.1.0" />
     </releases>
     <launchable type="desktop-id">io.github.glaumar.QRookie.desktop</launchable>
