@@ -3,3 +3,5 @@ CmakeLists.txt.user
 .directory
 build_flatpak/
 .flatpak-builder/
+export/
+QRookie.flatpak

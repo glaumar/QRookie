@@ -10,7 +10,7 @@
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent) {
     connect(&update_serials_timer_, &QTimer::timeout, this,
             &DeviceManager::updateSerials);
-    startServer();
+    restartServer();
 }
 
 DeviceManager::~DeviceManager() {}
