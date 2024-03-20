@@ -51,7 +51,6 @@ qt_add_resources(${APP_BINARY_NAME} "configuration"
 if(EXISTS "${CMAKE_SOURCE_DIR}/third/rclone/")
     target_include_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
     target_link_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
-    message(STATUS "third/rclone/ exists")
 endif()
 target_link_libraries(${APP_BINARY_NAME} PRIVATE librclone.a)
 

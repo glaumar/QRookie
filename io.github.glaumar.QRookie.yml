@@ -13,7 +13,7 @@ finish-args:
   - --share=network
   - --share=ipc
   - --persist=.android
-  - --filesystem=xdg-config/fontconfig:ro
+
 build-options:
   append-path: /usr/lib/sdk/golang/bin
   build-args:
@@ -39,32 +39,24 @@ modules:
         url: https://github.com/p7zip-project/p7zip/releases/download/v17.05/linux-cmake-p7zip.zip
         sha256: ac5240801ef208b7e7018a353c0d699526f5a0367fb8be89ce89a7b2cafb7d4e
 
-  - name: libusb
-    buildsystem: autotools
-    sources: 
-      - type: archive
-        url: https://github.com/libusb/libusb/archive/v1.0.27.tar.gz
-        sha256: e8f18a7a36ecbb11fb820bd71540350d8f61bcd9db0d2e8c18a6fb80b214a3de
-
   - name: android-tools
     buildsystem: simple
     build-commands:
       - install -pDm 0755 adb -t "$FLATPAK_DEST/bin/"
-      - install -pDm 0755 fastboot -t "$FLATPAK_DEST/bin/"
     sources:
       - type: archive
         url: https://dl.google.com/android/repository/platform-tools_r34.0.0-linux.zip
         sha256: 8137c2834dea05cb64c1a8bc041ea00fcd43e3a8a29429ad4f25b8ee51efebf6
 
   - name: qcoro
-    buildsystem: cmake
+    buildsystem: cmake-ninja
     sources:
       - type: archive
         url: https://github.com/danvratil/qcoro/archive/refs/tags/v0.10.0.tar.gz
         sha256: b7c8f00273ad27d85814bf4ec93eb6922c75656800a61d11854d36355a4a1aec
 
   - name: qrookie
-    buildsystem: cmake
+    buildsystem: cmake-ninja
     sources:
       - type: dir
         path: .
@@ -77,3 +69,10 @@ modules:
           - .flatpak
           - QRookie.flatpak
           - export
+          - repo
+
+  - name: cleanup
+    buildsystem: simple
+    build-commands:
+      - rm -rf "$FLATPAK_DEST/lib/librclone.a"
+      - rm -rf "$FLATPAK_DEST/include/librclone.h"
