@@ -9,7 +9,10 @@
     <project_license>GPL-3.0-or-later</project_license>
 
     <url type="homepage">https://github.com/glaumar/QRookie</url>
-    <developer_name>Glaumar</developer_name>
+    <developer id="tech.geekgo.www">
+        <name>Glaumar</name>
+        <email>glaumar@geekgo.tech</email>
+    </developer>
 
     <description>
         <p>
@@ -19,13 +22,14 @@
     </description>
     <content_rating type="oars-1.1" />
     <releases>
-        <release date="2024-03-20" version="0.1.1" />
-        <description>
-            <p>Release description</p>
-            <ul>
-                <li>Fix: adb connect error in flatpak</li>
-            </ul>
-        </description>
+        <release date="2024-03-20" version="0.1.1">
+            <description>
+                <p>Release description</p>
+                <ul>
+                    <li>Fix: adb connect error in flatpak</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-03-19" version="0.1.0" />
     </releases>
     <launchable type="desktop-id">io.github.glaumar.QRookie.desktop</launchable>
