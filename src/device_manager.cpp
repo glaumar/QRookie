@@ -113,36 +113,6 @@ QCoro::Task<QVector<AppInfo>> DeviceManager::installedApps(
     co_return apps;
 }
 
-// QCoro::Task<QVariantMap> DeviceManager::deviceApp(
-//     const QString& serial, const QString& package_name) const {
-//     if (serials_.isEmpty() || !serials_.contains(serial)) {
-//         co_return QVariantMap{{"packageName", ""}, {"versionCode", 0}};
-//     }
-
-//     QProcess basic_process;
-//     auto adb = qCoro(basic_process);
-//     adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
-//                       "--show-versioncode", package_name});
-
-//     co_await adb.waitForFinished();
-
-//     if (basic_process.exitStatus() != QProcess::NormalExit ||
-//         basic_process.exitCode() != 0) {
-//         qWarning() << "Failed to get app" << package_name << "for device"
-//                    << serial;
-//         co_return QVariantMap{{"packageName", ""}, {"versionCode", 0}};
-//     }
-
-//     QString output = basic_process.readAllStandardOutput();
-//     auto first_line = output.section('\n', 0, 0);
-//     QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
-//     auto match = re.match(first_line);
-//     QString local_package_name = match.captured(1);
-//     QString local_version_code = match.captured(2);
-//     co_return QVariantMap{{"packageName", local_package_name},
-//                           {"versionCode", local_version_code.toLongLong()}};
-// }
-
 QCoro::Task<QString> DeviceManager::deviceModel(const QString& serial) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
         co_return QString("");
@@ -219,23 +189,36 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         co_return false;
     }
 
-    QProcess basic_process;
 
-    QString apk_path = path + "/" + package_name + ".apk";
-    if (!QFile::exists(apk_path)) {
-        qWarning() << "APK file" << apk_path << "does not exist";
+    QDir apk_dir(path);
+
+    if (!apk_dir.exists()) {
+        qWarning() << path << " does not exist";
         co_return false;
     }
-    auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "install", "-r", apk_path});
 
-    co_await adb.waitForFinished();
+    QStringList apk_files =
+    apk_dir.entryList(QStringList() << "*.apk", QDir::Files);
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
-        qWarning() << "Failed to install" << apk_path << "on device" << serial;
-        qWarning() << basic_process.readAllStandardError();
+    if (apk_files.isEmpty()) {
+        qWarning() << "No apk file found in" << path;
         co_return false;
+    }
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    for(const QString& apk_file : apk_files) {
+        QString apk_path = path + "/" + apk_file;
+        qDebug() << "Installing" << apk_path << "on device" << serial;
+        adb.start("adb", {"-s", serial, "install", "-r", apk_path});
+        co_await adb.waitForFinished();
+
+        if (basic_process.exitStatus() != QProcess::NormalExit ||
+            basic_process.exitCode() != 0) {
+            qWarning() << "Failed to install" << apk_path << "on device" << serial;
+            qWarning() << basic_process.readAllStandardError();
+            co_return false;
+        }
     }
 
     QString obb_path = path + "/" + package_name;
