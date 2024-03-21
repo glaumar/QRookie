@@ -12,6 +12,9 @@ Rectangle {
     property var thumbnailPath
     property var status
 
+    signal installButtonClicked
+    signal deleteButtonClicked
+
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
@@ -94,7 +97,6 @@ Rectangle {
         anchors.top: name_text.bottom
         anchors.left: thumbnail.right
         text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-        // font.pointSize: Qt.application.font.pointSize * 0.9
         color: app.globalPalette.text
     }
 
@@ -105,7 +107,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.margins: 10
         onClicked: {
-            app.vrp.installQml(modelData);
+            installButtonClicked();
         }
     }
 
@@ -117,7 +119,7 @@ Rectangle {
         anchors.margins: 10
         icon.source: "delete"
         onClicked: {
-            app.vrp.removeFromLocalQueue(modelData);
+            deleteButtonClicked();
         }
     }
 

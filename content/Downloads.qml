@@ -35,7 +35,7 @@ RowLayout {
             height: 160
             name: modelData.name
             size: modelData.size
-                        thumbnailPath: {
+            thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")
                     return "Image/matrix.png";
@@ -46,10 +46,6 @@ RowLayout {
             status: app.vrp.getStatus(modelData)
 
             Connections {
-                // function onConnectedDeviceChanged() {
-                //     status = app.vrp.getStatus(modelData);
-                // }
-
                 function onDownloadProgressChanged(release_name, progress_, speed_) {
                     if (modelData.release_name === release_name)
                         progress = progress_;
@@ -72,11 +68,19 @@ RowLayout {
     ListView {
         id: local_list
 
+        property int oldIndex: 0
+
         Layout.fillHeight: true
         implicitWidth: 600
         spacing: 20
         snapMode: ListView.SnapToItem
         model: app.vrp.localQueue
+        onModelChanged: {
+            if (count - 1 >= oldIndex)
+                positionViewAtIndex(oldIndex, ListView.Center);
+            else
+                positionViewAtIndex(count - 1, ListView.Center);
+        }
 
         Text {
             anchors.centerIn: local_list
@@ -99,7 +103,7 @@ RowLayout {
             height: 160
             releaseName: modelData.release_name
             size: modelData.size
-                        thumbnailPath: {
+            thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")
                     return "Image/matrix.png";
@@ -107,6 +111,13 @@ RowLayout {
                     return "file://" + path;
             }
             status: app.vrp.getStatus(modelData)
+            onInstallButtonClicked: {
+                app.vrp.installQml(modelData);
+            }
+            onDeleteButtonClicked: {
+                local_list.oldIndex = local_list.indexAt(x, y);
+                app.vrp.removeFromLocalQueue(modelData);
+            }
 
             Connections {
                 function onStatusChanged(release_name_, status_) {
