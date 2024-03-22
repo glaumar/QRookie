@@ -46,7 +46,7 @@ RowLayout {
             status: app.vrp.getStatus(modelData)
 
             Connections {
-                function onDownloadProgressChanged(release_name, progress_, speed_) {
+                function onDownloadProgressChanged(release_name, progress_) {
                     if (modelData.release_name === release_name)
                         progress = progress_;
 

@@ -21,7 +21,7 @@ set(APP_BINARY_NAME "qrookie")
 
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 
 
@@ -36,6 +36,7 @@ qt_add_executable(${APP_BINARY_NAME} src/main.cpp
                              src/vrp_public.cpp src/vrp_public.h
                              src/vrp_downloader.cpp src/vrp_downloader.h
                              src/device_manager.cpp src/device_manager.h
+                             src/http_downloader.cpp src/http_downloader.h
                              src/game_info.h
                              src/app_info.h
                              src/librclone_wrapper.h
@@ -63,6 +64,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     QCoro6::Core
     QCoro6::Qml
     QCoro6::Network
+    Qt6::Xml
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)

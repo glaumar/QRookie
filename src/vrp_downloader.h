@@ -12,6 +12,7 @@
 #include "device_manager.h"
 #include "game_info.h"
 #include "vrp_public.h"
+#include "http_downloader.h"
 
 class VrpDownloader : public QObject {
     Q_OBJECT
@@ -169,8 +170,7 @@ class VrpDownloader : public QObject {
     void deviceModelChanged();
     void spaceUsageChanged();
     void statusChanged(QString release_name, Status status);
-    void downloadProgressChanged(QString release_name, double progress,
-                                 double speed);
+    void downloadProgressChanged(QString release_name, double progress);
 
    private:
     QCoro::Task<bool> downloadMetadata();
@@ -180,7 +180,7 @@ class VrpDownloader : public QObject {
     bool saveLocalQueue();
     bool loadLocalQueue();
     QCoro::Task<void> updateInstalledQueue();
-    bool checkDownloadStatus(int job_id);
+    // bool checkDownloadStatus(int job_id);
 
     VrpPublic vrp_public_;
     QString cache_path_;
@@ -194,12 +194,12 @@ class VrpDownloader : public QObject {
     QVector<GameInfo> installing_queue_;
     QVector<AppInfo> installed_queue_;
     QVector<GameInfo> auto_install_queue_;
-    // int current_job_id_;
     DeviceManager device_manager_;
     QString connected_device_;
     QString device_model_;
     long long total_space_;
     long long free_space_;
+    HttpDownloader http_downloader_;
 };
 
 #endif /* QROOKIE_VRP_DOWNLOADER */

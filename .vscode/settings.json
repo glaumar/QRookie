@@ -101,6 +101,10 @@
         "qjsonobject": "cpp",
         "fstream": "cpp",
         "ranges": "cpp",
-        "qpair": "cpp"
+        "qpair": "cpp",
+        "qcoronetworkreply": "cpp",
+        "qcoroiodevice": "cpp",
+        "qxmlstreamreader": "cpp",
+        "qnetworkreply": "cpp"
     }
 }
