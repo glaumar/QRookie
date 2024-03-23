@@ -38,22 +38,13 @@ qt_add_executable(${APP_BINARY_NAME} src/main.cpp
                              src/device_manager.cpp src/device_manager.h
                              src/http_downloader.cpp src/http_downloader.h
                              src/game_info.h
-                             src/app_info.h
-                             src/librclone_wrapper.h
-                             src/rclone_result.h)
+                             src/app_info.h)
 
 qt_add_resources(${APP_BINARY_NAME} "configuration"
     PREFIX "/"
     FILES
         qtquickcontrols2.conf
 )
-
-# librclone
-if(EXISTS "${CMAKE_SOURCE_DIR}/third/rclone/")
-    target_include_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
-    target_link_directories(${APP_BINARY_NAME} PRIVATE "third/rclone/")
-endif()
-target_link_libraries(${APP_BINARY_NAME} PRIVATE librclone.a)
 
 target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Core

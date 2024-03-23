@@ -10,11 +10,8 @@
 #include <QStandardPaths>
 
 #include "qrookie.h"
-#include "rclone_result.h"
 
 VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
-    RcloneInitialize();
-
     // Create cache and data directories
     QDir dir;
     cache_path_ =
@@ -72,8 +69,6 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
 }
 
 VrpDownloader::~VrpDownloader() {
-    RcloneFinalize();
-
     saveLocalQueue();
     // TODO: cleanup cache
 }
@@ -128,25 +123,6 @@ QCoro::Task<bool> VrpDownloader::updateMetadata() {
 }
 
 QCoro::Task<bool> VrpDownloader::downloadMetadata() {
-    // https://rclone.org/rc/#operations-copyfile
-    // QString rc_method("operations/copyfile");
-    // QString rc_input = QString(R"({
-    //     "srcFs": ":http,url='%1':",
-    //     "srcRemote": "/meta.7z",
-    //     "dstFs": "%2",
-    //     "dstRemote": "meta.7z",
-    //     "_config": {
-    //             "Transfers": 1,
-    //             "TPSLimit": 1.0,
-    //             "TPSLimitBurst": 3,
-    //             "MultiThreadStreams": 0,
-    //             "UserAgent": "rclone/v1.65.2"
-    //     }
-    // })")
-    //                        .arg(vrp_public_.baseUrl(), cache_path_);
-
-    // RcloneResult result = RcloneRPC(rc_method, rc_input);
-
     if (co_await http_downloader_.download("meta.7z")) {
         QProcess basic_process;
         auto p7za = qCoro(basic_process);
@@ -175,8 +151,7 @@ QCoro::Task<bool> VrpDownloader::downloadMetadata() {
             co_return true;
         }
     } else {
-        // qWarning() << "Download Metadata failed :\n\t status :"
-        //            << result.status() << "\n\t output: " << result.output();
+        qWarning() << "Download Metadata failed";
         co_return false;
     }
 }
@@ -309,29 +284,6 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
         emit statusChanged(game.release_name, Status::Downloading);
 
         QString id = getGameId(game.release_name);
-        //     // https://rclone.org/rc/#sync-copy
-        //     QString rc_method("sync/copy");
-        //     QString rc_input =
-        //         QString(R"({
-        //     "srcFs": ":http,url='%1':/%2",
-        //     "dstFs": "%3/%4",
-        //     "_async": true,
-        //     "_config": {
-        //             "Transfers": 1,
-        //             "TPSLimit": 1.0,
-        //             "TPSLimitBurst": 3,
-        //             "MultiThreadStreams": 0,
-        //             "UserAgent": "rclone/v1.65.2"
-        //     }
-        // })")
-        //             .arg(QString("https://theapp.vrrookie.xyz/"), id,
-        //             cache_path_,
-        //                  id);  // TODO:use vrp_public
-
-        //     RcloneResult result = RcloneRPC(rc_method, rc_input);
-        //     QJsonDocument doc =
-        //         QJsonDocument::fromJson(result.output().toLocal8Bit());
-        //     int job_id = doc.object()["jobid"].toInt();
 
         auto conn = connect(
             &http_downloader_, &HttpDownloader::downloadProgressDir, this,
@@ -361,34 +313,6 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
     }
     co_return;
 }
-
-// bool VrpDownloader::checkDownloadStatus(int job_id) {
-//     // https://rclone.org/rc/#job-status
-//     RcloneResult job_status = RcloneRPC(QString("job/status"),
-//                                         QString(R"({"jobid":%1})").arg(job_id));
-//     // TODO: check if job_status is successful
-//     QJsonDocument doc_job =
-//         QJsonDocument::fromJson(job_status.output().toLocal8Bit());
-//     bool is_finished = doc_job.object()["finished"].toBool();
-
-//     if (is_finished) {
-//         return true;
-//     }
-
-//     QString group = doc_job.object()["group"].toString();
-
-//     // https://rclone.org/rc/#core-stats
-//     RcloneResult group_stats = RcloneRPC(
-//         QString("core/stats"), QString(R"({"group":"%1"})").arg(group));
-//     QJsonDocument group_stats_doc =
-//         QJsonDocument::fromJson(group_stats.output().toLocal8Bit());
-//     double transferred = group_stats_doc.object()["bytes"].toDouble();
-//     double total = group_stats_doc.object()["totalBytes"].toDouble();
-//     double speed = group_stats_doc.object()["speed"].toDouble();
-//     emit downloadProgressChanged(downloading_queue_[0].release_name,
-//                                  transferred / total, speed);
-//     return false;
-// }
 
 QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
     if (decompressing_queue_.contains(game)) {

@@ -180,7 +180,6 @@ class VrpDownloader : public QObject {
     bool saveLocalQueue();
     bool loadLocalQueue();
     QCoro::Task<void> updateInstalledQueue();
-    // bool checkDownloadStatus(int job_id);
 
     VrpPublic vrp_public_;
     QString cache_path_;

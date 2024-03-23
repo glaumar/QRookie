@@ -1,3 +1,0 @@
-[submodule "third/rclone"]
-	path = third/rclone
-	url = https://github.com/rclone/rclone.git
