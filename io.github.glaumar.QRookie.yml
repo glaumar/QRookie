@@ -2,9 +2,6 @@ app-id: io.github.glaumar.QRookie
 runtime: org.kde.Platform
 runtime-version: "6.6"
 sdk: org.kde.Sdk
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.golang:
-    version: "23.08"
 command: qrookie
 finish-args:
   - --socket=wayland
@@ -13,23 +10,10 @@ finish-args:
   - --share=network
   - --share=ipc
   - --persist=.android
-
-build-options:
-  append-path: /usr/lib/sdk/golang/bin
-  build-args:
-    - --share=network
+cleanup:
+  - "*.a"
+  - /include
 modules:
-  - name: librclone
-    buildsystem: simple
-    build-commands:
-      - go -C . build --buildmode=c-archive -o librclone.a github.com/rclone/rclone/librclone
-      - install -pDm 0644 librclone.a -t "$FLATPAK_DEST/lib/"
-      - install -pDm 0644 librclone.h -t "$FLATPAK_DEST/include/"
-    sources:
-      - type: archive
-        url: https://github.com/rclone/rclone/archive/refs/tags/v1.65.2.tar.gz
-        sha256: 5ae6179908650429e8d366e4940b586a4bd4aa9ee90c23c423be35550dded346
-
   - name: p7zip
     buildsystem: simple
     build-commands:

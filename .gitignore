@@ -6,3 +6,5 @@ build_flatpak/
 export/
 QRookie.flatpak
 repo/
+.VSCodeCounter/
+QRookie.flatpak
