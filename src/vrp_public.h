@@ -13,7 +13,10 @@ class VrpPublic : public QObject {
     Q_OBJECT
    public:
     VrpPublic(QObject *parent = nullptr)
-        : QObject(parent), base_url_(""), password_(""), manager_(nullptr) {}
+        : QObject(parent),
+          base_url_("https://theapp.vrrookie.xyz/"),
+          password_("gL59VfgPxoHR"),
+          manager_(nullptr) {}
     QCoro::Task<bool> update();
     QString baseUrl() const { return base_url_; }
     QString password() const { return password_; }
