@@ -53,6 +53,7 @@ class VrpDownloader : public QObject {
     Q_INVOKABLE QCoro::QmlTask updateMetadataQml() { return updateMetadata(); }
     Q_INVOKABLE void filterGamesByName(const QString& filter){
         filter_ = filter;
+        filter_.remove(" ");
         emit gamesInfoChanged();
     }
     Q_INVOKABLE QVariantList find(const QString& package_name);
