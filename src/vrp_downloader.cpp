@@ -335,8 +335,7 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
                           .arg(cache_path_, getGameId(game.release_name))
                    << "-aoa"  // Overwrite All existing files without prompt.
                    << QString("-o%1").arg(data_path_)
-                   << QString("-p%1").arg(
-                          QString("gL59VfgPxoHR")));  // TODO: use vrp_public
+                   << QString("-p%1").arg(vrp_public_.password()));
 
     co_await p7za.waitForFinished();
 
