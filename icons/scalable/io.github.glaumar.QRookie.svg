@@ -7,7 +7,7 @@
    viewBox="0 0 16 16"
    version="1.1"
    id="svg1"
-   sodipodi:docname="qrookie.svg"
+   sodipodi:docname="io.github.glaumar.QRookie.svg"
    inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -26,9 +26,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="11.449575"
-     inkscape:cx="12.620556"
-     inkscape:cy="25.110103"
+     inkscape:zoom="5.7247875"
+     inkscape:cx="-44.892496"
+     inkscape:cy="47.949378"
      inkscape:window-width="2560"
      inkscape:window-height="1340"
      inkscape:window-x="0"
@@ -96,13 +96,15 @@
        clip-path="url(#clipPath2)"
        inkscape:transform-center-x="0.084610129"
        inkscape:transform-center-y="-1.021292"
-       transform="translate(0,-1.3333333)">
+       transform="translate(0,-1.3333333)"
+       style="fill:#ff6600">
       <g
          inkscape:label="Clip"
-         id="g1">
+         id="g1"
+         style="fill:#ff6600">
         <path
            id="rect2"
-           style="fill:#000000;stroke-width:0.333333"
+           style="fill:#ff6600;stroke-width:0.333333"
            d="m 4.4156415,5.0064468 h 7.1393595 c 1.337247,0 2.413803,1.076556 2.413803,2.4138027 v 0.1549577 c 0,1.3372467 -1.076556,2.4138027 -2.413803,2.4138027 0,0 -1.7981782,0.3262651 -2.5985994,-0.00484 C 8.5405308,9.8121387 8.4490299,9.039069 7.9990352,9.032152 7.5284651,9.0249188 7.4057815,9.824314 6.9677692,9.9964588 6.1760091,10.307631 4.4156415,9.9890099 4.4156415,9.9890099 3.0784006,9.9851069 2.0018389,8.9124539 2.0018389,7.5752072 V 7.4202495 c 0,-1.3372467 1.076556,-2.4138027 2.4138026,-2.4138027 z"
            sodipodi:nodetypes="ssssssaassss" />
       </g>
@@ -125,7 +127,7 @@
       </g>
     </g>
     <path
-       style="fill:#000000;stroke-width:0.333333"
+       style="fill:#ff6600;stroke-width:0.333333"
        d="m 4.9702191,10.084075 c 0,0 1.5608983,2.113514 2.6927141,2.072139 1.5364136,-0.05617 3.4401558,-3.0722654 3.4401558,-3.0722654 0,0 -2.4778704,1.4590224 -3.8626791,1.5578274 -0.7772542,0.05546 -2.2701908,-0.557701 -2.2701908,-0.557701 z"
        id="path5"
        sodipodi:nodetypes="cacac" />

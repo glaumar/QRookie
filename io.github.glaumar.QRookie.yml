@@ -54,9 +54,3 @@ modules:
           - QRookie.flatpak
           - export
           - repo
-
-  - name: cleanup
-    buildsystem: simple
-    build-commands:
-      - rm -rf "$FLATPAK_DEST/lib/librclone.a"
-      - rm -rf "$FLATPAK_DEST/include/librclone.h"
