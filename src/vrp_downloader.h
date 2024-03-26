@@ -61,7 +61,6 @@ class VrpDownloader : public QObject {
         filter_.remove(" ");
         emit gamesInfoChanged();
     }
-    Q_INVOKABLE QVariantList find(const QString& package_name);
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
@@ -74,8 +73,7 @@ class VrpDownloader : public QObject {
     }
 
     Q_INVOKABLE Status getStatus(const GameInfo& game){
-        Status s = all_games_[game];
-        return s;
+        return  all_games_[game];
     }
     void setStatus(const GameInfo& game, Status status) {
         all_games_[game] = status;
@@ -141,7 +139,6 @@ class VrpDownloader : public QObject {
     QString filter_;
     QVector<AppInfo> installed_queue_;
     QMap<GameInfo, Status> all_games_;
-    QMultiMap<QString, GameInfo> package_name_map_;
     DeviceManager device_manager_;
     QString connected_device_;
     QString device_model_;

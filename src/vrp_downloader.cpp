@@ -204,7 +204,6 @@ bool VrpDownloader::parseMetadata() {
     }
 
     // Clean up old metadata
-    package_name_map_.clear();
     QMutableMapIterator<GameInfo, Status> it(all_games_);
     while (it.hasNext()) {
         it.next();
@@ -235,7 +234,6 @@ bool VrpDownloader::parseMetadata() {
 
             if (!all_games_.contains(game_info)) {
                 all_games_[game_info] = Status::Downloadable;
-                package_name_map_.insert(game_info.package_name, game_info);
                 is_empty = false;
             }
         }
@@ -271,17 +269,6 @@ QString VrpDownloader::getGameThumbnailPath(const QString& package_name) {
     } else {
         return "";
     }
-}
-
-QVariantList VrpDownloader::find(const QString& package_name) {
-    QVariantList result;
-    auto it = package_name_map_.find(package_name);
-    while (it != package_name_map_.end()) {
-        result.append(QVariant::fromValue(it.value()));
-        ++it;
-    }
-
-    return result;
 }
 
 bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
@@ -457,7 +444,6 @@ bool VrpDownloader::loadGamesInfo() {
     }
 
     all_games_.clear();
-    package_name_map_.clear();
 
     if (file.open(QIODevice::ReadOnly)) {
         QByteArray data = file.readAll();
@@ -476,8 +462,6 @@ bool VrpDownloader::loadGamesInfo() {
             // TODO: check error
             Status status = Status(obj["status"].toInt());
             all_games_[game] = status;
-
-            package_name_map_.insert(game.package_name, game);
         }
 
         emit gamesInfoChanged();

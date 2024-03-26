@@ -7,46 +7,9 @@ import VrpDownloader
 Rectangle {
     property var name
     property var thumbnailPath
-    property var gameInfo
-    property var releaseName
-    property var status: VrpDownloader.Unknown
 
-    onStatusChanged: function() {
-        action_button.enabled = false;
-        action_button.icon.source = "install";
-        switch (status) {
-        case VrpDownloader.UpdatableRemotely:
-            action_button.text = qsTr("Download and Update");
-            action_button.enabled = true;
-            break;
-        case VrpDownloader.UpdatableLocally:
-            action_button.text = qsTr("Update");
-            action_button.enabled = true;
-            break;
-        case VrpDownloader.DecompressionError:
-        case VrpDownloader.DownloadError:
-        case VrpDownloader.InstallError:
-            action_button.text = qsTr("Error, Click to Try Again");
-            action_button.enabled = true;
-            action_button.icon.source = "error";
-            break;
-        case VrpDownloader.Queued:
-            action_button.text = qsTr("Queued...");
-            break;
-        case VrpDownloader.Downloading:
-            action_button.text = qsTr("Downloading...");
-            break;
-        case VrpDownloader.Decompressing:
-            action_button.text = qsTr("Decompressing...");
-            break;
-        case VrpDownloader.Installing:
-            action_button.text = qsTr("Installing...");
-            break;
-        default:
-            action_button.text = qsTr("Installed");
-            break;
-        }
-    }
+    signal uninstallButtonClicked()
+
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
@@ -98,12 +61,9 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         width: app_info.width
-        text: qsTr("Installed")
+        text: qsTr("Uninstall")
         onClicked: {
-            if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.DecompressionError || VrpDownloader.DownloadError ||VrpDownloader.InstallError)
-                app.vrp.addToDownloadQueue(gameInfo);
-            else if (status === VrpDownloader.UpdatableLocally)
-                app.vrp.installQml(gameInfo);
+            uninstallButtonClicked();
         }
     }
 

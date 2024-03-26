@@ -107,32 +107,18 @@ RowLayout {
             width: apps_info.cellWidth - 20
             height: apps_info.cellHeight - 20
             name: modelData.package_name
-                        thumbnailPath: {
+            thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")
                     return "Image/matrix.png";
                 else
                     return "file://" + path;
             }
-            Component.onCompleted: {
-                let games_info = app.vrp.find(modelData.package_name);
-                if (games_info.length > 0) {
-                    gameInfo = games_info[0];
-                    releaseName = gameInfo.release_name;
-                    status = app.vrp.getStatus(gameInfo);
-                }
+
+            onUninstallButtonClicked: {
+                // TODO: Uninstall
+                console.log("TODO: Uninstall");
             }
-
-            Connections {
-                function onStatusChanged(release_name_, status_) {
-                    if (releaseName === release_name_)
-                        status = status_;
-
-                }
-
-                target: app.vrp
-            }
-
         }
 
     }
