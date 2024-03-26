@@ -129,10 +129,6 @@ RowLayout {
 
                 }
 
-                // function onInstalledQueueChanged() {
-                //     status = app.vrp.getStatus(modelData);
-                // }
-
                 target: app.vrp
             }
 

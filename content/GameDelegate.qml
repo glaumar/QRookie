@@ -80,17 +80,28 @@ Rectangle {
             progress_bar.indeterminate = true;
             progress_bar.visible = true;
             break;
-        // case VrpDownloader.Installed:
-        //     action_button.text = qsTr("Installed");
-        //     progress_bar.value = 1;
-        //     progress_bar.visible = true;
-        //     action_button.icon.source = "install";
-        //     break;
-        // case VrpDownloader.Error:
-        //     action_button.text = qsTr("Error, Click to Try Again");
-        //     action_button.enabled = true;
-        //     action_button.icon.source = "error";
-        //     break;
+        case VrpDownloader.InstalledAndRemotely:
+        case VrpDownloader.InstalledAndLocally:
+            action_button.text = qsTr("Installed");
+            progress_bar.value = 1;
+            progress_bar.visible = true;
+            action_button.icon.source = "install";
+            break;
+        case VrpDownloader.DownloadError:
+            action_button.text = qsTr("DownloadError, Click to Try Again");
+            action_button.enabled = true;
+            action_button.icon.source = "error";
+            break;
+        case VrpDownloader.DecompressionError:
+            action_button.text = qsTr("DecompressionError, Click to Try Again");
+            action_button.enabled = true;
+            action_button.icon.source = "error";
+            break;
+        case VrpDownloader.InstallError:
+            action_button.text = qsTr("InstallError, Click to Try Again");
+            action_button.enabled = true;
+            action_button.icon.source = "error";
+            break;
         }
     }
     radius: 5
@@ -160,7 +171,7 @@ Rectangle {
         text: qsTr("Downlad")
         width: game_info.width
         onClicked: {
-            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally)
+            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally || status === VrpDownloader.InstallError)
                 app.vrp.installQml(modelData);
             else
                 app.vrp.addToDownloadQueue(modelData);

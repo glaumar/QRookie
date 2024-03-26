@@ -60,6 +60,7 @@ VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
     device_manager_.autoUpdateSerials();
 
     loadGamesInfo();
+    updateInstalledQueue();
 
     // Restore download
     if (all_games_.key(Status::Queued) != GameInfo{}) {
@@ -107,7 +108,8 @@ QVariantList VrpDownloader::localQueue() const {
     auto it = all_games_.constBegin();
     while (it != all_games_.constEnd()) {
         Status s = it.value();
-        if (s == Status::Local || s == Status::Installable) {
+        if (s == Status::Local || s == Status::Installable ||
+            s == Status::InstalledAndLocally || s == Status::InstallError) {
             list.append(QVariant::fromValue(it.key()));
         }
         ++it;
@@ -245,6 +247,8 @@ bool VrpDownloader::parseMetadata() {
     } else {
         qDebug() << "Metadata parsed successfully";
         emit gamesInfoChanged();
+        emit localQueueChanged();
+        emit downloadsQueueChanged();
         return true;
     }
 }
@@ -282,9 +286,8 @@ QVariantList VrpDownloader::find(const QString& package_name) {
 
 bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
     Status s = getStatus(game);
-    qDebug() << s;
     if (s != Status::Downloadable && s != Status::UpdatableRemotely &&
-        s != Status::DownloadError) {
+        s != Status::DownloadError && s != Status::DecompressionError) {
         return false;
     }
 
@@ -476,6 +479,10 @@ bool VrpDownloader::loadGamesInfo() {
 
             package_name_map_.insert(game.package_name, game);
         }
+
+        emit gamesInfoChanged();
+        emit localQueueChanged();
+        emit downloadsQueueChanged();
         return true;
     } else {
         qWarning("load games info: Failed to open file for reading.");
@@ -514,14 +521,33 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
         installed_queue_ = apps;
         emit installedQueueChanged();
 
-        // Update Installed game Status
-        for (const auto& a : apps) {
-            auto it = package_name_map_.find(a.package_name);
-            while (it != package_name_map_.end()) {
-                const GameInfo& game = it.value();
-                Status from_s = getStatus(game);
+        QMap<QString, long long> installed_map;
+        for (const auto& app : apps) {
+            installed_map[app.package_name] = app.version_code;
+        }
+
+        // Update game status
+        QMutableMapIterator<GameInfo, Status> it(all_games_);
+        while (it.hasNext()) {
+            it.next();
+            Status from_s = it.value();
+
+            if (from_s == Status::UpdatableLocally ||
+                from_s == Status::InstalledAndLocally ||
+                from_s == Status::Installable) {
+                from_s = Status::Local;
+            } else if (from_s == Status::UpdatableRemotely ||
+                       from_s == Status::InstalledAndRemotely) {
+                from_s = Status::Downloadable;
+            }
+
+            QString package_name = it.key().package_name;
+            QString release_name = it.key().release_name;
+            if (installed_map.contains(package_name)) {
                 Status to_s;
-                if (game.version_code.toLongLong() > a.version_code) {
+                if (it.key().version_code.toLongLong() >
+                    installed_map[package_name]) {
+                    qDebug() << "Updatable: " << release_name;
                     to_s = from_s == Status::Local ? Status::UpdatableLocally
                                                    : Status::UpdatableRemotely;
                 } else {
@@ -529,19 +555,12 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
                                ? Status::InstalledAndLocally
                                : Status::InstalledAndRemotely;
                 }
-                setStatus(game, to_s);
-                ++it;
-            }
-        }
+                it.setValue(to_s);
+                emit statusChanged(release_name, to_s);
 
-        // Update non-installed game Status
-        QMutableMapIterator<GameInfo, Status> it(all_games_);
-        while (it.hasNext()) {
-            it.next();
-            Status s = it.value();
-            if (s == Status::Local) {
+            } else if (from_s == Status::Local) {
                 it.setValue(Status::Installable);
-                emit statusChanged(it.key().release_name, Status::Installable);
+                emit statusChanged(release_name, Status::Installable);
             }
         }
     }
