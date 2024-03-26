@@ -61,6 +61,7 @@ class VrpDownloader : public QObject {
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game, bool auto_install);
+    Q_INVOKABLE void removeFromDownloadQueue(const GameInfo& game);
 
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {

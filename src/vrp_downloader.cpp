@@ -245,6 +245,17 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game, bool auto_install) {
     return true;
 }
 
+void VrpDownloader::removeFromDownloadQueue(const GameInfo& game) {
+    if(isDownloading(game)){
+        http_downloader_.abortDownloadDir(getGameId(game.release_name));
+    } else if(isQueued(game)){
+        downloading_queue_.removeAll(game);
+        emit downloadsQueueChanged();
+        emit statusChanged(game.release_name, getStatus(game));
+    }
+}
+
+
 QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
     if (!hasConnectedDevice()) {
         co_return false;
@@ -297,19 +308,20 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
             });
 
         if (co_await http_downloader_.downloadDir(id)) {
-            disconnect(conn);
             qDebug() << "Download finished: " << game.release_name;
             downloading_queue_.removeAll(game);
             decompressGame(game);
         } else {
             qDebug() << "Download failed" << game.release_name;
             downloading_queue_.removeAll(game);
-            // emit downloadsQueueChanged();
-            failed_queue_.removeAll(game);
-            failed_queue_.append(game);
-            emit statusChanged(game.release_name, Status::Error);
+            emit downloadsQueueChanged();
+            // failed_queue_.removeAll(game);
+            // failed_queue_.append(game);
+            emit statusChanged(game.release_name, getStatus(game));
             qWarning() << "Download game failed :" << game.release_name;
         }
+        disconnect(conn);
+
     }
     co_return;
 }

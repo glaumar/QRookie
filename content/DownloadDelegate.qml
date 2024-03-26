@@ -13,6 +13,8 @@ Rectangle {
     property var progress
     property var status
 
+    signal deleteButtonClicked()
+
     radius: 5
     layer.enabled: true
     color: app.globalPalette.base
@@ -61,7 +63,6 @@ Rectangle {
         anchors.left: thumbnail.right
         anchors.bottom: parent.bottom
         value: progress
-        // height: 10
         layer.enabled: true
 
         layer.effect: DropShadow {
@@ -75,17 +76,21 @@ Rectangle {
 
     Text {
         id: status_lalel
+
         anchors.margins: 10
         anchors.right: progress_bar.right
         anchors.bottom: progress_bar.top
         text: {
             if (status === VrpDownloader.Queued) {
                 progress_bar.indeterminate = false;
+                delete_button.enabled = true;
                 return qsTr("Queued");
             } else if (status === VrpDownloader.Decompressing) {
                 progress_bar.indeterminate = true;
+                delete_button.enabled = false;
                 return qsTr("Decompressing");
             } else if (status === VrpDownloader.Downloading) {
+                delete_button.enabled = true;
                 if (isNaN(progress) || progress <= 1e-36) {
                     progress_bar.indeterminate = true;
                     return qsTr("Starting Downloading");
@@ -98,15 +103,29 @@ Rectangle {
                     return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
                 }
             } else if (status === VrpDownloader.Error) {
+                delete_button.enabled = false;
                 progress_bar.indeterminate = false;
-                status_lalel.color = "red"
+                status_lalel.color = "red";
                 return qsTr("Error");
             } else {
+                delete_button.enabled = false;
                 progress_bar.indeterminate = false;
                 return qsTr("Unknown Status");
             }
         }
         color: app.globalPalette.text
+    }
+
+    Button {
+        id: delete_button
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        icon.source: "delete"
+        onClicked: {
+            deleteButtonClicked();
+        }
     }
 
     layer.effect: DropShadow {
@@ -115,4 +134,5 @@ Rectangle {
         verticalOffset: 6
         color: app.globalPalette.shadow
     }
+
 }

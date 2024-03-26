@@ -7,12 +7,9 @@ import VrpDownloader
 
 Rectangle {
     property var name
-    // property var releaseName
     property var size
     property var lastUpdated
     property var thumbnailPath
-    // property var versionCode
-    // property var packageName
     property var progress
     property var status
 
@@ -28,7 +25,6 @@ Rectangle {
         }
     }
     onStatusChanged: function() {
-        //TODO: add icon for each status
         progress_bar.value = 0;
         progress_bar.indeterminate = false;
         progress_bar.visible = false;

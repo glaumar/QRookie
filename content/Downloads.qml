@@ -44,6 +44,9 @@ RowLayout {
             }
             progress: 0
             status: app.vrp.getStatus(modelData)
+            onDeleteButtonClicked: {
+                app.vrp.removeFromDownloadQueue(modelData);
+            }
 
             Connections {
                 function onDownloadProgressChanged(release_name, progress_) {

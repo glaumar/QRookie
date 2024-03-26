@@ -18,7 +18,6 @@ HttpDownloader::HttpDownloader(QObject* parent)
       base_url_("https://theapp.vrrookie.xyz/") {}
 
 QCoro::Task<bool> HttpDownloader::download(const QString file_path) {
-
     // TODO: reuse downloaded file
     QFile file(download_directory_ + "/" + file_path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -39,6 +38,16 @@ QCoro::Task<bool> HttpDownloader::download(const QString file_path) {
     qDebug() << "Downloading: " << url;
     bool result = false;
     while (true) {
+        if (!abort_files_.isEmpty() && abort_files_.top() == file_path) {
+            abort_files_.pop();
+            break;
+        }
+
+        if (!abort_dirs_.isEmpty() && file_path.startsWith(abort_dirs_.top())) {
+            abort_dirs_.pop();
+            break;
+        }
+
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Downloading Error: " << reply->errorString();
             break;
@@ -120,15 +129,19 @@ QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path) {
         dir.mkpath(downloadDirectory() + "/" + dir_path);
     }
 
+    bool result = true;
     for (const auto& [name, size] : files) {
         if (!co_await download(dir_path + "/" + name)) {
             qDebug() << "Download failed: " << dir_path;
-            co_return false;
+            result = false;
+            break;
         }
         *total_received += size;
     }
-    disconnect(conn);
 
-    emit downloadProgressDir(dir_path, total_size, total_size);
-    co_return true;
+    if(result) {
+        emit downloadProgressDir(dir_path, total_size, total_size);
+    }
+    disconnect(conn);
+    co_return result;
 }

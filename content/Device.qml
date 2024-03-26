@@ -44,14 +44,6 @@ RowLayout {
         }
 
         ProgressBar {
-            // layer.enabled: true
-            // layer.effect: DropShadow {
-            //     transparentBorder: true
-            //     horizontalOffset: 6
-            //     verticalOffset: 6
-            //     color: app.globalPalette.shadow
-            // }
-
             id: space_usage_bar
 
             anchors.margins: 10
