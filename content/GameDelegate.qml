@@ -80,17 +80,17 @@ Rectangle {
             progress_bar.indeterminate = true;
             progress_bar.visible = true;
             break;
-        case VrpDownloader.Installed:
-            action_button.text = qsTr("Installed");
-            progress_bar.value = 1;
-            progress_bar.visible = true;
-            action_button.icon.source = "install";
-            break;
-        case VrpDownloader.Error:
-            action_button.text = qsTr("Error, Click to Try Again");
-            action_button.enabled = true;
-            action_button.icon.source = "error";
-            break;
+        // case VrpDownloader.Installed:
+        //     action_button.text = qsTr("Installed");
+        //     progress_bar.value = 1;
+        //     progress_bar.visible = true;
+        //     action_button.icon.source = "install";
+        //     break;
+        // case VrpDownloader.Error:
+        //     action_button.text = qsTr("Error, Click to Try Again");
+        //     action_button.enabled = true;
+        //     action_button.icon.source = "error";
+        //     break;
         }
     }
     radius: 5
@@ -162,10 +162,8 @@ Rectangle {
         onClicked: {
             if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally)
                 app.vrp.installQml(modelData);
-            else if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error)
-                app.vrp.addToDownloadQueue(modelData, true);
             else
-                app.vrp.addToDownloadQueue(modelData, false);
+                app.vrp.addToDownloadQueue(modelData);
         }
     }
 

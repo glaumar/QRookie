@@ -8,6 +8,7 @@ struct GameInfo {
     bool operator==(const GameInfo& other) const {
         return release_name == other.release_name;
     }
+
     QString name;
     QString release_name;
     QString package_name;
@@ -23,4 +24,9 @@ struct GameInfo {
     Q_PROPERTY(QString last_updated MEMBER last_updated)
     Q_PROPERTY(QString size MEMBER size)
 };
+
+inline bool operator<(const GameInfo& lhs, const GameInfo& rhs) {
+    return lhs.release_name < rhs.release_name;
+}
+
 #endif /* QROOKIE_GAME_INFO */

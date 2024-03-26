@@ -36,15 +36,15 @@ Rectangle {
         case VrpDownloader.Installing:
             install_button.text = qsTr("Installing...");
             break;
-        case VrpDownloader.Installed:
-            install_button.text = qsTr("Reinstall");
-            install_button.enabled = true;
-            break;
-        case VrpDownloader.Error:
-            install_button.text = qsTr("Error, Click to Try Again");
-            install_button.enabled = true;
-            install_button.icon.source = "error";
-            break;
+        // case VrpDownloader.Installed:
+        //     install_button.text = qsTr("Reinstall");
+        //     install_button.enabled = true;
+        //     break;
+        // case VrpDownloader.Error:
+        //     install_button.text = qsTr("Error, Click to Try Again");
+        //     install_button.enabled = true;
+        //     install_button.icon.source = "error";
+        //     break;
         default:
             install_button.text = qsTr("Unknown Status");
             break;

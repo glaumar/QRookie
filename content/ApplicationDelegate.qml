@@ -23,11 +23,11 @@ Rectangle {
             action_button.text = qsTr("Update");
             action_button.enabled = true;
             break;
-        case VrpDownloader.Error:
-            action_button.text = qsTr("Error, Click to Try Again");
-            action_button.enabled = true;
-            action_button.icon.source = "error";
-            break;
+        // case VrpDownloader.Error:
+        //     action_button.text = qsTr("Error, Click to Try Again");
+        //     action_button.enabled = true;
+        //     action_button.icon.source = "error";
+        //     break;
         case VrpDownloader.Queued:
             action_button.text = qsTr("Queued...");
             break;
@@ -99,7 +99,7 @@ Rectangle {
         text: qsTr("Installed")
         onClicked: {
             if (status === VrpDownloader.UpdatableRemotely || status === VrpDownloader.Error)
-                app.vrp.addToDownloadQueue(gameInfo, true);
+                app.vrp.addToDownloadQueue(gameInfo);
             else if (status === VrpDownloader.UpdatableLocally)
                 app.vrp.installQml(gameInfo);
         }

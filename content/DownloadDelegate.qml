@@ -102,12 +102,14 @@ Rectangle {
                     let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
                     return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
                 }
-            } else if (status === VrpDownloader.Error) {
-                delete_button.enabled = false;
-                progress_bar.indeterminate = false;
-                status_lalel.color = "red";
-                return qsTr("Error");
-            } else {
+            }
+            //  else if (status === VrpDownloader.Error) {
+            //     delete_button.enabled = false;
+            //     progress_bar.indeterminate = false;
+            //     status_lalel.color = "red";
+            //     return qsTr("Error");
+            // }
+             else {
                 delete_button.enabled = false;
                 progress_bar.indeterminate = false;
                 return qsTr("Unknown Status");

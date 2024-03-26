@@ -68,9 +68,9 @@ ColumnLayout {
 
                 }
 
-                function onInstalledQueueChanged() {
-                    status = app.vrp.getStatus(modelData);
-                }
+                // function onInstalledQueueChanged() {
+                //     status = app.vrp.getStatus(modelData);
+                // }
 
                 target: app.vrp
             }
