@@ -419,8 +419,30 @@ bool VrpDownloader::saveGamesInfo() {
         jsonObject["version_code"] = game.version_code;
         jsonObject["last_updated"] = game.last_updated;
         jsonObject["size"] = game.size;
-        jsonObject["status"] =
-            status == Status::Downloading ? Status::Queued : status;
+
+        switch (status) {
+            case Status::Downloading:
+            case Status::DownloadError:
+            case Status::Decompressing:
+            case Status::DecompressionError:
+                status = Status::Queued;
+                break;
+            case Status::Installable:
+            case Status::Installing:
+            case Status::InstallError:
+            case Status::UpdatableLocally:
+            case Status::InstalledAndLocally:
+                status = Status::Local;
+                break;
+            case Status::UpdatableRemotely:
+            case Status::InstalledAndRemotely:
+                status = Downloadable;
+                break;
+
+            default:
+                break;
+        }
+        jsonObject["status"] = status;
         jsonArray.append(jsonObject);
         ++it;
     }
