@@ -75,7 +75,7 @@ Rectangle {
     }
 
     Text {
-        id: status_lalel
+        id: status_label
 
         anchors.margins: 10
         anchors.right: progress_bar.right
@@ -84,13 +84,16 @@ Rectangle {
             if (status === VrpDownloader.Queued) {
                 progress_bar.indeterminate = false;
                 delete_button.enabled = true;
+                status_label.color = app.globalPalette.text;
                 return qsTr("Queued");
             } else if (status === VrpDownloader.Decompressing) {
                 progress_bar.indeterminate = true;
                 delete_button.enabled = false;
+                status_label.color = app.globalPalette.text;
                 return qsTr("Decompressing");
             } else if (status === VrpDownloader.Downloading) {
                 delete_button.enabled = true;
+                status_label.color = app.globalPalette.text;
                 if (isNaN(progress) || progress <= 1e-36) {
                     progress_bar.indeterminate = true;
                     return qsTr("Starting Downloading");
@@ -103,14 +106,14 @@ Rectangle {
                     return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
                 }
             } else if (status === VrpDownloader.DownloadError) {
-                delete_button.enabled = false;
+                delete_button.enabled = true;
                 progress_bar.indeterminate = false;
-                status_lalel.color = "red";
+                status_label.color = "red";
                 return qsTr("DownloadError");
             } else if (status === VrpDownloader.DecompressionError) {
-                delete_button.enabled = false;
+                delete_button.enabled = true;
                 progress_bar.indeterminate = false;
-                status_lalel.color = "red";
+                status_label.color = "red";
                 return qsTr("DecompressionError");
             } else {
                 delete_button.enabled = false;
