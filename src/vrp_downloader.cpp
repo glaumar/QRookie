@@ -90,31 +90,36 @@ QVariantList VrpDownloader::gamesInfo() const {
 
 QVariantList VrpDownloader::downloadsQueue() const {
     QVariantList list;
-    auto it = all_games_.constBegin();
-    while (it != all_games_.constEnd()) {
-        Status s = it.value();
-        if (s == Status::Decompressing || s == Status::DecompressionError ||
-            s == Status::Downloading || s == Status::DownloadError ||
-            s == Status::Queued) {
-            list.append(QVariant::fromValue(it.key()));
-        }
-        ++it;
+    // auto it = all_games_.constBegin();
+    // while (it != all_games_.constEnd()) {
+    //     Status s = it.value();
+    //     if (s == Status::Decompressing || s == Status::DecompressionError ||
+    //         s == Status::Downloading || s == Status::DownloadError ||
+    //         s == Status::Queued) {
+    //         list.append(QVariant::fromValue(it.key()));
+    //     }
+    //     ++it;
+    // }
+    for(const auto& game : downloads_queue_) {
+        list.append(QVariant::fromValue(game));
     }
     return list;
 }
 
 QVariantList VrpDownloader::localQueue() const {
     QVariantList list;
-    auto it = all_games_.constBegin();
-    while (it != all_games_.constEnd()) {
-        Status s = it.value();
-        if (s == Status::Local || s == Status::Installable ||
-            s == Status::InstalledAndLocally || s == Status::InstallError) {
-            list.append(QVariant::fromValue(it.key()));
-        }
-        ++it;
+    // auto it = all_games_.constBegin();
+    // while (it != all_games_.constEnd()) {
+    //     Status s = it.value();
+    //     if (s == Status::Local || s == Status::Installable ||
+    //         s == Status::InstalledAndLocally || s == Status::InstallError) {
+    //         list.append(QVariant::fromValue(it.key()));
+    //     }
+    //     ++it;
+    // }
+    for(const auto& game : local_queue_) {
+        list.append(QVariant::fromValue(game));
     }
-
     return list;
 }
 
@@ -245,8 +250,8 @@ bool VrpDownloader::parseMetadata() {
     } else {
         qDebug() << "Metadata parsed successfully";
         emit gamesInfoChanged();
-        emit localQueueChanged();
-        emit downloadsQueueChanged();
+        // emit localQueueChanged();
+        // emit downloadsQueueChanged();
         return true;
     }
 }
@@ -279,12 +284,16 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
     }
 
     setStatus(game, Status::Queued);
+    downloads_queue_.removeAll(game);
+    downloads_queue_.append(game);
     emit downloadsQueueChanged();
     qDebug() << "Queued: " << game.release_name;
 
-    if (all_games_.key(Status::Downloading) == GameInfo{}) {
+    // Start download if not already downloading
+    if(getDownloadingGame() == GameInfo{}) {
         downloadQueuedGames();
     }
+
     return true;
 }
 
@@ -293,15 +302,17 @@ void VrpDownloader::removeFromDownloadQueue(const GameInfo& game) {
     if (s == Status::Downloading) {
         setStatus(game, Status::Downloadable);
         http_downloader_.abortDownloadDir(getGameId(game.release_name));
+        downloads_queue_.removeAll(game);
         emit downloadsQueueChanged();
-    } else if (s == Status::Queued) {
+    } else {
         setStatus(game, Status::Downloadable);
+        downloads_queue_.removeAll(game);
         emit downloadsQueueChanged();
     }
 }
 
 QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
-    GameInfo game = all_games_.key(Status::Queued);
+    GameInfo game = getFirstQueuedGame();
     while (game != GameInfo{}) {
         qDebug() << "Downloading: " << game.release_name;
         setStatus(game, Status::Downloading);
@@ -325,12 +336,11 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
         } else {
             if (getStatus(game) == Status::Downloading) {
                 setStatus(game, Status::DownloadError);
-                emit downloadsQueueChanged();
                 qWarning() << "Download game failed :" << game.release_name;
             }
         }
         disconnect(conn);
-        game = all_games_.key(Status::Queued);
+        game = getFirstQueuedGame();
     }
     co_return;
 }
@@ -364,7 +374,6 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
                  basic_process.readAllStandardError().data());
         qDebug() << "Decompression failed: " << game.release_name;
         setStatus(game, Status::DecompressionError);
-        // emit downloadsQueueChanged();
         co_return false;
     } else {
         qDebug() << "Decompression finished: " << game.release_name;
@@ -373,7 +382,9 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
         } else {
             setStatus(game, Status::Local);
         }
+        downloads_queue_.removeAll(game);
         emit downloadsQueueChanged();
+        local_queue_.prepend(game);
         emit localQueueChanged();
 
         if (hasConnectedDevice()) {
@@ -484,6 +495,14 @@ bool VrpDownloader::loadGamesInfo() {
             // TODO: check error
             Status status = Status(obj["status"].toInt());
             all_games_[game] = status;
+            if(status == Status::Queued || status == Status::Downloading ||
+               status == Status::DownloadError || status == Status::Decompressing ||
+               status == Status::DecompressionError) {
+                downloads_queue_.append(game);
+            }else if(status == Status::Local || status == Status::Installable ||
+                     status == Status::InstalledAndLocally || status == Status::InstallError) {
+                local_queue_.append(game);
+            }
         }
 
         emit gamesInfoChanged();
@@ -573,8 +592,29 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
     co_return;
 }
 
+GameInfo  VrpDownloader::getDownloadingGame() const {
+    for(const auto& game : downloads_queue_) {
+        if(getStatus(game) == Status::Downloading) {
+            return game;
+        }
+    }
+    return {};
+}
+
+GameInfo VrpDownloader::getFirstQueuedGame() const{
+    for(const auto& game : downloads_queue_) {
+        if(getStatus(game) == Status::Queued) {
+            return game;
+        }
+    }
+    return {};
+}
+
+
+
 bool VrpDownloader::removeFromLocalQueue(const GameInfo& game) {
     setStatus(game, Status::Downloadable);
+    local_queue_.removeAll(game);
     emit localQueueChanged();
 
     auto game_dir = getLocalGamePath(game.release_name);

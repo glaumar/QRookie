@@ -72,10 +72,14 @@ class VrpDownloader : public QObject {
         return install(game);
     }
 
-    Q_INVOKABLE Status getStatus(const GameInfo& game){
-        return  all_games_[game];
+    Q_INVOKABLE Status getStatus(const GameInfo& game) const {
+        return all_games_[game];
     }
     void setStatus(const GameInfo& game, Status status) {
+        if (!all_games_.contains(game)) {
+            return;
+        }
+
         all_games_[game] = status;
         emit statusChanged(game.release_name, status);
         // TODO: emit queue change signal
@@ -132,12 +136,16 @@ class VrpDownloader : public QObject {
     bool saveGamesInfo();
     bool loadGamesInfo();
     QCoro::Task<void> updateInstalledQueue();
+    GameInfo getDownloadingGame() const;
+    GameInfo getFirstQueuedGame() const;
 
     VrpPublic vrp_public_;
     QString cache_path_;
     QString data_path_;
     QString filter_;
     QVector<AppInfo> installed_queue_;
+    QVector<GameInfo> downloads_queue_;
+    QVector<GameInfo> local_queue_;
     QMap<GameInfo, Status> all_games_;
     DeviceManager device_manager_;
     QString connected_device_;
