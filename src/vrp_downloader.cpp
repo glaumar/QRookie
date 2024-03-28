@@ -90,16 +90,6 @@ QVariantList VrpDownloader::gamesInfo() const {
 
 QVariantList VrpDownloader::downloadsQueue() const {
     QVariantList list;
-    // auto it = all_games_.constBegin();
-    // while (it != all_games_.constEnd()) {
-    //     Status s = it.value();
-    //     if (s == Status::Decompressing || s == Status::DecompressionError ||
-    //         s == Status::Downloading || s == Status::DownloadError ||
-    //         s == Status::Queued) {
-    //         list.append(QVariant::fromValue(it.key()));
-    //     }
-    //     ++it;
-    // }
     for(const auto& game : downloads_queue_) {
         list.append(QVariant::fromValue(game));
     }
@@ -108,15 +98,6 @@ QVariantList VrpDownloader::downloadsQueue() const {
 
 QVariantList VrpDownloader::localQueue() const {
     QVariantList list;
-    // auto it = all_games_.constBegin();
-    // while (it != all_games_.constEnd()) {
-    //     Status s = it.value();
-    //     if (s == Status::Local || s == Status::Installable ||
-    //         s == Status::InstalledAndLocally || s == Status::InstallError) {
-    //         list.append(QVariant::fromValue(it.key()));
-    //     }
-    //     ++it;
-    // }
     for(const auto& game : local_queue_) {
         list.append(QVariant::fromValue(game));
     }
@@ -179,6 +160,7 @@ QCoro::Task<bool> VrpDownloader::downloadMetadata() {
                 << QString("-p%1").arg(vrp_public_.password()));
 
         co_await p7za.waitForFinished();
+        QFile::remove(http_downloader_.downloadDirectory() + "/meta.7z");
 
         if (basic_process.exitStatus() != QProcess::NormalExit ||
             basic_process.exitCode() != 0) {
