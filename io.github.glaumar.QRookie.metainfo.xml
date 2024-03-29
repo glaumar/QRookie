@@ -22,6 +22,20 @@
     </description>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-03-29" version="0.2.0">
+            <description>
+                <p>Release description</p>
+                <ul>
+                    <li>Remove dependence on librclone</li>
+                    <li>Repair the failure of installation</li>
+                    <li>Support to cancel download and breakpoint continuation</li>
+                    <li>Fix the problem of failed to search for the use of spaces</li>
+                    <li>Support uninstall application</li>
+                    <li>Support to filter the game through status</li>
+                    <li>Automatically clean the cache after downloading</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-03-20" version="0.1.3">
             <description>
                 <p>Release description</p>
