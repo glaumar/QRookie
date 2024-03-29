@@ -257,3 +257,25 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
 
     co_return true;
 }
+
+QCoro::Task<bool> DeviceManager::uninstallApk(const QString serial,
+                                              const QString package_name) const {
+    if (serials_.isEmpty() || !serials_.contains(serial)) {
+        co_return false;
+    }
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start("adb", {"-s", serial, "uninstall", package_name});
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to uninstall" << package_name << "on device"
+                   << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    co_return true;
+}

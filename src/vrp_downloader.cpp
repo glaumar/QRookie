@@ -419,6 +419,20 @@ QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
     co_return result;
 }
 
+QCoro::Task<bool> VrpDownloader::uninstall(const QString packege_name) {
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    bool result =
+        co_await device_manager_.uninstallApk(connectedDevice(), packege_name);
+    if (result) {
+        updateInstalledQueue();
+    }
+
+    co_return result;
+}
+
 bool VrpDownloader::saveGamesInfo() {
     QJsonArray jsonArray;
     auto it = all_games_.constBegin();
@@ -586,7 +600,6 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
                 Status to_s;
                 if (it.key().version_code.toLongLong() >
                     installed_map[package_name]) {
-                    qDebug() << "Updatable: " << release_name;
                     to_s = from_s == Status::Local ? Status::UpdatableLocally
                                                    : Status::UpdatableRemotely;
                 } else {

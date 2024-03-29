@@ -116,8 +116,7 @@ RowLayout {
             }
 
             onUninstallButtonClicked: {
-                // TODO: Uninstall
-                console.log("TODO: Uninstall");
+                app.vrp.uninstallQml(modelData.package_name);
             }
         }
 

@@ -5,11 +5,11 @@
 #include <QCoroTask>
 #include <QCryptographicHash>
 #include <QMap>
+#include <QMetaEnum>
 #include <QMultiMap>
 #include <QProcess>
 #include <QTimer>
 #include <QVariant>
-#include <QMetaEnum>
 
 #include "app_info.h"
 #include "device_manager.h"
@@ -80,6 +80,11 @@ class VrpDownloader : public QObject {
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {
         return install(game);
+    }
+
+    QCoro::Task<bool> uninstall(const QString packege_name);
+    Q_INVOKABLE QCoro::QmlTask uninstallQml(const QString packege_name) {
+        return uninstall(packege_name);
     }
 
     Q_INVOKABLE Status getStatus(const GameInfo& game) const {

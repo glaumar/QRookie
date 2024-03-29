@@ -32,6 +32,9 @@ class DeviceManager : public QObject {
     QCoro::Task<bool> installApk(const QString serial, const QString path,
                                  const QString package_name) const;
 
+    QCoro::Task<bool> uninstallApk(const QString serial,
+                                   const QString package_name) const;
+
     Q_INVOKABLE void autoUpdateSerials(const int ms = 3000) {
         update_serials_timer_.start(ms);
     }
