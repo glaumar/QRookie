@@ -90,7 +90,7 @@ QVariantList VrpDownloader::gamesInfo() const {
 
 QVariantList VrpDownloader::downloadsQueue() const {
     QVariantList list;
-    for(const auto& game : downloads_queue_) {
+    for (const auto& game : downloads_queue_) {
         list.append(QVariant::fromValue(game));
     }
     return list;
@@ -98,7 +98,7 @@ QVariantList VrpDownloader::downloadsQueue() const {
 
 QVariantList VrpDownloader::localQueue() const {
     QVariantList list;
-    for(const auto& game : local_queue_) {
+    for (const auto& game : local_queue_) {
         list.append(QVariant::fromValue(game));
     }
     return list;
@@ -272,7 +272,7 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
     qDebug() << "Queued: " << game.release_name;
 
     // Start download if not already downloading
-    if(getDownloadingGame() == GameInfo{}) {
+    if (getDownloadingGame() == GameInfo{}) {
         downloadQueuedGames();
     }
 
@@ -291,6 +291,20 @@ void VrpDownloader::removeFromDownloadQueue(const GameInfo& game) {
         downloads_queue_.removeAll(game);
         emit downloadsQueueChanged();
     }
+}
+
+bool VrpDownloader::removeFromLocalQueue(const GameInfo& game) {
+    setStatus(game, Status::Downloadable);
+    local_queue_.removeAll(game);
+    emit localQueueChanged();
+
+    auto game_dir = getLocalGamePath(game.release_name);
+
+    QDir dir(game_dir);
+    if (dir.exists()) {
+        return dir.removeRecursively();
+    }
+    return false;
 }
 
 QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
@@ -477,12 +491,15 @@ bool VrpDownloader::loadGamesInfo() {
             // TODO: check error
             Status status = Status(obj["status"].toInt());
             all_games_[game] = status;
-            if(status == Status::Queued || status == Status::Downloading ||
-               status == Status::DownloadError || status == Status::Decompressing ||
-               status == Status::DecompressionError) {
+            if (status == Status::Queued || status == Status::Downloading ||
+                status == Status::DownloadError ||
+                status == Status::Decompressing ||
+                status == Status::DecompressionError) {
                 downloads_queue_.append(game);
-            }else if(status == Status::Local || status == Status::Installable ||
-                     status == Status::InstalledAndLocally || status == Status::InstallError) {
+            } else if (status == Status::Local ||
+                       status == Status::Installable ||
+                       status == Status::InstalledAndLocally ||
+                       status == Status::InstallError) {
                 local_queue_.append(game);
             }
         }
@@ -574,36 +591,20 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
     co_return;
 }
 
-GameInfo  VrpDownloader::getDownloadingGame() const {
-    for(const auto& game : downloads_queue_) {
-        if(getStatus(game) == Status::Downloading) {
+GameInfo VrpDownloader::getDownloadingGame() const {
+    for (const auto& game : downloads_queue_) {
+        if (getStatus(game) == Status::Downloading) {
             return game;
         }
     }
     return {};
 }
 
-GameInfo VrpDownloader::getFirstQueuedGame() const{
-    for(const auto& game : downloads_queue_) {
-        if(getStatus(game) == Status::Queued) {
+GameInfo VrpDownloader::getFirstQueuedGame() const {
+    for (const auto& game : downloads_queue_) {
+        if (getStatus(game) == Status::Queued) {
             return game;
         }
     }
     return {};
-}
-
-
-
-bool VrpDownloader::removeFromLocalQueue(const GameInfo& game) {
-    setStatus(game, Status::Downloadable);
-    local_queue_.removeAll(game);
-    emit localQueueChanged();
-
-    auto game_dir = getLocalGamePath(game.release_name);
-
-    QDir dir(game_dir);
-    if (dir.exists()) {
-        return dir.removeRecursively();
-    }
-    return false;
 }

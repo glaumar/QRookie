@@ -189,7 +189,6 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         co_return false;
     }
 
-
     QDir apk_dir(path);
 
     if (!apk_dir.exists()) {
@@ -198,7 +197,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
     }
 
     QStringList apk_files =
-    apk_dir.entryList(QStringList() << "*.apk", QDir::Files);
+        apk_dir.entryList(QStringList() << "*.apk", QDir::Files);
 
     if (apk_files.isEmpty()) {
         qWarning() << "No apk file found in" << path;
@@ -207,7 +206,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    for(const QString& apk_file : apk_files) {
+    for (const QString& apk_file : apk_files) {
         QString apk_path = path + "/" + apk_file;
         qDebug() << "Installing" << apk_path << "on device" << serial;
         adb.start("adb", {"-s", serial, "install", "-r", apk_path});
@@ -215,7 +214,8 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
 
         if (basic_process.exitStatus() != QProcess::NormalExit ||
             basic_process.exitCode() != 0) {
-            qWarning() << "Failed to install" << apk_path << "on device" << serial;
+            qWarning() << "Failed to install" << apk_path << "on device"
+                       << serial;
             qWarning() << basic_process.readAllStandardError();
             co_return false;
         }
@@ -252,8 +252,8 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         }
     }
 
-    //TODO: support for install.txt
-    // https://vrpirates.wiki/en/Howto/Manual-Sideloading
+    // TODO: support for install.txt
+    //  https://vrpirates.wiki/en/Howto/Manual-Sideloading
 
     co_return true;
 }

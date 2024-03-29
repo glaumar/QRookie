@@ -61,11 +61,13 @@ class VrpDownloader : public QObject {
         filter_.remove(" ");
         emit gamesInfoChanged();
     }
+
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
     Q_INVOKABLE void removeFromDownloadQueue(const GameInfo& game);
+    Q_INVOKABLE bool removeFromLocalQueue(const GameInfo& game);
 
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {
@@ -82,7 +84,6 @@ class VrpDownloader : public QObject {
 
         all_games_[game] = status;
         emit statusChanged(game.release_name, status);
-        // TODO: emit queue change signal
     }
 
     Q_INVOKABLE bool hasConnectedDevice() const {
@@ -108,12 +109,8 @@ class VrpDownloader : public QObject {
 
     QVariantList gamesInfo() const;
     QVariantList downloadsQueue() const;
-
     QVariantList localQueue() const;
-    Q_INVOKABLE bool removeFromLocalQueue(const GameInfo& game);
-
     QVariantList installedQueue() const;
-
     QVariantList deviceList() const;
 
    signals:
