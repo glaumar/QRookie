@@ -10,6 +10,22 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
 ![](./screenshots/Screenshot3.png)
 
 # Download
+
+## Arch Linux 
+
+![AUR Version](https://img.shields.io/aur/version/qrookie-vrp) ![AUR Last Modified](https://img.shields.io/aur/last-modified/qrookie-vrp)
+
+
+Install from AUR
+```shell
+paru -S qrookie-vrp
+```
+
+## SteamOS And other Linux
+![GitHub Release](https://img.shields.io/github/v/release/glaumar/QRookie) ![GitHub Release Date](https://img.shields.io/github/release-date/Glaumar/QRookie)
+![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie.flatpak)
+
+
 See [releases](https://github.com/glaumar/QRookie/releases).
 
 Now there is only a flatpak package, which can run on almost all linux distributions, including SteamOS (Steam Deck).
@@ -25,4 +41,4 @@ QRookie currently does not support `install.txt`. Some games may fail to install
 No, QRookie does not provide any games. It is just a downloader that downloads games from public servers. QRookie does not know what it is downloading, and it does not check whether the downloaded content is a legitimate game or a virus. **To ensure the safety of your VR device, please do not use QRookie** .
 
 ---
-![](https://badges.pufler.dev/visits/glaumar/QRookie) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/glaumar/QRookie/total)
+![](https://badges.pufler.dev/visits/glaumar/QRookie)
