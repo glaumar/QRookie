@@ -11,7 +11,8 @@
 
 #include "qrookie.h"
 
-VrpDownloader::VrpDownloader(QObject* parent) : QObject(parent) {
+VrpDownloader::VrpDownloader(QObject* parent)
+    : QObject(parent), status_filter_(Status::Unknown) {
     // Create cache and data directories
     QDir dir;
     cache_path_ =
@@ -75,14 +76,19 @@ VrpDownloader::~VrpDownloader() {
 
 QVariantList VrpDownloader::gamesInfo() const {
     QVariantList list;
-    auto it = all_games_.constBegin();
-    while (it != all_games_.constEnd()) {
+
+    for (auto it = all_games_.constBegin(); it != all_games_.constEnd(); ++it) {
         QString name = it.key().name;
+
+        if (status_filter_ != Status::Unknown &&
+            !(it.value() & status_filter_)) {
+            continue;
+        }
+
         if (filter_.isEmpty() ||
             name.remove(" ").contains(filter_, Qt::CaseInsensitive)) {
             list.append(QVariant::fromValue(it.key()));
         }
-        ++it;
     }
 
     return list;
@@ -416,6 +422,8 @@ QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
 bool VrpDownloader::saveGamesInfo() {
     QJsonArray jsonArray;
     auto it = all_games_.constBegin();
+    auto meta_status = QMetaEnum::fromType<Status>();
+
     while (it != all_games_.constEnd()) {
         QJsonObject jsonObject;
         const GameInfo& game = it.key();
@@ -445,11 +453,14 @@ bool VrpDownloader::saveGamesInfo() {
             case Status::InstalledAndRemotely:
                 status = Downloadable;
                 break;
-
+            case Status::Unknown:
+                status = Status::Downloadable;
             default:
                 break;
         }
-        jsonObject["status"] = status;
+
+        auto status_key = meta_status.valueToKey(status);
+        jsonObject["status"] = QString(status_key);
         jsonArray.append(jsonObject);
         ++it;
     }
@@ -478,6 +489,7 @@ bool VrpDownloader::loadGamesInfo() {
         QByteArray data = file.readAll();
         QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
         QJsonArray jsonArray = jsonDoc.array();
+        auto meta_status = QMetaEnum::fromType<Status>();
         for (const auto& value : jsonArray) {
             GameInfo game;
             auto obj = value.toObject();
@@ -488,8 +500,11 @@ bool VrpDownloader::loadGamesInfo() {
             game.last_updated = obj["last_updated"].toString();
             game.size = value.toObject()["size"].toString();
 
-            // TODO: check error
-            Status status = Status(obj["status"].toInt());
+            int status_int =
+                meta_status.keyToValue(obj["status"].toString().toUtf8());
+
+            Status status = status_int >= 0 ? static_cast<Status>(status_int)
+                                            : Status::Unknown;
             all_games_[game] = status;
             if (status == Status::Queued || status == Status::Downloading ||
                 status == Status::DownloadError ||

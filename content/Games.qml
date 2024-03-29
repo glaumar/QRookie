@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpDownloader
 
 ColumnLayout {
     Rectangle {
@@ -13,11 +14,45 @@ ColumnLayout {
         Layout.bottomMargin: 10
         height: 40
 
-        TextField {
+        RowLayout {
             anchors.fill: parent
-            id: filter_field
-            placeholderText: qsTr("Filter by name...")
-            onTextChanged: app.vrp.filterGamesByName(text)
+
+            TextField {
+                id: filter_field
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                placeholderText: qsTr("Filter by name...")
+                onTextChanged: app.vrp.filterGamesByName(text)
+            }
+
+            RadioButton {
+                checked: true
+                text: qsTr("All")
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Unknown)
+            }
+
+            RadioButton {
+                text: qsTr("Downloading")
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Downloading | VrpDownloader.Queued | VrpDownloader.DownloadError | VrpDownloader.Decompressing | VrpDownloader.DecompressionError)
+            }
+
+            RadioButton {
+                text: qsTr("Local")
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Local | VrpDownloader.UpdatableLocally | VrpDownloader.Installing | VrpDownloader.InstallError | VrpDownloader.InstalledAndLocally)
+            }
+
+            RadioButton {
+                text: qsTr("Updatable")
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.UpdatableLocally | VrpDownloader.UpdatableRemotely)
+            }
+
+            RadioButton {
+                text: qsTr("Installed")
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.InstalledAndLocally | VrpDownloader.InstalledAndRemotely)
+                Layout.rightMargin: 10
+            }
+
         }
 
     }
@@ -67,10 +102,6 @@ ColumnLayout {
                         status = status_;
 
                 }
-
-                // function onInstalledQueueChanged() {
-                //     status = app.vrp.getStatus(modelData);
-                // }
 
                 target: app.vrp
             }
