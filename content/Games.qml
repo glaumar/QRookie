@@ -45,11 +45,13 @@ ColumnLayout {
             RadioButton {
                 text: qsTr("Updatable")
                 onClicked: app.vrp.filterGamesByStatus(VrpDownloader.UpdatableLocally | VrpDownloader.UpdatableRemotely)
+                enabled: app.vrp.connectedDevice.length > 0
             }
 
             RadioButton {
                 text: qsTr("Installed")
                 onClicked: app.vrp.filterGamesByStatus(VrpDownloader.InstalledAndLocally | VrpDownloader.InstalledAndRemotely)
+                enabled: app.vrp.connectedDevice.length > 0
                 Layout.rightMargin: 10
             }
 
