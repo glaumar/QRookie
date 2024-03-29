@@ -258,8 +258,8 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
     co_return true;
 }
 
-QCoro::Task<bool> DeviceManager::uninstallApk(const QString serial,
-                                              const QString package_name) const {
+QCoro::Task<bool> DeviceManager::uninstallApk(
+    const QString serial, const QString package_name) const {
     if (serials_.isEmpty() || !serials_.contains(serial)) {
         co_return false;
     }

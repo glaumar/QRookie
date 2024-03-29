@@ -70,7 +70,6 @@ VrpDownloader::VrpDownloader(QObject* parent)
 }
 
 VrpDownloader::~VrpDownloader() {
-    // TODO: cleanup cache
     saveGamesInfo();
 }
 
@@ -358,6 +357,7 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
 
     QProcess basic_process;
     auto p7za = qCoro(basic_process);
+
     // Decompress
     p7za.start("7za",
                QStringList()
@@ -393,6 +393,9 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
             install(game);
         }
 
+        // clean up cache
+        QDir dir(cache_path_ + "/" + getGameId(game.release_name));
+        dir.removeRecursively();
         co_return true;
     }
 }
