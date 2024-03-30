@@ -21,7 +21,7 @@ Install from AUR
 paru -S qrookie-vrp
 ```
 
-## SteamOS And other Linux
+## SteamOS And Other Linux
 ![GitHub Release](https://img.shields.io/github/v/release/glaumar/QRookie) ![GitHub Release Date](https://img.shields.io/github/release-date/Glaumar/QRookie)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie.flatpak)
 
