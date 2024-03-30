@@ -1,0 +1,119 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cmake",
+			"label": "CMake: build",
+			"command": "build",
+			"targets": [
+				"qrookie"
+			],
+			"group": "build",
+			"problemMatcher": [],
+		},
+		{
+			"type": "shell",
+			"label": "Run qrookie",
+			"command": "build/qrookie",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": "CMake: build"
+		},
+		{
+			"type": "shell",
+			"label": "Flatpak Build",
+			"command": "flatpak-builder build_flatpak  io.github.glaumar.QRookie.yml --force-clean",
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "Flatpak Install",
+			"command": "flatpak-builder build_flatpak  io.github.glaumar.QRookie.yml --force-clean --install --user",
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "Flatpak Export",
+			"command": "flatpak build-export export build_flatpak && flatpak build-bundle export QRookie.flatpak io.github.glaumar.QRookie --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo",
+			"group": "none",
+			"dependsOn": "Flatpak Build"
+		},
+		{
+			"type": "shell",
+			"label": "Generate DEB Package",
+			"command": "cd build && cpack -C CPackConfig.cmake",
+			"group": "none",
+			"dependsOn": "CMake: build"
+		},
+		{
+			"type": "shell",
+			"label": "Generate AUR Package",
+			"command": "makepkg --clean -f && makepkg --printsrcinfo > .SRCINFO",
+			"options": {
+				"cwd": "${workspaceFolder}/AUR"
+			},
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "ArchLinux Clean Environment Build",
+			"command": "extra-x86_64-build",
+			"options": {
+				"cwd": "${workspaceFolder}/AUR"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared"
+			},
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "AUR Package Install",
+			"command": "sudo pacman -U qrookie-git-*.pkg.tar.zst",
+			"options": {
+				"cwd": "${workspaceFolder}/AUR"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared"
+			},
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "Update Translation",
+			"command": "lupdate src -ts i18n/qrookie_zh_CN.ts",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "none",
+			"problemMatcher": []
+		},
+		{
+			"label": "Format C/C++ Code",
+			"type": "shell",
+			"command": "clang-format -i *.h *.cpp",
+			"options": {
+				"cwd": "${workspaceFolder}/src"
+			},
+			"group": "none",
+		},
+		{
+			"label": "check metainfo.xml file",
+			"type": "shell",
+			"command": "flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream  io.github.glaumar.QRookie.metainfo.xml",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "none",
+		}
+
+	]
+}

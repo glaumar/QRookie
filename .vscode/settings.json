@@ -105,7 +105,8 @@
         "qcoronetworkreply": "cpp",
         "qcoroiodevice": "cpp",
         "qxmlstreamreader": "cpp",
-        "qnetworkreply": "cpp"
+        "qnetworkreply": "cpp",
+        "qquickstyle": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,
