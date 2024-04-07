@@ -141,6 +141,27 @@ Rectangle {
             fillMode: Image.PreserveAspectFit
             layer.enabled: true
 
+            Button {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 5
+                icon.source: "kt-magnet"
+                onClicked: {
+                    textEdit.text = app.vrp.getMagnetURI(modelData.release_name);
+                    textEdit.selectAll();
+                    textEdit.copy();
+                }
+                ToolTip.text: qsTr("Copy Magnet")
+                ToolTip.visible: hovered
+
+                TextEdit {
+                    id: textEdit
+                    //just to copy the text
+                    visible: false
+                }
+
+            }
+
             layer.effect: OpacityMask {
 
                 maskSource: Rectangle {
@@ -166,7 +187,6 @@ Rectangle {
         Text {
             anchors.right: parent.right
             text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-            // font.pointSize: Qt.application.font.pointSize * 0.9
             color: app.globalPalette.text
         }
 

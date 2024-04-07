@@ -30,6 +30,8 @@
 
 VrpDownloader::VrpDownloader(QObject* parent)
     : QObject(parent), status_filter_(Status::Unknown) {
+
+    // TODO: using AppSettings
     // Create cache and data directories
     QDir dir;
     cache_path_ =
@@ -145,6 +147,8 @@ QVariantList VrpDownloader::deviceList() const {
 }
 
 QCoro::Task<bool> VrpDownloader::updateMetadata() {
+
+    vrp_torrent_.update();
     if (!co_await vrp_public_.update()) {
         qWarning() << "Update metadata failed";
         co_return false;

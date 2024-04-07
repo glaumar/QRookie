@@ -19,7 +19,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "device_manager.h"
 #include "qrookie.h"
 #include "vrp_downloader.h"
 

@@ -33,6 +33,7 @@
 #include "game_info.h"
 #include "http_downloader.h"
 #include "vrp_public.h"
+#include "vrp_torrent.h"
 
 class VrpDownloader : public QObject {
     Q_OBJECT
@@ -90,6 +91,9 @@ class VrpDownloader : public QObject {
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
+    Q_INVOKABLE QString getMagnetURI(const QString& release_name) const {
+        return vrp_torrent_.findMagnetURI(release_name);
+    }
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
     Q_INVOKABLE void removeFromDownloadQueue(const GameInfo& game);
     Q_INVOKABLE bool removeFromLocalQueue(const GameInfo& game);
@@ -167,6 +171,7 @@ class VrpDownloader : public QObject {
     GameInfo getFirstQueuedGame() const;
 
     VrpPublic vrp_public_;
+    VrpTorrent vrp_torrent_;
     QString cache_path_;
     QString data_path_;
     QString filter_;
