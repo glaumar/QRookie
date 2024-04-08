@@ -21,14 +21,13 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
 RowLayout {
-    anchors.fill: parent
-
-    ColumnLayout {
-        Layout.preferredWidth: parent.width / 2
+    Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
         Label {
+            id: download_title
+
             text: qsTr("Downloading")
             font.bold: true
             font.pointSize: Qt.application.font.pointSize * 2
@@ -37,8 +36,10 @@ RowLayout {
         ListView {
             id: downloading_list
 
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: parent.height - download_title.height
+            anchors.top: download_title.bottom
+            anchors.margins: 5
             clip: true
             spacing: 10
             snapMode: ListView.SnapToItem
@@ -91,12 +92,13 @@ RowLayout {
 
     }
 
-    ColumnLayout {
-        Layout.preferredWidth: parent.width / 2
+    Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
         Label {
+            id: local_title
+
             text: qsTr("Local")
             font.bold: true
             font.pointSize: Qt.application.font.pointSize * 2
@@ -107,8 +109,10 @@ RowLayout {
 
             property int oldIndex: 0
 
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: parent.height - local_title.height
+            anchors.top: local_title.bottom
+            anchors.margins: 5
             spacing: 10
             clip: true
             snapMode: ListView.SnapToItem
