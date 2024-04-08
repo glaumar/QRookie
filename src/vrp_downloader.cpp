@@ -74,7 +74,7 @@ VrpDownloader::VrpDownloader(QObject* parent)
                     free_space_ = usage.second;
                 }
                 emit deviceModelChanged();
-                emit spaceUsageChanged();
+                emit spaceUsageChanged(total_space_, free_space_);
                 updateInstalledQueue();
             });
     device_manager_.autoUpdateSerials();
@@ -88,9 +88,7 @@ VrpDownloader::VrpDownloader(QObject* parent)
     }
 }
 
-VrpDownloader::~VrpDownloader() {
-    saveGamesInfo();
-}
+VrpDownloader::~VrpDownloader() { saveGamesInfo(); }
 
 QVariantList VrpDownloader::gamesInfo() const {
     QVariantList list;

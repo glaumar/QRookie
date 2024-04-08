@@ -16,13 +16,13 @@
  */
 
 import QCoro
-import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
-Rectangle {
+Kirigami.Card {
     property var name
     property var size
     property var lastUpdated
@@ -62,7 +62,7 @@ Rectangle {
             action_button.text = qsTr("Queued");
             break;
         case VrpDownloader.Downloading:
-            if (isNaN(progress) || progress <= 1e-36) {
+            if (isNaN(progress) || progress <= 0) {
                 action_button.text = qsTr("Starting Downloading");
                 progress_bar.indeterminate = true;
                 progress_bar.visible = true;
@@ -121,30 +121,36 @@ Rectangle {
             break;
         }
     }
-    radius: 5
-    layer.enabled: true
-    color: app.globalPalette.base
 
-    Column {
-        id: game_info
+    banner {
+        source: thumbnailPath
+        title: name
+        titleAlignment: Qt.AlignLeft | Qt.AlignBottom
+        titleWrapMode: Text.WrapAnywhere
+    }
 
-        padding: 10
-        spacing: 5
-        width: parent.width - 20
+    contentItem: ColumnLayout {
+        Layout.margins: 5
 
-        Image {
-            id: thumbnail
+        Label {
+            Layout.alignment: Qt.AlignRight
+            text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
+        }
 
-            asynchronous: true
-            width: parent.width
-            source: thumbnailPath
-            fillMode: Image.PreserveAspectFit
-            layer.enabled: true
+        Label {
+            Layout.alignment: Qt.AlignRight
+            text: lastUpdated
+        }
 
+    }
+
+    footer: ColumnLayout {
+        Layout.margins: 5
+
+        RowLayout {
             Button {
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 5
+                id: magnet_button
+
                 icon.source: "kt-magnet"
                 onClicked: {
                     textEdit.text = app.vrp.getMagnetURI(modelData.release_name);
@@ -156,79 +162,35 @@ Rectangle {
 
                 TextEdit {
                     id: textEdit
+
                     //just to copy the text
                     visible: false
                 }
 
             }
 
-            layer.effect: OpacityMask {
+            Button {
+                id: action_button
 
-                maskSource: Rectangle {
-                    width: thumbnail.width
-                    height: thumbnail.height
-                    radius: 5
+                Layout.fillWidth: true
+                text: qsTr("Downlad")
+                onClicked: {
+                    if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally || status === VrpDownloader.InstallError)
+                        app.vrp.installQml(modelData);
+                    else
+                        app.vrp.addToDownloadQueue(modelData);
                 }
-
             }
 
         }
 
-        Text {
-            text: name
-            font.bold: true
-            wrapMode: Text.WordWrap
-            width: thumbnail.width
-            height: font.pixelSize * 3
-            font.pointSize: Qt.application.font.pointSize * 1.3
-            color: app.globalPalette.text
+        ProgressBar {
+            id: progress_bar
+
+            Layout.fillWidth: true
+            value: (isNaN(progress) || progress <= 0) ? 0 : progress
         }
 
-        Text {
-            anchors.right: parent.right
-            text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-            color: app.globalPalette.text
-        }
-
-        Text {
-            anchors.right: parent.right
-            text: lastUpdated
-            font.pointSize: Qt.application.font.pointSize * 0.8
-            color: app.globalPalette.text
-        }
-
-    }
-
-    Button {
-        id: action_button
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: progress_bar.top
-        anchors.bottomMargin: 5
-        text: qsTr("Downlad")
-        width: game_info.width
-        onClicked: {
-            if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally || status === VrpDownloader.InstallError)
-                app.vrp.installQml(modelData);
-            else
-                app.vrp.addToDownloadQueue(modelData);
-        }
-    }
-
-    ProgressBar {
-        id: progress_bar
-
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - 2
-        value: (isNaN(progress) || progress <= 1e-36) ? 0 : progress
-    }
-
-    layer.effect: DropShadow {
-        transparentBorder: true
-        horizontalOffset: 6
-        verticalOffset: 6
-        color: app.globalPalette.shadow
     }
 
 }

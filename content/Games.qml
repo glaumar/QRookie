@@ -19,13 +19,14 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
 ColumnLayout {
-    Rectangle {
+    Kirigami.Card {
+        //TODO: use Kirigami.ActionToolBar
+
         id: toolbar
 
-        color: app.globalPalette.base
-        radius: 5
         Layout.fillWidth: true
         Layout.rightMargin: 10
         Layout.bottomMargin: 10
@@ -84,8 +85,8 @@ ColumnLayout {
         Layout.fillHeight: true
         snapMode: GridView.SnapToRow
         model: app.vrp.gamesInfo
-        cellWidth: 315
-        cellHeight: 255 + Qt.application.font.pixelSize * 7
+        cellWidth: 310
+        cellHeight: 300
 
         ScrollBar.vertical: ScrollBar {
             visible: true
@@ -94,15 +95,15 @@ ColumnLayout {
         delegate: GameDelegate {
             id: gameDelegate
 
-            width: games.cellWidth - 20
-            height: games.cellHeight - 20
+            width: games.cellWidth - 10
+            height: games.cellHeight - 10
             name: modelData.name
             size: modelData.size
             lastUpdated: modelData.last_updated
             thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")
-                    return "Image/matrix.png";
+                    return "qrc:/qt/qml/content/Image/matrix.png";
                 else
                     return "file://" + path;
             }

@@ -15,93 +15,88 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
 RowLayout {
-    id: device_layout
-
-    Layout.margins: 10
-    spacing: 10
-
-    Rectangle {
+    Item {
         id: device_info
 
-        width: 300
         Layout.fillHeight: true
         Layout.bottomMargin: 10
-        color: app.globalPalette.base
-        radius: 5
-        layer.enabled: true
+        Layout.rightMargin: 5
+        width: 310
 
-        Text {
-            id: device_name
+        Kirigami.Card {
+            anchors.fill: parent
 
-            width: parent.width - 20
-            anchors.margins: 10
-            anchors.left: parent.left
-            anchors.top: parent.top
-            font.bold: true
-            font.pointSize: Qt.application.font.pointSize * 2
-            color: app.globalPalette.text
-            text: app.vrp.deviceModel === "" ? "No device connected" : app.vrp.deviceModel
-        }
-
-        Text {
-            id: space_usage_text
-
-            anchors.margins: 10
-            anchors.right: parent.right
-            anchors.top: device_name.bottom
-            color: app.globalPalette.text
-            text: (isNaN(app.vrp.totalSpace) || isNaN(app.vrp.freeSpace) || app.vrp.freeSpace < 10 || app.vrp.totalSpace < 10 || app.vrp.freeSpace > app.vrp.totalSpace) ? "0.00 GB / 0.00 GB" : ((app.vrp.totalSpace - app.vrp.freeSpace) / 1024 / 1024).toFixed(2) + " GB / " + (app.vrp.totalSpace / 1024 / 1024).toFixed(2) + " GB"
-        }
-
-        ProgressBar {
-            id: space_usage_bar
-
-            anchors.margins: 10
-            width: parent.width - 20
-            anchors.left: parent.left
-            anchors.top: space_usage_text.bottom
-            value: (isNaN(app.vrp.totalSpace) || isNaN(app.vrp.freeSpace) || app.vrp.freeSpace < 10 || app.vrp.totalSpace < 10 || app.vrp.freeSpace > app.vrp.totalSpace) ? 0 : (app.vrp.totalSpace - app.vrp.freeSpace) / app.vrp.totalSpace
-        }
-
-        ComboBox {
-            id: device_selector
-
-            property int last_index: -1
-
-            width: parent.width - 20
-            anchors.margins: 10
-            anchors.left: parent.left
-            anchors.top: space_usage_bar.bottom
-            model: app.vrp.deviceList
-            onModelChanged: {
-                if (device_selector.count > 0 && app.vrp.hasConnectedDevice()) {
-                    let index = find(app.vrp.connectedDevice);
-                    if (index >= 0) {
-                        device_selector.currentIndex = index;
-                        device_selector.last_index = index;
+            Connections {
+                function onSpaceUsageChanged(total_space, free_space) {
+                    if (!isNaN(total_space) && !isNaN(free_space) && free_space > 0 && free_space <= total_space) {
+                        space_usage_text.text = ((total_space - free_space) / 1024 / 1024).toFixed(2) + " GB / " + (total_space / 1024 / 1024).toFixed(2) + " GB";
+                        space_usage_bar.value = (total_space - free_space) / total_space;
+                    } else {
+                        space_usage_text.text = "0.00 GB / 0.00 GB";
+                        space_usage_bar.value = 0;
                     }
                 }
-            }
-            onCurrentTextChanged: {
-                if (device_selector.count > 0 && app.vrp.connectedDevice !== device_selector.currentText && device_selector.currentIndex !== device_selector.last_index) {
-                    device_selector.last_index = device_selector.currentIndex;
-                    app.vrp.connectedDevice = device_selector.currentText;
-                }
-            }
-        }
 
-        layer.effect: DropShadow {
-            transparentBorder: true
-            horizontalOffset: 6
-            verticalOffset: 6
-            color: app.globalPalette.shadow
+                target: app.vrp
+            }
+
+            contentItem: Column {
+                spacing: 10
+
+                Label {
+                    id: space_usage_text
+
+                    width: parent.width
+                    text: "0.00 GB / 0.00 GB"
+                }
+
+                ProgressBar {
+                    id: space_usage_bar
+
+                    width: parent.width
+                    value: 0
+                }
+
+                ComboBox {
+                    id: device_selector
+
+                    property int last_index: -1
+
+                    width: parent.width
+                    model: app.vrp.deviceList
+                    onModelChanged: {
+                        if (device_selector.count > 0 && app.vrp.hasConnectedDevice()) {
+                            let index = find(app.vrp.connectedDevice);
+                            if (index >= 0) {
+                                device_selector.currentIndex = index;
+                                device_selector.last_index = index;
+                            }
+                        }
+                    }
+                    onCurrentTextChanged: {
+                        if (device_selector.count > 0 && app.vrp.connectedDevice !== device_selector.currentText && device_selector.currentIndex !== device_selector.last_index) {
+                            device_selector.last_index = device_selector.currentIndex;
+                            app.vrp.connectedDevice = device_selector.currentText;
+                        }
+                    }
+                }
+
+            }
+
+            header: Kirigami.Heading {
+                id: device_name
+
+                text: app.vrp.deviceModel === "" ? "No device connected" : app.vrp.deviceModel
+                level: 1
+            }
+
         }
 
     }
@@ -109,11 +104,12 @@ RowLayout {
     GridView {
         id: apps_info
 
-        Layout.fillWidth: true
         Layout.fillHeight: true
+        Layout.fillWidth: true
         snapMode: GridView.SnapToRow
-        cellWidth: 315
-        cellHeight: 255 + Qt.application.font.pixelSize * 4
+        clip: true
+        cellWidth: 310
+        cellHeight: 220
         model: app.vrp.installedQueue
 
         ScrollBar.vertical: ScrollBar {
@@ -121,17 +117,16 @@ RowLayout {
         }
 
         delegate: ApplicationDelegate {
-            width: apps_info.cellWidth - 20
-            height: apps_info.cellHeight - 20
+            width: apps_info.cellWidth - 10
+            height: apps_info.cellHeight - 10
             name: modelData.package_name
             thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")
-                    return "Image/matrix.png";
+                    return "qrc:/qt/qml/content/Image/matrix.png";
                 else
                     return "file://" + path;
             }
-
             onUninstallButtonClicked: {
                 app.vrp.uninstallQml(modelData.package_name);
             }

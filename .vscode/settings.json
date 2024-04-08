@@ -107,7 +107,8 @@
         "qxmlstreamreader": "cpp",
         "qnetworkreply": "cpp",
         "qquickstyle": "cpp",
-        "qobject": "cpp"
+        "qobject": "cpp",
+        "qbytearray": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,

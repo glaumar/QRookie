@@ -15,13 +15,13 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
-Rectangle {
+Kirigami.Card {
     id: game_info
 
     property var name
@@ -31,10 +31,6 @@ Rectangle {
     property var status
 
     signal deleteButtonClicked()
-
-    radius: 5
-    layer.enabled: true
-    color: app.globalPalette.base
 
     Image {
         id: thumbnail
@@ -46,21 +42,9 @@ Rectangle {
         asynchronous: true
         source: thumbnailPath
         fillMode: Image.PreserveAspectFit
-        layer.enabled: true
-
-        layer.effect: OpacityMask {
-
-            maskSource: Rectangle {
-                width: thumbnail.width
-                height: thumbnail.height
-                radius: 5
-            }
-
-        }
-
     }
 
-    Text {
+    Label {
         anchors.margins: 10
         anchors.left: thumbnail.right
         anchors.top: parent.top
@@ -70,7 +54,6 @@ Rectangle {
         wrapMode: Text.WordWrap
         height: font.pixelSize * 2
         font.pointSize: Qt.application.font.pointSize * 1.3
-        color: app.globalPalette.text
     }
 
     ProgressBar {
@@ -81,17 +64,9 @@ Rectangle {
         anchors.bottom: parent.bottom
         value: progress
         layer.enabled: true
-
-        layer.effect: DropShadow {
-            transparentBorder: true
-            horizontalOffset: 6
-            verticalOffset: 6
-            color: app.globalPalette.shadow
-        }
-
     }
 
-    Text {
+    Label {
         id: status_label
 
         anchors.margins: 10
@@ -101,16 +76,16 @@ Rectangle {
             if (status === VrpDownloader.Queued) {
                 progress_bar.indeterminate = false;
                 delete_button.enabled = true;
-                status_label.color = app.globalPalette.text;
+                status_label.color = Kirigami.Theme.textColor;
                 return qsTr("Queued");
             } else if (status === VrpDownloader.Decompressing) {
                 progress_bar.indeterminate = true;
                 delete_button.enabled = false;
-                status_label.color = app.globalPalette.text;
+                status_label.color = Kirigami.Theme.textColor;
                 return qsTr("Decompressing");
             } else if (status === VrpDownloader.Downloading) {
                 delete_button.enabled = true;
-                status_label.color = app.globalPalette.text;
+                status_label.color = Kirigami.Theme.textColor;
                 if (isNaN(progress) || progress <= 1e-36) {
                     progress_bar.indeterminate = true;
                     return qsTr("Starting Downloading");
@@ -138,7 +113,6 @@ Rectangle {
                 return qsTr("Unknown Status");
             }
         }
-        color: app.globalPalette.text
     }
 
     Button {
@@ -151,13 +125,6 @@ Rectangle {
         onClicked: {
             deleteButtonClicked();
         }
-    }
-
-    layer.effect: DropShadow {
-        transparentBorder: true
-        horizontalOffset: 6
-        verticalOffset: 6
-        color: app.globalPalette.shadow
     }
 
 }

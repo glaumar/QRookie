@@ -15,13 +15,13 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
-Rectangle {
+Kirigami.Card {
     id: game_info
 
     property var size
@@ -29,12 +29,9 @@ Rectangle {
     property var thumbnailPath
     property var status
 
-    signal installButtonClicked
-    signal deleteButtonClicked
+    signal installButtonClicked()
+    signal deleteButtonClicked()
 
-    radius: 5
-    layer.enabled: true
-    color: app.globalPalette.base
     onStatusChanged: function() {
         install_button.enabled = false;
         install_button.icon.source = "install";
@@ -78,18 +75,6 @@ Rectangle {
         asynchronous: true
         source: thumbnailPath
         fillMode: Image.PreserveAspectFit
-        layer.enabled: true
-
-        layer.effect: OpacityMask {
-
-            maskSource: Rectangle {
-                width: thumbnail.width
-                height: thumbnail.height
-                radius: 5
-            }
-
-        }
-
     }
 
     Text {
@@ -104,7 +89,7 @@ Rectangle {
         wrapMode: Text.WordWrap
         height: font.pixelSize * 2.5
         font.pointSize: Qt.application.font.pointSize * 1.3
-        color: app.globalPalette.text
+        color: Kirigami.Theme.textColor
     }
 
     Text {
@@ -114,7 +99,7 @@ Rectangle {
         anchors.top: name_text.bottom
         anchors.left: thumbnail.right
         text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-        color: app.globalPalette.text
+        color: Kirigami.Theme.textColor
     }
 
     Button {
@@ -138,13 +123,6 @@ Rectangle {
         onClicked: {
             deleteButtonClicked();
         }
-    }
-
-    layer.effect: DropShadow {
-        transparentBorder: true
-        horizontalOffset: 6
-        verticalOffset: 6
-        color: app.globalPalette.shadow
     }
 
 }

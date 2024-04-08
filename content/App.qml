@@ -19,11 +19,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import VrpDownloader
+import org.kde.kirigami as Kirigami
 
-ApplicationWindow {
+Kirigami.ApplicationWindow {
     id: app
 
-    property SystemPalette globalPalette
     property VrpDownloader vrp
 
     visible: true
@@ -55,10 +55,6 @@ ApplicationWindow {
             id: device_tab
         }
 
-    }
-
-    globalPalette: SystemPalette {
-        colorGroup: SystemPalette.Active
     }
 
     vrp: VrpDownloader {
