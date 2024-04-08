@@ -24,11 +24,16 @@ import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
     property var name
+    property var releaseName
     property var size
     property var lastUpdated
     property var thumbnailPath
     property var progress
     property var status
+
+
+    signal installButtonClicked()
+    signal downloadButtonClicked()
 
     onProgressChanged: {
         if (status === VrpDownloader.Downloading && !isNaN(progress)) {
@@ -152,7 +157,7 @@ Kirigami.Card {
 
                 icon.source: "kt-magnet"
                 onClicked: {
-                    textEdit.text = app.vrp.getMagnetURI(modelData.release_name);
+                    textEdit.text = app.vrp.getMagnetURI(releaseName);
                     textEdit.selectAll();
                     textEdit.copy();
                 }
@@ -175,9 +180,9 @@ Kirigami.Card {
                 text: qsTr("Downlad")
                 onClicked: {
                     if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally || status === VrpDownloader.InstallError)
-                        app.vrp.installQml(modelData);
+                        installButtonClicked();
                     else
-                        app.vrp.addToDownloadQueue(modelData);
+                        downloadButtonClicked();
                 }
             }
 

@@ -154,7 +154,7 @@ class VrpDownloader : public QObject {
     void installedQueueChanged();
     void deviceListChanged();
     void connectedDeviceChanged();
-    void deviceModelChanged();
+    void deviceModelChanged(QString model);
     void spaceUsageChanged(long long total_space, long long free_space);
     void statusChanged(QString release_name, Status status);
     void downloadProgressChanged(QString release_name, double progress);

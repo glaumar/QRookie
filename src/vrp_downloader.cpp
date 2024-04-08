@@ -73,7 +73,7 @@ VrpDownloader::VrpDownloader(QObject* parent)
                     total_space_ = usage.first;
                     free_space_ = usage.second;
                 }
-                emit deviceModelChanged();
+                emit deviceModelChanged(device_model_);
                 emit spaceUsageChanged(total_space_, free_space_);
                 updateInstalledQueue();
             });

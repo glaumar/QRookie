@@ -44,6 +44,10 @@ RowLayout {
                     }
                 }
 
+                function onDeviceModelChanged(model) {
+                    device_name.text = model === "" ? "No device connected" : model;
+                }
+
                 target: app.vrp
             }
 
@@ -90,11 +94,12 @@ RowLayout {
 
             }
 
-            header: Kirigami.Heading {
+            header: Label {
                 id: device_name
 
-                text: app.vrp.deviceModel === "" ? "No device connected" : app.vrp.deviceModel
-                level: 1
+                text: "No device connected"
+                font.bold: true
+                font.pointSize: Qt.application.font.pointSize * 2
             }
 
         }

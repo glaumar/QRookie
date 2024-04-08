@@ -98,6 +98,7 @@ ColumnLayout {
             width: games.cellWidth - 10
             height: games.cellHeight - 10
             name: modelData.name
+            releaseName: modelData.release_name
             size: modelData.size
             lastUpdated: modelData.last_updated
             thumbnailPath: {
@@ -109,6 +110,12 @@ ColumnLayout {
             }
             progress: 0
             status: app.vrp.getStatus(modelData)
+            onInstallButtonClicked: {
+                app.vrp.installQml(modelData);
+            }
+            onDownloadButtonClicked: {
+                app.vrp.addToDownloadQueue(modelData);
+            }
 
             Connections {
                 function onDownloadProgressChanged(release_name_, progress_) {
