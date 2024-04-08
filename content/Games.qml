@@ -57,7 +57,7 @@ ColumnLayout {
 
             RadioButton {
                 text: qsTr("Local")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Local | VrpDownloader.UpdatableLocally | VrpDownloader.Installing | VrpDownloader.InstallError | VrpDownloader.InstalledAndLocally)
+                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Local |VrpDownloader.Installable| VrpDownloader.UpdatableLocally | VrpDownloader.Installing | VrpDownloader.InstallError | VrpDownloader.InstalledAndLocally)
             }
 
             RadioButton {
