@@ -77,7 +77,7 @@ Kirigami.Card {
         fillMode: Image.PreserveAspectFit
     }
 
-    Text {
+    Label {
         id: name_text
 
         anchors.margins: 10
@@ -89,17 +89,15 @@ Kirigami.Card {
         wrapMode: Text.WordWrap
         height: font.pixelSize * 2.5
         font.pointSize: Qt.application.font.pointSize * 1.3
-        color: Kirigami.Theme.textColor
     }
 
-    Text {
+    Label {
         id: size_text
 
         anchors.margins: 10
         anchors.top: name_text.bottom
         anchors.left: thumbnail.right
         text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
-        color: Kirigami.Theme.textColor
     }
 
     Button {
