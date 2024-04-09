@@ -74,7 +74,7 @@ VrpDownloader::VrpDownloader(QObject* parent)
                 }
                 emit deviceModelChanged(device_model_);
                 emit spaceUsageChanged(total_space_, free_space_);
-                updateInstalledQueue();
+                updateInstalledApps();
             });
     device_manager_.autoUpdateSerials();
 
@@ -82,8 +82,11 @@ VrpDownloader::VrpDownloader(QObject* parent)
             &VrpDownloader::removeLocalGameFile);
     connect(&download_games_, &GameInfoModel::removed, this,
             &VrpDownloader::removeFromDownloadQueue);
+    connect(&installed_apps_, &GameInfoModel::removed,
+            [this](const GameInfo& game) { uninstall(game.package_name); });
+
     loadGamesInfo();
-    updateInstalledQueue();
+    updateInstalledApps();
 
     // Restore download
     if (all_games_.key(Status::Queued) != GameInfo{}) {
@@ -108,15 +111,6 @@ QVariantList VrpDownloader::gamesInfo() const {
             name.remove(" ").contains(filter_, Qt::CaseInsensitive)) {
             list.append(QVariant::fromValue(it.key()));
         }
-    }
-
-    return list;
-}
-
-QVariantList VrpDownloader::installedQueue() const {
-    QVariantList list;
-    for (const auto& app_info : installed_queue_) {
-        list.append(QVariant::fromValue(app_info));
     }
 
     return list;
@@ -242,8 +236,6 @@ bool VrpDownloader::parseMetadata() {
     } else {
         qDebug() << "Metadata parsed successfully";
         emit gamesInfoChanged();
-        // emit localQueueChanged();
-        // emit downloadsQueueChanged();
         return true;
     }
 }
@@ -282,6 +274,7 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
         return false;
     }
 
+    download_games_.remove(game);
     setStatus(game, Status::Queued);
     download_games_.append(game);
     qDebug() << "Queued: " << game.release_name;
@@ -412,7 +405,10 @@ QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
     if (result) {
         qDebug() << "Install finished: " << game.release_name;
         setStatus(game, Status::InstalledAndLocally);
-        updateInstalledQueue();
+        GameInfo game = {.package_name = game.package_name,
+                         .version_code = game.version_code};
+        installed_apps_.remove(game);
+        installed_apps_.prepend(game);
     } else {
         qDebug() << "Install failed: " << game.release_name;
         setStatus(game, Status::InstallError);
@@ -426,13 +422,8 @@ QCoro::Task<bool> VrpDownloader::uninstall(const QString packege_name) {
         co_return false;
     }
 
-    bool result =
-        co_await device_manager_.uninstallApk(connectedDevice(), packege_name);
-    if (result) {
-        updateInstalledQueue();
-    }
-
-    co_return result;
+    co_return co_await device_manager_.uninstallApk(connectedDevice(),
+                                                    packege_name);
 }
 
 bool VrpDownloader::saveGamesInfo() {
@@ -543,10 +534,9 @@ bool VrpDownloader::loadGamesInfo() {
     }
 }
 
-QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
+QCoro::Task<void> VrpDownloader::updateInstalledApps() {
     if (!hasConnectedDevice()) {
-        installed_queue_.clear();
-        emit installedQueueChanged();
+        installed_apps_.clear();
 
         // Update Status
         QMutableMapIterator<GameInfo, Status> it(all_games_);
@@ -570,52 +560,54 @@ QCoro::Task<void> VrpDownloader::updateInstalledQueue() {
     }
 
     auto apps = co_await device_manager_.installedApps(connectedDevice());
-    if (apps != installed_queue_) {
-        installed_queue_ = apps;
-        emit installedQueueChanged();
+    installed_apps_.clear();
+    for (const auto& app : apps) {
+        GameInfo game = {.package_name = app.package_name,
+                         .version_code = QString::number(app.version_code)};
+        installed_apps_.append(game);
+    }
 
-        QMap<QString, long long> installed_map;
-        for (const auto& app : apps) {
-            installed_map[app.package_name] = app.version_code;
+    QMap<QString, long long> installed_map;
+    for (const auto& app : apps) {
+        installed_map[app.package_name] = app.version_code;
+    }
+
+    // Update game status
+    QMutableMapIterator<GameInfo, Status> it(all_games_);
+    while (it.hasNext()) {
+        it.next();
+        Status from_s = it.value();
+
+        if (from_s == Status::UpdatableLocally ||
+            from_s == Status::InstalledAndLocally ||
+            from_s == Status::Installable) {
+            from_s = Status::Local;
+        } else if (from_s == Status::UpdatableRemotely ||
+                   from_s == Status::InstalledAndRemotely) {
+            from_s = Status::Downloadable;
         }
 
-        // Update game status
-        QMutableMapIterator<GameInfo, Status> it(all_games_);
-        while (it.hasNext()) {
-            it.next();
-            Status from_s = it.value();
-
-            if (from_s == Status::UpdatableLocally ||
-                from_s == Status::InstalledAndLocally ||
-                from_s == Status::Installable) {
-                from_s = Status::Local;
-            } else if (from_s == Status::UpdatableRemotely ||
-                       from_s == Status::InstalledAndRemotely) {
-                from_s = Status::Downloadable;
+        QString package_name = it.key().package_name;
+        QString release_name = it.key().release_name;
+        if (installed_map.contains(package_name)) {
+            Status to_s;
+            if (it.key().version_code.toLongLong() >
+                installed_map[package_name]) {
+                to_s = from_s == Status::Local ? Status::UpdatableLocally
+                                               : Status::UpdatableRemotely;
+            } else {
+                to_s = from_s == Status::Local ? Status::InstalledAndLocally
+                                               : Status::InstalledAndRemotely;
             }
+            it.setValue(to_s);
+            emit statusChanged(release_name, to_s);
 
-            QString package_name = it.key().package_name;
-            QString release_name = it.key().release_name;
-            if (installed_map.contains(package_name)) {
-                Status to_s;
-                if (it.key().version_code.toLongLong() >
-                    installed_map[package_name]) {
-                    to_s = from_s == Status::Local ? Status::UpdatableLocally
-                                                   : Status::UpdatableRemotely;
-                } else {
-                    to_s = from_s == Status::Local
-                               ? Status::InstalledAndLocally
-                               : Status::InstalledAndRemotely;
-                }
-                it.setValue(to_s);
-                emit statusChanged(release_name, to_s);
-
-            } else if (from_s == Status::Local) {
-                it.setValue(Status::Installable);
-                emit statusChanged(release_name, Status::Installable);
-            }
+        } else if (from_s == Status::Local) {
+            it.setValue(Status::Installable);
+            emit statusChanged(release_name, Status::Installable);
         }
     }
+
     co_return;
 }
 

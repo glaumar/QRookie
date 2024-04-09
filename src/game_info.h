@@ -23,7 +23,9 @@
 
 struct GameInfo {
     bool operator==(const GameInfo& other) const {
-        return release_name == other.release_name;
+        return release_name == other.release_name &&
+               package_name == other.package_name &&
+               version_code == other.version_code;
     }
 
     QString name;

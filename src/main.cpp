@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     app.setDesktopFileName(APPLICATION_ID);
 
     qmlRegisterType<VrpDownloader>("VrpDownloader", 1, 0, "VrpDownloader");
-    qmlRegisterType<GameInfoModel>("GameInfoModel", 1, 0, "GameInfoModel");
+    // qmlRegisterType<GameInfoModel>("GameInfoModel", 1, 0, "GameInfoModel");
     QCoro::Qml::registerTypes();
 
     QQmlApplicationEngine engine;

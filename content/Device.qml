@@ -115,7 +115,7 @@ RowLayout {
         clip: true
         cellWidth: 310
         cellHeight: 220
-        model: app.vrp.installedQueue
+        model: app.vrp.installedAppsModel()
 
         ScrollBar.vertical: ScrollBar {
             visible: true
@@ -124,16 +124,16 @@ RowLayout {
         delegate: ApplicationDelegate {
             width: apps_info.cellWidth - 10
             height: apps_info.cellHeight - 10
-            name: modelData.package_name
+            name: model.package_name
             thumbnailPath: {
-                let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                let path = app.vrp.getGameThumbnailPath(model.package_name);
                 if (path === "")
                     return "qrc:/qt/qml/content/Image/matrix.png";
                 else
                     return "file://" + path;
             }
             onUninstallButtonClicked: {
-                app.vrp.uninstallQml(modelData.package_name);
+                apps_info.model.remove(index);
             }
         }
 

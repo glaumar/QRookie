@@ -41,8 +41,6 @@ class VrpDownloader : public QObject {
     Q_ENUMS(Status)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
-    Q_PROPERTY(QVariantList installedQueue READ installedQueue NOTIFY
-                   installedQueueChanged)
     Q_PROPERTY(QVariantList deviceList READ deviceList NOTIFY deviceListChanged)
     Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE
                    connectToDevice NOTIFY connectedDeviceChanged)
@@ -87,6 +85,7 @@ class VrpDownloader : public QObject {
     }
     Q_INVOKABLE GameInfoModel* localGamesModel() { return &local_games_; }
     Q_INVOKABLE GameInfoModel* downloadGamesModel() { return &download_games_; }
+    Q_INVOKABLE GameInfoModel* installedAppsModel() { return &installed_apps_; }
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
@@ -94,7 +93,7 @@ class VrpDownloader : public QObject {
         return vrp_torrent_.findMagnetURI(release_name);
     }
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
-    Q_INVOKABLE void removeFromDownloadQueue(const GameInfo& game);
+     void removeFromDownloadQueue(const GameInfo& game);
     Q_INVOKABLE bool removeLocalGameFile(const GameInfo& game);
 
     QCoro::Task<bool> install(const GameInfo game);
@@ -103,9 +102,9 @@ class VrpDownloader : public QObject {
     }
 
     QCoro::Task<bool> uninstall(const QString packege_name);
-    Q_INVOKABLE QCoro::QmlTask uninstallQml(const QString packege_name) {
-        return uninstall(packege_name);
-    }
+    // Q_INVOKABLE QCoro::QmlTask uninstallQml(const QString packege_name) {
+    //     return uninstall(packege_name);
+    // }
 
     Q_INVOKABLE Status getStatus(const GameInfo& game) const {
         return all_games_[game];
@@ -141,12 +140,10 @@ class VrpDownloader : public QObject {
     long long freeSpace() const { return free_space_; }
 
     QVariantList gamesInfo() const;
-    QVariantList installedQueue() const;
     QVariantList deviceList() const;
 
    signals:
     void gamesInfoChanged();
-    void installedQueueChanged();
     void deviceListChanged();
     void connectedDeviceChanged();
     void deviceModelChanged(QString model);
@@ -161,7 +158,7 @@ class VrpDownloader : public QObject {
     QCoro::Task<void> downloadQueuedGames();
     bool saveGamesInfo();
     bool loadGamesInfo();
-    QCoro::Task<void> updateInstalledQueue();
+    QCoro::Task<void> updateInstalledApps();
     GameInfo getDownloadingGame() const;
     GameInfo getFirstQueuedGame() const;
 
@@ -171,7 +168,7 @@ class VrpDownloader : public QObject {
     QString data_path_;
     QString filter_;
     StatusFlags status_filter_;
-    QVector<AppInfo> installed_queue_;
+    GameInfoModel installed_apps_;
     GameInfoModel download_games_;
     GameInfoModel local_games_;
     QMap<GameInfo, Status> all_games_;

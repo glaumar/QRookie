@@ -30,7 +30,6 @@
 
 class DeviceManager : public QObject {
     Q_OBJECT
-
    public:
     DeviceManager(QObject* parent = nullptr);
     ~DeviceManager();

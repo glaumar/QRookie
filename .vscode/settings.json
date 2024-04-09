@@ -115,7 +115,8 @@
         "any": "cpp",
         "deque": "cpp",
         "hash_map": "cpp",
-        "byte": "cpp"
+        "byte": "cpp",
+        "forward_list": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,

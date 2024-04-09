@@ -1,3 +1,20 @@
+/*
+ Copyright (c) 2024 glaumar <glaumar@geekgo.tech>
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "game_info_model.h"
 
 #include "vrp_downloader.h"
@@ -83,12 +100,15 @@ void GameInfoModel::remove(const GameInfo& game_info) {
     remove(index);
 }
 
-// void GameInfoModel::clear() {
-//     if(games_info_.isEmpty()) {
-//         return;
-//     }
+void GameInfoModel::clear() {
+    if(games_info_.isEmpty()) {
+        return;
+    }
 
-//     emit beginRemoveRows(QModelIndex(), 0, games_info_.size() - 1);
-//     games_info_.clear();
-//     emit endRemoveRows();
-// }
+    emit beginRemoveRows(QModelIndex(), 0, games_info_.size() - 1);
+    for(auto& game : games_info_) {
+        emit removed(game);
+    }
+    games_info_.clear();
+    emit endRemoveRows();
+}

@@ -1,3 +1,20 @@
+/*
+ Copyright (c) 2024 glaumar <glaumar@geekgo.tech>
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 #ifndef QROOKIE_GAME_INFO_MODEL
 #define QROOKIE_GAME_INFO_MODEL
@@ -29,6 +46,7 @@ class GameInfoModel : public QAbstractListModel {
     Q_INVOKABLE void append(const GameInfo& game);
     Q_INVOKABLE void remove(int index);
     Q_INVOKABLE void remove(const GameInfo& game);
+    Q_INVOKABLE void clear();
 
     size_t size() const { return games_info_.size(); }
 
@@ -37,7 +55,6 @@ class GameInfoModel : public QAbstractListModel {
         return games_info_[index];
     }
 
-    // Q_INVOKABLE void clear();
 
     virtual int rowCount(
         const QModelIndex& parent = QModelIndex()) const override;
