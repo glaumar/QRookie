@@ -28,7 +28,7 @@ RowLayout {
         Label {
             id: download_title
 
-            text: qsTr("Downloading")
+            text: qsTr("Downloading") + " (" + downloading_list.count + ")"
             font.bold: true
             font.pointSize: Qt.application.font.pointSize * 2
         }
@@ -99,7 +99,7 @@ RowLayout {
         Label {
             id: local_title
 
-            text: qsTr("Local")
+            text: qsTr("Local") + " (" + local_list.count + ")"
             font.bold: true
             font.pointSize: Qt.application.font.pointSize * 2
         }
