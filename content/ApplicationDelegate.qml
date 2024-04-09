@@ -18,7 +18,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {

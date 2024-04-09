@@ -18,7 +18,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 ColumnLayout {
@@ -47,29 +47,29 @@ ColumnLayout {
             RadioButton {
                 checked: true
                 text: qsTr("All")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Unknown)
+                onClicked: app.vrp.filterGamesByStatus(VrpManager.Unknown)
             }
 
             RadioButton {
                 text: qsTr("Downloading")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Downloading | VrpDownloader.Queued | VrpDownloader.DownloadError | VrpDownloader.Decompressing | VrpDownloader.DecompressionError)
+                onClicked: app.vrp.filterGamesByStatus(VrpManager.Downloading | VrpManager.Queued | VrpManager.DownloadError | VrpManager.Decompressing | VrpManager.DecompressionError)
             }
 
             RadioButton {
                 text: qsTr("Local")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.Local |VrpDownloader.Installable| VrpDownloader.UpdatableLocally | VrpDownloader.Installing | VrpDownloader.InstallError | VrpDownloader.InstalledAndLocally)
+                onClicked: app.vrp.filterGamesByStatus(VrpManager.Local | VrpManager.Installable | VrpManager.UpdatableLocally | VrpManager.Installing | VrpManager.InstallError | VrpManager.InstalledAndLocally)
             }
 
             RadioButton {
                 text: qsTr("Updatable")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.UpdatableLocally | VrpDownloader.UpdatableRemotely)
-                enabled: app.vrp.connectedDevice.length > 0
+                onClicked: app.vrp.filterGamesByStatus(VrpManager.UpdatableLocally | VrpManager.UpdatableRemotely)
+                enabled: app.deviceManager.connectedDevice.length > 0
             }
 
             RadioButton {
                 text: qsTr("Installed")
-                onClicked: app.vrp.filterGamesByStatus(VrpDownloader.InstalledAndLocally | VrpDownloader.InstalledAndRemotely)
-                enabled: app.vrp.connectedDevice.length > 0
+                onClicked: app.vrp.filterGamesByStatus(VrpManager.InstalledAndLocally | VrpManager.InstalledAndRemotely)
+                enabled: app.deviceManager.connectedDevice.length > 0
                 Layout.rightMargin: 10
             }
 

@@ -18,7 +18,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
@@ -73,17 +73,17 @@ Kirigami.Card {
         anchors.right: progress_bar.right
         anchors.bottom: progress_bar.top
         text: {
-            if (status === VrpDownloader.Queued) {
+            if (status === VrpManager.Queued) {
                 progress_bar.indeterminate = false;
                 delete_button.enabled = true;
                 status_label.color = Kirigami.Theme.textColor;
                 return qsTr("Queued");
-            } else if (status === VrpDownloader.Decompressing) {
+            } else if (status === VrpManager.Decompressing) {
                 progress_bar.indeterminate = true;
                 delete_button.enabled = false;
                 status_label.color = Kirigami.Theme.textColor;
                 return qsTr("Decompressing");
-            } else if (status === VrpDownloader.Downloading) {
+            } else if (status === VrpManager.Downloading) {
                 delete_button.enabled = true;
                 status_label.color = Kirigami.Theme.textColor;
                 if (isNaN(progress) || progress <= 1e-36) {
@@ -97,12 +97,12 @@ Kirigami.Card {
                     let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
                     return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
                 }
-            } else if (status === VrpDownloader.DownloadError) {
+            } else if (status === VrpManager.DownloadError) {
                 delete_button.enabled = true;
                 progress_bar.indeterminate = false;
                 status_label.color = "red";
                 return qsTr("DownloadError");
-            } else if (status === VrpDownloader.DecompressionError) {
+            } else if (status === VrpManager.DecompressionError) {
                 delete_button.enabled = true;
                 progress_bar.indeterminate = false;
                 status_label.color = "red";

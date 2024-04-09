@@ -21,9 +21,7 @@
 
 #include <QAbstractListModel>
 #include <QList>
-
 #include "game_info.h"
-class VrpDownloader;
 
 class GameInfoModel : public QAbstractListModel {
     Q_OBJECT
@@ -40,7 +38,6 @@ class GameInfoModel : public QAbstractListModel {
     };
 
     explicit GameInfoModel(QObject* parent = nullptr);
-    virtual ~GameInfoModel() {}
     Q_INVOKABLE void insert(int index, const GameInfo& game);
     Q_INVOKABLE void prepend(const GameInfo& game);
     Q_INVOKABLE void append(const GameInfo& game);

@@ -15,10 +15,11 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import DeviceManager
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 RowLayout {
@@ -44,11 +45,11 @@ RowLayout {
                     }
                 }
 
-                function onDeviceModelChanged(model) {
-                    device_name.text = model === "" ? "No device connected" : model;
+                function onDeviceNameChanged(name) {
+                    device_name.text = name === "" ? "No device connected" : name;
                 }
 
-                target: app.vrp
+                target: app.deviceManager
             }
 
             contentItem: Column {
@@ -71,24 +72,10 @@ RowLayout {
                 ComboBox {
                     id: device_selector
 
-                    property int last_index: -1
-
                     width: parent.width
-                    model: app.vrp.deviceList
-                    onModelChanged: {
-                        if (device_selector.count > 0 && app.vrp.hasConnectedDevice()) {
-                            let index = find(app.vrp.connectedDevice);
-                            if (index >= 0) {
-                                device_selector.currentIndex = index;
-                                device_selector.last_index = index;
-                            }
-                        }
-                    }
-                    onCurrentTextChanged: {
-                        if (device_selector.count > 0 && app.vrp.connectedDevice !== device_selector.currentText && device_selector.currentIndex !== device_selector.last_index) {
-                            device_selector.last_index = device_selector.currentIndex;
-                            app.vrp.connectedDevice = device_selector.currentText;
-                        }
+                    model: app.deviceManager.devicesList
+                    onActivated: (index) => {
+                        app.deviceManager.connectToDevice(textAt(index));
                     }
                 }
 
@@ -115,7 +102,7 @@ RowLayout {
         clip: true
         cellWidth: 310
         cellHeight: 220
-        model: app.vrp.installedAppsModel()
+        model: app.deviceManager.appListModel()
 
         ScrollBar.vertical: ScrollBar {
             visible: true
@@ -133,7 +120,9 @@ RowLayout {
                     return "file://" + path;
             }
             onUninstallButtonClicked: {
+                let package_name = model.package_name;
                 apps_info.model.remove(index);
+                app.deviceManager.uninstallApkQml(package_name);
             }
         }
 

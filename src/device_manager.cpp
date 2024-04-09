@@ -24,9 +24,12 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 
-DeviceManager::DeviceManager(QObject* parent) : QObject(parent) {
-    connect(&update_serials_timer_, &QTimer::timeout, this,
+DeviceManager::DeviceManager(QObject* parent)
+    : QObject(parent), total_space_(0), free_space_(0) {
+    connect(&auto_update_timer_, &QTimer::timeout, this,
             &DeviceManager::updateSerials);
+    connect(this, &DeviceManager::connectedDeviceChanged, this,
+            &DeviceManager::updateDeviceInfo);
 }
 
 DeviceManager::~DeviceManager() {}
@@ -61,6 +64,12 @@ QCoro::Task<bool> DeviceManager::restartServer() {
     co_return result;
 }
 
+void DeviceManager::updateDeviceInfo() {
+    updateDeviceName();
+    updateSpaceUsage();
+    updateAppList();
+}
+
 QCoro::Task<void> DeviceManager::updateSerials() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
@@ -79,7 +88,7 @@ QCoro::Task<void> DeviceManager::updateSerials() {
     QStringList lines = output.split("\n");
     lines.removeFirst();
     lines.removeAll("");
-    QVector<QString> serials;
+    QStringList serials;
     for (const QString& line : lines) {
         if (line.contains("\tdevice")) {
             QStringList parts = line.split("\t");
@@ -89,55 +98,60 @@ QCoro::Task<void> DeviceManager::updateSerials() {
         }
     }
 
-    if (serials_ != serials) {
-        serials_ = serials;
-        emit serialsChanged();
-    }
-    co_return;
-}
-
-QCoro::Task<QVector<AppInfo>> DeviceManager::installedApps(
-    const QString& serial) const {
-    if (serials_.isEmpty() || !serials_.contains(serial)) {
-        co_return QVector<AppInfo>();
-    }
-    QProcess basic_process;
-    auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
-                      "--show-versioncode", "-3"});
-
-    co_await adb.waitForFinished();
-
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
-        qWarning() << "Failed to get apps for device" << serial;
-        co_return QVector<AppInfo>();
-    }
-
-    /* EXAMPLE OUTPUT:
-        package:com.facebook.arvr.quillplayer versionCode:135
-        package:com.oculus.mobile_mrc_setup versionCode:1637173263
-    */
-    QString output = basic_process.readAllStandardOutput();
-    QStringList lines = output.split("\n");
-    lines.removeAll("");
-    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
-    QVector<AppInfo> apps;
-    for (const QString& line : lines) {
-        auto match = re.match(line);
-        if (match.hasMatch()) {
-            QString package_name = match.captured(1);
-            QString version_code = match.captured(2);
-            apps.append({package_name, version_code.toLongLong()});
+    if (serials.isEmpty()) {
+        disconnectDevice();
+        if (!devices_list_.isEmpty()) {
+            devices_list_.clear();
+            emit devicesListChanged();
         }
+        co_return;
     }
-    co_return apps;
+
+    if (hasConnectedDevice() && serials.contains(connectedDevice())) {
+        QStringList new_devices;
+        for (auto& s : serials) {
+            if (!devices_list_.contains(s)) {
+                new_devices.append(s);
+            }
+        }
+
+        QStringList removed_devices;
+        for (auto& s : devices_list_) {
+            if (!serials.contains(s)) {
+                removed_devices.append(s);
+            }
+        }
+
+        if (new_devices.isEmpty() && removed_devices.isEmpty()) {
+            co_return;
+        }
+
+        for (auto& s : removed_devices) {
+            devices_list_.removeAll(s);
+        }
+
+        devices_list_.removeAll(connectedDevice());
+        devices_list_.prepend(connectedDevice());
+
+        devices_list_.append(new_devices);
+        emit devicesListChanged();
+
+    } else {
+        // The device is disconnected or there is no connected device, connect
+        // to the first device
+        devices_list_ = serials;
+        connectToDevice(devices_list_.first());
+        emit devicesListChanged();
+    }
 }
 
-QCoro::Task<QString> DeviceManager::deviceModel(const QString& serial) const {
-    if (serials_.isEmpty() || !serials_.contains(serial)) {
-        co_return QString("");
+QCoro::Task<void> DeviceManager::updateDeviceName() {
+    if (!hasConnectedDevice()) {
+        setDeviceName("");
+        co_return;
     }
+
+    auto serial = connectedDevice();
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
@@ -149,19 +163,23 @@ QCoro::Task<QString> DeviceManager::deviceModel(const QString& serial) const {
     if (basic_process.exitStatus() != QProcess::NormalExit ||
         basic_process.exitCode() != 0) {
         qWarning() << "Failed to get model for device" << serial;
-        co_return QString("");
+        co_return;
     } else {
         QString output = basic_process.readAllStandardOutput();
         output.replace("\n", "");
-        co_return output;
+
+        setDeviceName(output);
+        co_return;
     }
 }
 
-QCoro::Task<QPair<long long, long long>> DeviceManager::spaceUsage(
-    const QString& serial) const {
-    if (serials_.isEmpty() || !serials_.contains(serial)) {
-        co_return QPair<long long, long long>(0, 0);
+QCoro::Task<void> DeviceManager::updateSpaceUsage() {
+    if (!hasConnectedDevice()) {
+        setSpaceUsage(0, 0);
+        co_return;
     }
+
+    auto serial = connectedDevice();
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
@@ -173,7 +191,7 @@ QCoro::Task<QPair<long long, long long>> DeviceManager::spaceUsage(
     if (basic_process.exitStatus() != QProcess::NormalExit ||
         basic_process.exitCode() != 0) {
         qWarning() << "Failed to get space usage for device" << serial;
-        co_return QPair<long long, long long>(0, 0);
+        co_return;
 
     } else {
         /* EXAMPLE OUTPUT:
@@ -187,28 +205,74 @@ QCoro::Task<QPair<long long, long long>> DeviceManager::spaceUsage(
 
         if (lines.isEmpty()) {
             qWarning() << "Failed to get space usage for device" << serial;
-            co_return QPair<long long, long long>(0, 0);
+            co_return;
         }
 
         QString line = lines.first();
         QStringList parts = line.split(QRegularExpression("\\s+"));
         if (parts.size() < 4) {
             qWarning() << "Failed to get space usage for device" << serial;
-            co_return QPair<long long, long long>(0, 0);
+            co_return;
         }
         long long total_space = parts[1].toLongLong();
         long long free_space = parts[3].toLongLong();
-        co_return QPair<long long, long long>(total_space, free_space);
-        ;
+        setSpaceUsage(total_space, free_space);
+        co_return;
     }
 }
 
-QCoro::Task<bool> DeviceManager::installApk(const QString serial,
-                                            const QString path,
-                                            const QString package_name) const {
-    if (serials_.isEmpty() || !serials_.contains(serial)) {
+QCoro::Task<void> DeviceManager::updateAppList() {
+    if (!hasConnectedDevice()) {
+        app_list_model_.clear();
+        emit appListChanged();
+        co_return;
+    }
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
+                      "--show-versioncode", "-3"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get apps for device" << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+        package:com.facebook.arvr.quillplayer versionCode:135
+        package:com.oculus.mobile_mrc_setup versionCode:1637173263
+    */
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
+
+    app_list_model_.clear();
+    for (const QString& line : lines) {
+        auto match = re.match(line);
+        if (match.hasMatch()) {
+            QString package_name = match.captured(1);
+            QString version_code = match.captured(2);
+            auto app = GameInfo{.package_name = package_name,
+                                .version_code = version_code};
+
+            app_list_model_.append(app);
+        }
+    }
+    emit appListChanged();
+    co_return;
+}
+
+QCoro::Task<bool> DeviceManager::installApk(const QString path,
+                                            const QString package_name) {
+    if (!hasConnectedDevice()) {
         co_return false;
     }
+    auto serial = connectedDevice();
 
     QDir apk_dir(path);
 
@@ -271,17 +335,20 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         }
     }
 
+    updateDeviceInfo();
+
     // TODO: support for install.txt
     //  https://vrpirates.wiki/en/Howto/Manual-Sideloading
 
     co_return true;
 }
 
-QCoro::Task<bool> DeviceManager::uninstallApk(
-    const QString serial, const QString package_name) const {
-    if (serials_.isEmpty() || !serials_.contains(serial)) {
+QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name) {
+    if (!hasConnectedDevice()) {
         co_return false;
     }
+
+    auto serial = connectedDevice();
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
@@ -296,5 +363,6 @@ QCoro::Task<bool> DeviceManager::uninstallApk(
         co_return false;
     }
 
+    updateDeviceInfo();
     co_return true;
 }

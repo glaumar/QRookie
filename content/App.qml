@@ -15,26 +15,26 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import DeviceManager
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.ApplicationWindow {
     id: app
 
-    property VrpDownloader vrp
+    property VrpManager vrp
+    property DeviceManager deviceManager
 
     visible: true
     width: 1280
     height: 800
     title: qsTr("QRookie")
     Component.onCompleted: {
-        vrp.updateMetadataQml().then(function() {
-            //TODO: Add a loading screen
-            console.log("Metadata updated");
-        })
+        deviceManager.enableAutoUpdate();
+        vrp.updateMetadataQml();
     }
 
     StackLayout {
@@ -57,8 +57,10 @@ Kirigami.ApplicationWindow {
 
     }
 
-    vrp: VrpDownloader {
+    vrp: VrpManager {
     }
+
+    deviceManager: vrp.deviceManager()
 
     header: TabBar {
         id: bar

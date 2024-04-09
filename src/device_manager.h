@@ -21,48 +21,113 @@
 #include <QCoroProcess>
 #include <QCoroQmlTask>
 #include <QObject>
+#include <QStringListModel>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QVector>
 
-#include "app_info.h"
+#include "game_info_model.h"
 
 class DeviceManager : public QObject {
     Q_OBJECT
+
+    Q_PROPERTY(QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
+    Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE
+                   connectToDevice NOTIFY connectedDeviceChanged)
+    Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
+    Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
+    Q_PROPERTY(long long freeSpace READ freeSpace NOTIFY spaceUsageChanged)
+
    public:
     DeviceManager(QObject* parent = nullptr);
     ~DeviceManager();
 
-    QCoro::Task<bool> startServer();
-    QCoro::Task<bool> restartServer();
-    QVector<QString> serials() const { return serials_; }
+    Q_INVOKABLE QCoro::Task<bool> startServer();
+    Q_INVOKABLE QCoro::Task<bool> restartServer();
+    QCoro::Task<bool> installApk(const QString path,
+                                 const QString package_name);
 
-    QCoro::Task<QVector<AppInfo>> installedApps(const QString& serial) const;
-
-    QCoro::Task<QString> deviceModel(const QString& serial) const;
-
-    QCoro::Task<QPair<long long, long long>> spaceUsage(
-        const QString& serial) const;
-
-    QCoro::Task<bool> installApk(const QString serial, const QString path,
-                                 const QString package_name) const;
-
-    QCoro::Task<bool> uninstallApk(const QString serial,
-                                   const QString package_name) const;
-
-    Q_INVOKABLE void autoUpdateSerials(const int ms = 3000) {
-        update_serials_timer_.start(ms);
+    Q_INVOKABLE QCoro::QmlTask installApkQml(const QString path,
+                                             const QString package_name) {
+        return installApk(path, package_name);
     }
-    Q_INVOKABLE void stopUpdateSerials() { update_serials_timer_.stop(); }
+
+    QCoro::Task<bool> uninstallApk(const QString package_name);
+    Q_INVOKABLE QCoro::QmlTask uninstallApkQml(const QString package_name) {
+        return uninstallApk(package_name);
+    };
+
+    Q_INVOKABLE QVariantList devicesList() const {
+        QVariantList list;
+        for(auto& device : devices_list_) {
+            list.append(device);
+        }
+        return list;
+    }
+    
+    Q_INVOKABLE GameInfoModel* appListModel() { return &app_list_model_; }
+
+    Q_INVOKABLE QCoro::Task<void> updateSerials();
+    Q_INVOKABLE void updateDeviceInfo();
+    Q_INVOKABLE QCoro::Task<void> updateDeviceName();
+    Q_INVOKABLE QCoro::Task<void> updateSpaceUsage();
+    Q_INVOKABLE QCoro::Task<void> updateAppList();
+
+    Q_INVOKABLE void enableAutoUpdate(const int ms = 3000) {
+        auto_update_timer_.start(ms);
+    }
+    Q_INVOKABLE void disableAutoUpdate() { auto_update_timer_.stop(); }
+
+    Q_INVOKABLE bool hasConnectedDevice() const {
+        return !connected_device_.isEmpty();
+    }
+    Q_INVOKABLE void disconnectDevice() {
+        if (!hasConnectedDevice()) return;
+
+        connected_device_.clear();
+        emit connectedDeviceChanged();
+    }
+
+    Q_INVOKABLE QString connectedDevice() const { return connected_device_; }
+    Q_INVOKABLE void connectToDevice(const QString& serial) {
+        if (connectedDevice() != serial &&
+            devices_list_.contains(serial)) {
+            connected_device_ = serial;
+            emit connectedDeviceChanged();
+        }
+    }
+
+    Q_INVOKABLE QString deviceName() const { return device_name_; }
+    Q_INVOKABLE void setDeviceName(const QString& device_name) {
+        device_name_ = device_name;
+        emit deviceNameChanged(device_name_);
+    }
+
+    Q_INVOKABLE long long totalSpace() const { return total_space_; }
+    Q_INVOKABLE long long freeSpace() const { return free_space_; }
+    Q_INVOKABLE void setSpaceUsage(long long total_space,
+                                   long long free_space) {
+        total_space_ = total_space;
+        free_space_ = free_space;
+        emit spaceUsageChanged(total_space, free_space);
+    }
 
    signals:
-    void serialsChanged();
+    void devicesListChanged();
+    void appListChanged();
+    void connectedDeviceChanged();
+    void deviceNameChanged(QString device_name);
+    void spaceUsageChanged(long long total_space, long long free_space);
 
    private:
-    QCoro::Task<void> updateSerials();
-    QVector<QString> serials_;
-    QTimer update_serials_timer_;
+    QStringList devices_list_;
+    GameInfoModel app_list_model_;
+    QTimer auto_update_timer_;
+    QString connected_device_;
+    QString device_name_;
+    long long total_space_;
+    long long free_space_;
 };
 
 #endif /* QROOKIE_DEVICE_MANAGER */

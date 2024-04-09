@@ -17,7 +17,7 @@
 
 #include "game_info_model.h"
 
-#include "vrp_downloader.h"
+#include "vrp_manager.h"
 
 GameInfoModel::GameInfoModel(QObject* parent) : QAbstractListModel(parent) {
     role_names_[nameRole] = "name";

@@ -19,7 +19,7 @@ import QCoro
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
@@ -36,7 +36,7 @@ Kirigami.Card {
     signal downloadButtonClicked()
 
     onProgressChanged: {
-        if (status === VrpDownloader.Downloading && !isNaN(progress)) {
+        if (status === VrpManager.Downloading && !isNaN(progress)) {
             progress_bar.value = progress;
             progress_bar.indeterminate = false;
             let downloaded = progress * size;
@@ -53,20 +53,20 @@ Kirigami.Card {
         action_button.enabled = false;
         action_button.icon.source = "";
         switch (status) {
-        case VrpDownloader.UpdatableRemotely:
+        case VrpManager.UpdatableRemotely:
             action_button.text = qsTr("Download and Update");
             action_button.enabled = true;
             action_button.icon.source = "download";
             break;
-        case VrpDownloader.Downloadable:
+        case VrpManager.Downloadable:
             action_button.text = qsTr("Download");
             action_button.enabled = true;
             action_button.icon.source = "download";
             break;
-        case VrpDownloader.Queued:
+        case VrpManager.Queued:
             action_button.text = qsTr("Queued");
             break;
-        case VrpDownloader.Downloading:
+        case VrpManager.Downloading:
             if (isNaN(progress) || progress <= 0) {
                 action_button.text = qsTr("Starting Downloading");
                 progress_bar.indeterminate = true;
@@ -74,52 +74,52 @@ Kirigami.Card {
                 action_button.icon.source = "download";
             }
             break;
-        case VrpDownloader.Decompressing:
+        case VrpManager.Decompressing:
             action_button.text = qsTr("Decompressing");
             progress_bar.indeterminate = true;
             progress_bar.visible = true;
             break;
-        case VrpDownloader.Local:
+        case VrpManager.Local:
             action_button.text = qsTr("No Connected Device");
             progress_bar.value = 1;
             progress_bar.visible = true;
             action_button.icon.source = "install";
             break;
-        case VrpDownloader.UpdatableLocally:
+        case VrpManager.UpdatableLocally:
             action_button.text = qsTr("Update");
             action_button.enabled = true;
             action_button.icon.source = "install";
             break;
-        case VrpDownloader.Installable:
+        case VrpManager.Installable:
             action_button.text = qsTr("Install");
             action_button.enabled = true;
             progress_bar.visible = true;
             progress_bar.value = 1;
             action_button.icon.source = "install";
             break;
-        case VrpDownloader.Installing:
+        case VrpManager.Installing:
             action_button.text = qsTr("Installing");
             progress_bar.indeterminate = true;
             progress_bar.visible = true;
             break;
-        case VrpDownloader.InstalledAndRemotely:
-        case VrpDownloader.InstalledAndLocally:
+        case VrpManager.InstalledAndRemotely:
+        case VrpManager.InstalledAndLocally:
             action_button.text = qsTr("Installed");
             progress_bar.value = 1;
             progress_bar.visible = true;
             action_button.icon.source = "install";
             break;
-        case VrpDownloader.DownloadError:
+        case VrpManager.DownloadError:
             action_button.text = qsTr("DownloadError, Click to Try Again");
             action_button.enabled = true;
             action_button.icon.source = "error";
             break;
-        case VrpDownloader.DecompressionError:
+        case VrpManager.DecompressionError:
             action_button.text = qsTr("DecompressionError, Click to Try Again");
             action_button.enabled = true;
             action_button.icon.source = "error";
             break;
-        case VrpDownloader.InstallError:
+        case VrpManager.InstallError:
             action_button.text = qsTr("InstallError, Click to Try Again");
             action_button.enabled = true;
             action_button.icon.source = "error";
@@ -179,7 +179,7 @@ Kirigami.Card {
                 Layout.fillWidth: true
                 text: qsTr("Downlad")
                 onClicked: {
-                    if (status === VrpDownloader.Installable || status === VrpDownloader.UpdatableLocally || status === VrpDownloader.InstallError)
+                    if (status === VrpManager.Installable || status === VrpManager.UpdatableLocally || status === VrpManager.InstallError)
                         installButtonClicked();
                     else
                         downloadButtonClicked();

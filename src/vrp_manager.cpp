@@ -15,7 +15,7 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vrp_downloader.h"
+#include "vrp_manager.h"
 
 #include <QCoroTimer>
 #include <QDir>
@@ -28,8 +28,12 @@
 
 #include "qrookie.h"
 
-VrpDownloader::VrpDownloader(QObject* parent)
-    : QObject(parent), status_filter_(Status::Unknown) {
+VrpManager::VrpManager(QObject* parent)
+    : QObject(parent),
+      status_filter_(Status::Unknown),
+      local_games_(new GameInfoModel(this)),
+      download_games_(new GameInfoModel(this)),
+      device_manager_(new DeviceManager(this)) {
     // TODO: using AppSettings
     // Create cache and data directories
     QDir dir;
@@ -46,47 +50,16 @@ VrpDownloader::VrpDownloader(QObject* parent)
 
     http_downloader_.setDownloadDirectory(cache_path_);
 
-    // DeviceManager
-    connect(&device_manager_, &DeviceManager::serialsChanged, [this]() {
-        auto devices = device_manager_.serials();
+    connect(device_manager_, &DeviceManager::appListChanged, this,
+            &VrpManager::updateGameStatusWithDevice);
+    device_manager_->enableAutoUpdate();
 
-        if (devices.isEmpty()) {
-            disconnectDevice();
-        } else if (!devices.contains(connectedDevice())) {
-            connectToDevice(devices.first());
-        }
-        emit deviceListChanged();
-    });
-
-    connect(this, &VrpDownloader::connectedDeviceChanged,
-            [this]() -> QCoro::Task<void> {
-                if (!hasConnectedDevice()) {
-                    device_model_.clear();
-                    total_space_ = 0;
-                    free_space_ = 0;
-                } else {
-                    device_model_ =
-                        co_await device_manager_.deviceModel(connectedDevice());
-                    auto usage =
-                        co_await device_manager_.spaceUsage(connectedDevice());
-                    total_space_ = usage.first;
-                    free_space_ = usage.second;
-                }
-                emit deviceModelChanged(device_model_);
-                emit spaceUsageChanged(total_space_, free_space_);
-                updateInstalledApps();
-            });
-    device_manager_.autoUpdateSerials();
-
-    connect(&local_games_, &GameInfoModel::removed, this,
-            &VrpDownloader::removeLocalGameFile);
-    connect(&download_games_, &GameInfoModel::removed, this,
-            &VrpDownloader::removeFromDownloadQueue);
-    connect(&installed_apps_, &GameInfoModel::removed,
-            [this](const GameInfo& game) { uninstall(game.package_name); });
-
+    connect(local_games_, &GameInfoModel::removed, this,
+            &VrpManager::removeLocalGameFile);
+    connect(download_games_, &GameInfoModel::removed, this,
+            &VrpManager::removeFromDownloadQueue);
     loadGamesInfo();
-    updateInstalledApps();
+    // updateInstalledApps();
 
     // Restore download
     if (all_games_.key(Status::Queued) != GameInfo{}) {
@@ -94,9 +67,9 @@ VrpDownloader::VrpDownloader(QObject* parent)
     }
 }
 
-VrpDownloader::~VrpDownloader() { saveGamesInfo(); }
+VrpManager::~VrpManager() { saveGamesInfo(); }
 
-QVariantList VrpDownloader::gamesInfo() const {
+QVariantList VrpManager::gamesInfo() const {
     QVariantList list;
 
     for (auto it = all_games_.constBegin(); it != all_games_.constEnd(); ++it) {
@@ -116,16 +89,7 @@ QVariantList VrpDownloader::gamesInfo() const {
     return list;
 }
 
-QVariantList VrpDownloader::deviceList() const {
-    auto devices = device_manager_.serials();
-    QVariantList list;
-    for (const auto& device : devices) {
-        list.append(QVariant::fromValue(device));
-    }
-    return list;
-}
-
-QCoro::Task<bool> VrpDownloader::updateMetadata() {
+QCoro::Task<bool> VrpManager::updateMetadata() {
     vrp_torrent_.update();
     if (!co_await vrp_public_.update()) {
         qWarning() << "Update metadata failed";
@@ -147,7 +111,7 @@ QCoro::Task<bool> VrpDownloader::updateMetadata() {
     }
 }
 
-QCoro::Task<bool> VrpDownloader::downloadMetadata() {
+QCoro::Task<bool> VrpManager::downloadMetadata() {
     if (co_await http_downloader_.download("meta.7z")) {
         QProcess basic_process;
         auto p7za = qCoro(basic_process);
@@ -182,7 +146,7 @@ QCoro::Task<bool> VrpDownloader::downloadMetadata() {
     }
 }
 
-bool VrpDownloader::parseMetadata() {
+bool VrpManager::parseMetadata() {
     QFile file(data_path_ + "/VRP-GameList.txt");
     if (!file.exists()) {
         qWarning() << "VRP-GameList.txt not found";
@@ -240,18 +204,18 @@ bool VrpDownloader::parseMetadata() {
     }
 }
 
-QString VrpDownloader::getGameId(const QString& release_name) const {
+QString VrpManager::getGameId(const QString& release_name) const {
     QCryptographicHash hash(QCryptographicHash::Md5);
     hash.addData((release_name + "\n").toUtf8());
     return hash.result().toHex();
 }
 
-QString VrpDownloader::getLocalGamePath(const QString& release_name) const {
+QString VrpManager::getLocalGamePath(const QString& release_name) const {
     // TODO: check path exists
     return data_path_ + "/" + release_name;
 }
 
-QString VrpDownloader::getGameThumbnailPath(const QString& package_name) {
+QString VrpManager::getGameThumbnailPath(const QString& package_name) {
     auto path = data_path_ + "/.meta/thumbnails/" + package_name + ".jpg";
     if (QFile::exists(path)) {
         return path;
@@ -260,7 +224,7 @@ QString VrpDownloader::getGameThumbnailPath(const QString& package_name) {
     }
 }
 
-bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
+bool VrpManager::addToDownloadQueue(const GameInfo game) {
     Status s = getStatus(game);
 
     static constexpr StatusFlags download_flags = {
@@ -274,9 +238,9 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
         return false;
     }
 
-    download_games_.remove(game);
+    download_games_->remove(game);
     setStatus(game, Status::Queued);
-    download_games_.append(game);
+    download_games_->append(game);
     qDebug() << "Queued: " << game.release_name;
 
     // Start download if not already downloading
@@ -287,7 +251,7 @@ bool VrpDownloader::addToDownloadQueue(const GameInfo game) {
     return true;
 }
 
-void VrpDownloader::removeFromDownloadQueue(const GameInfo& game) {
+void VrpManager::removeFromDownloadQueue(const GameInfo& game) {
     Status s = getStatus(game);
     if (s == Status::Downloading) {
         http_downloader_.abortDownloadDir(getGameId(game.release_name));
@@ -295,7 +259,7 @@ void VrpDownloader::removeFromDownloadQueue(const GameInfo& game) {
     setStatus(game, Status::Downloadable);
 }
 
-bool VrpDownloader::removeLocalGameFile(const GameInfo& game) {
+bool VrpManager::removeLocalGameFile(const GameInfo& game) {
     setStatus(game, Status::Downloadable);
     auto game_dir = getLocalGamePath(game.release_name);
 
@@ -306,7 +270,7 @@ bool VrpDownloader::removeLocalGameFile(const GameInfo& game) {
     return false;
 }
 
-QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
+QCoro::Task<void> VrpManager::downloadQueuedGames() {
     GameInfo game = getFirstQueuedGame();
     while (game != GameInfo{}) {
         qDebug() << "Downloading: " << game.release_name;
@@ -340,7 +304,7 @@ QCoro::Task<void> VrpDownloader::downloadQueuedGames() {
     co_return;
 }
 
-QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
+QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game) {
     if (getStatus(game) == Status::Decompressing) {
         qDebug() << "Already in decompressing queue: " << game.release_name;
         co_return false;
@@ -373,15 +337,17 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
         co_return false;
     } else {
         qDebug() << "Decompression finished: " << game.release_name;
-        if (hasConnectedDevice()) {
+
+        if (device_manager_->hasConnectedDevice()) {
             setStatus(game, Status::Installable);
         } else {
             setStatus(game, Status::Local);
         }
-        download_games_.remove(game);
-        local_games_.prepend(game);
 
-        if (hasConnectedDevice()) {
+        download_games_->remove(game);
+        local_games_->prepend(game);
+
+        if (device_manager_->hasConnectedDevice()) {
             install(game);
         }
 
@@ -392,23 +358,18 @@ QCoro::Task<bool> VrpDownloader::decompressGame(const GameInfo game) {
     }
 }
 
-QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
-    if (!hasConnectedDevice()) {
+QCoro::Task<bool> VrpManager::install(const GameInfo game) {
+    if (!device_manager_->hasConnectedDevice()) {
         co_return false;
     }
     qDebug() << "Installing: " << game.release_name;
     setStatus(game, Status::Installing);
-    bool result = co_await device_manager_.installApk(
-        connectedDevice(), getLocalGamePath(game.release_name),
-        game.package_name);
+    bool result = co_await device_manager_->installApk(
+        getLocalGamePath(game.release_name), game.package_name);
 
     if (result) {
         qDebug() << "Install finished: " << game.release_name;
         setStatus(game, Status::InstalledAndLocally);
-        GameInfo game = {.package_name = game.package_name,
-                         .version_code = game.version_code};
-        installed_apps_.remove(game);
-        installed_apps_.prepend(game);
     } else {
         qDebug() << "Install failed: " << game.release_name;
         setStatus(game, Status::InstallError);
@@ -417,16 +378,7 @@ QCoro::Task<bool> VrpDownloader::install(const GameInfo game) {
     co_return result;
 }
 
-QCoro::Task<bool> VrpDownloader::uninstall(const QString packege_name) {
-    if (!hasConnectedDevice()) {
-        co_return false;
-    }
-
-    co_return co_await device_manager_.uninstallApk(connectedDevice(),
-                                                    packege_name);
-}
-
-bool VrpDownloader::saveGamesInfo() {
+bool VrpManager::saveGamesInfo() {
     QJsonArray jsonArray;
     auto it = all_games_.constBegin();
     auto meta_status = QMetaEnum::fromType<Status>();
@@ -483,7 +435,7 @@ bool VrpDownloader::saveGamesInfo() {
     }
 }
 
-bool VrpDownloader::loadGamesInfo() {
+bool VrpManager::loadGamesInfo() {
     QFile file(data_path_ + "/games_info.json");
     if (!file.exists()) {
         qWarning() << "local_queue.json not found";
@@ -517,12 +469,12 @@ bool VrpDownloader::loadGamesInfo() {
                 status == Status::DownloadError ||
                 status == Status::Decompressing ||
                 status == Status::DecompressionError) {
-                download_games_.append(game);
+                download_games_->append(game);
             } else if (status == Status::Local ||
                        status == Status::Installable ||
                        status == Status::InstalledAndLocally ||
                        status == Status::InstallError) {
-                local_games_.append(game);
+                local_games_->append(game);
             }
         }
 
@@ -534,41 +486,37 @@ bool VrpDownloader::loadGamesInfo() {
     }
 }
 
-QCoro::Task<void> VrpDownloader::updateInstalledApps() {
-    if (!hasConnectedDevice()) {
-        installed_apps_.clear();
+void VrpManager::updateGameStatusWithDevice() {
+    auto apps_model = device_manager_->appListModel();
+    StatusFlags remote_flags = {Status::UpdatableRemotely,
+                                Status::InstalledAndRemotely};
 
+    StatusFlags local_flags = {Status::UpdatableLocally,
+                               Status::InstalledAndLocally,
+                               Status::Installable};
+
+    if (apps_model->rowCount() == 0) {
         // Update Status
         QMutableMapIterator<GameInfo, Status> it(all_games_);
         while (it.hasNext()) {
             it.next();
 
             Status s = it.value();
-            if (s == Status::UpdatableRemotely ||
-                s == Status::InstalledAndRemotely) {
+            if (remote_flags.testFlag(s)) {
                 it.setValue(Status::Downloadable);
                 emit statusChanged(it.key().release_name, Status::Downloadable);
-            } else if (s == Status::UpdatableLocally ||
-                       s == Status::InstalledAndLocally ||
-                       s == Status::Installable) {
+            } else if (local_flags.testFlag(s)) {
                 it.setValue(Status::Local);
                 emit statusChanged(it.key().release_name, Status::Local);
             }
         }
 
-        co_return;
+        return;
     }
 
-    auto apps = co_await device_manager_.installedApps(connectedDevice());
-    installed_apps_.clear();
-    for (const auto& app : apps) {
-        GameInfo game = {.package_name = app.package_name,
-                         .version_code = QString::number(app.version_code)};
-        installed_apps_.append(game);
-    }
-
-    QMap<QString, long long> installed_map;
-    for (const auto& app : apps) {
+    QMap<QString, QString> installed_map;
+    for (int i = 0; i < apps_model->rowCount(); i++) {
+        auto app = (*apps_model)[i];
         installed_map[app.package_name] = app.version_code;
     }
 
@@ -578,12 +526,9 @@ QCoro::Task<void> VrpDownloader::updateInstalledApps() {
         it.next();
         Status from_s = it.value();
 
-        if (from_s == Status::UpdatableLocally ||
-            from_s == Status::InstalledAndLocally ||
-            from_s == Status::Installable) {
+        if (local_flags.testFlag(from_s)) {
             from_s = Status::Local;
-        } else if (from_s == Status::UpdatableRemotely ||
-                   from_s == Status::InstalledAndRemotely) {
+        } else if (remote_flags.testFlag(from_s)) {
             from_s = Status::Downloadable;
         }
 
@@ -592,7 +537,7 @@ QCoro::Task<void> VrpDownloader::updateInstalledApps() {
         if (installed_map.contains(package_name)) {
             Status to_s;
             if (it.key().version_code.toLongLong() >
-                installed_map[package_name]) {
+                installed_map[package_name].toLongLong()) {
                 to_s = from_s == Status::Local ? Status::UpdatableLocally
                                                : Status::UpdatableRemotely;
             } else {
@@ -607,13 +552,11 @@ QCoro::Task<void> VrpDownloader::updateInstalledApps() {
             emit statusChanged(release_name, Status::Installable);
         }
     }
-
-    co_return;
 }
 
-GameInfo VrpDownloader::getDownloadingGame() const {
-    for (int i = 0; i < download_games_.size(); i++) {
-        const auto& game = download_games_[i];
+GameInfo VrpManager::getDownloadingGame() const {
+    for (int i = 0; i < download_games_->size(); i++) {
+        const auto& game = (*download_games_)[i];
         if (getStatus(game) == Status::Downloading) {
             return game;
         }
@@ -621,9 +564,9 @@ GameInfo VrpDownloader::getDownloadingGame() const {
     return {};
 }
 
-GameInfo VrpDownloader::getFirstQueuedGame() const {
-    for (int i = 0; i < download_games_.size(); i++) {
-        const auto& game = download_games_[i];
+GameInfo VrpManager::getFirstQueuedGame() const {
+    for (int i = 0; i < download_games_->size(); i++) {
+        const auto& game = (*download_games_)[i];
         if (getStatus(game) == Status::Queued) {
             return game;
         }

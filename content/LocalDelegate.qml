@@ -18,7 +18,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import VrpDownloader
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
@@ -36,25 +36,25 @@ Kirigami.Card {
         install_button.enabled = false;
         install_button.icon.source = "install";
         switch (status) {
-        case VrpDownloader.Local:
+        case VrpManager.Local:
             install_button.text = qsTr("No Connected Device");
             break;
-        case VrpDownloader.UpdatableLocally:
+        case VrpManager.UpdatableLocally:
             install_button.text = qsTr("Update");
             install_button.enabled = true;
             break;
-        case VrpDownloader.Installable:
+        case VrpManager.Installable:
             install_button.text = qsTr("Install");
             install_button.enabled = true;
             break;
-        case VrpDownloader.Installing:
+        case VrpManager.Installing:
             install_button.text = qsTr("Installing...");
             break;
-        case VrpDownloader.InstalledAndLocally:
+        case VrpManager.InstalledAndLocally:
             install_button.text = qsTr("Reinstall");
             install_button.enabled = true;
             break;
-        case VrpDownloader.InstallError:
+        case VrpManager.InstallError:
             install_button.text = qsTr("Error, Click to Try Again");
             install_button.enabled = true;
             install_button.icon.source = "error";
