@@ -27,7 +27,6 @@
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent) {
     connect(&update_serials_timer_, &QTimer::timeout, this,
             &DeviceManager::updateSerials);
-    restartServer();
 }
 
 DeviceManager::~DeviceManager() {}
@@ -66,7 +65,11 @@ QCoro::Task<void> DeviceManager::updateSerials() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"devices"});
-    co_await adb.waitForFinished();
+
+    if (!co_await adb.waitForFinished()) {
+        qWarning() << "Failed to get devices";
+        co_return;
+    }
     /* EXAMPLE OUTPUT:
         List of devices attached
         263407eb        device
@@ -90,6 +93,7 @@ QCoro::Task<void> DeviceManager::updateSerials() {
         serials_ = serials;
         emit serialsChanged();
     }
+    co_return;
 }
 
 QCoro::Task<QVector<AppInfo>> DeviceManager::installedApps(
@@ -227,7 +231,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
         QString apk_path = path + "/" + apk_file;
         qDebug() << "Installing" << apk_path << "on device" << serial;
         adb.start("adb", {"-s", serial, "install", "-r", apk_path});
-        co_await adb.waitForFinished();
+        co_await adb.waitForFinished(-1);
 
         if (basic_process.exitStatus() != QProcess::NormalExit ||
             basic_process.exitCode() != 0) {
@@ -241,14 +245,14 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
     QString obb_path = path + "/" + package_name;
     QDir obb_dir(obb_path);
     if (!package_name.isEmpty() && obb_dir.exists()) {
-        qDebug() << "Pushing obb file for" << package_name << "on device"
+        qDebug() << "Pushing obb file for" << package_name << "to device"
                  << serial;
         adb.start("adb", {"-s", serial, "shell", "rm", "-rf",
                           "/sdcard/Android/obb/" + package_name});
-        co_await adb.waitForFinished();
+        co_await adb.waitForFinished(-1);
         adb.start("adb", {"-s", serial, "shell", "mkdir",
                           "/sdcard/Android/obb/" + package_name});
-        co_await adb.waitForFinished();
+        co_await adb.waitForFinished(-1);
 
         QStringList obb_files =
             obb_dir.entryList(QStringList() << "*", QDir::Files);
@@ -256,16 +260,14 @@ QCoro::Task<bool> DeviceManager::installApk(const QString serial,
             qDebug() << "Pushing" << obb_file << "to device" << serial;
             adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file,
                               "/sdcard/Android/obb/" + package_name + "/"});
-            co_await adb.waitForFinished();
-        }
-
-        co_await adb.waitForFinished();
-        if (basic_process.exitStatus() != QProcess::NormalExit ||
-            basic_process.exitCode() != 0) {
-            qWarning() << "Failed to push obb file for" << package_name
-                       << "on device" << serial;
-            qWarning() << basic_process.readAllStandardError();
-            co_return false;
+            co_await adb.waitForFinished(-1);
+            if (basic_process.exitStatus() != QProcess::NormalExit ||
+                basic_process.exitCode() != 0) {
+                qWarning() << "Failed to push obb file for" << package_name
+                           << "on device" << serial;
+                qWarning() << basic_process.readAllStandardError();
+                co_return false;
+            }
         }
     }
 
