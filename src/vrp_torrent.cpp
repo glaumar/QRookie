@@ -24,11 +24,11 @@
 #include <QJsonObject>
 
 VrpTorrent::VrpTorrent(QObject *parent) : QObject(parent) {
-    //TODO: load local torrents.json
+    // TODO: load local torrents.json
 }
 
 VrpTorrent::~VrpTorrent() {
-    //TODO: save torrents.json
+    // TODO: save torrents.json
 }
 
 QCoro::Task<bool> VrpTorrent::update() {

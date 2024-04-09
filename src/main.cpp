@@ -19,6 +19,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
+#include "game_info_model.h"
 #include "qrookie.h"
 #include "vrp_downloader.h"
 
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]) {
     app.setDesktopFileName(APPLICATION_ID);
 
     qmlRegisterType<VrpDownloader>("VrpDownloader", 1, 0, "VrpDownloader");
+    qmlRegisterType<GameInfoModel>("GameInfoModel", 1, 0, "GameInfoModel");
     QCoro::Qml::registerTypes();
 
     QQmlApplicationEngine engine;

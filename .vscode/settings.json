@@ -108,7 +108,14 @@
         "qnetworkreply": "cpp",
         "qquickstyle": "cpp",
         "qobject": "cpp",
-        "qbytearray": "cpp"
+        "qbytearray": "cpp",
+        "qabstractlistmodel": "cpp",
+        "future": "cpp",
+        "shared_mutex": "cpp",
+        "any": "cpp",
+        "deque": "cpp",
+        "hash_map": "cpp",
+        "byte": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,

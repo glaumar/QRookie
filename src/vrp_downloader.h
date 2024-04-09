@@ -31,6 +31,7 @@
 #include "app_info.h"
 #include "device_manager.h"
 #include "game_info.h"
+#include "game_info_model.h"
 #include "http_downloader.h"
 #include "vrp_public.h"
 #include "vrp_torrent.h"
@@ -40,9 +41,6 @@ class VrpDownloader : public QObject {
     Q_ENUMS(Status)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
-    Q_PROPERTY(QVariantList downloadsQueue READ downloadsQueue NOTIFY
-                   downloadsQueueChanged)
-    Q_PROPERTY(QVariantList localQueue READ localQueue NOTIFY localQueueChanged)
     Q_PROPERTY(QVariantList installedQueue READ installedQueue NOTIFY
                    installedQueueChanged)
     Q_PROPERTY(QVariantList deviceList READ deviceList NOTIFY deviceListChanged)
@@ -87,7 +85,8 @@ class VrpDownloader : public QObject {
         status_filter_ = status_filter;
         emit gamesInfoChanged();
     }
-
+    Q_INVOKABLE GameInfoModel* localGamesModel() { return &local_games_; }
+    Q_INVOKABLE GameInfoModel* downloadGamesModel() { return &download_games_; }
     Q_INVOKABLE QString getGameThumbnailPath(const QString& package_name);
     Q_INVOKABLE QString getGameId(const QString& release_name) const;
     Q_INVOKABLE QString getLocalGamePath(const QString& release_name) const;
@@ -96,7 +95,7 @@ class VrpDownloader : public QObject {
     }
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
     Q_INVOKABLE void removeFromDownloadQueue(const GameInfo& game);
-    Q_INVOKABLE bool removeFromLocalQueue(const GameInfo& game);
+    Q_INVOKABLE bool removeLocalGameFile(const GameInfo& game);
 
     QCoro::Task<bool> install(const GameInfo game);
     Q_INVOKABLE QCoro::QmlTask installQml(const GameInfo game) {
@@ -142,15 +141,11 @@ class VrpDownloader : public QObject {
     long long freeSpace() const { return free_space_; }
 
     QVariantList gamesInfo() const;
-    QVariantList downloadsQueue() const;
-    QVariantList localQueue() const;
     QVariantList installedQueue() const;
     QVariantList deviceList() const;
 
    signals:
     void gamesInfoChanged();
-    void downloadsQueueChanged();
-    void localQueueChanged();
     void installedQueueChanged();
     void deviceListChanged();
     void connectedDeviceChanged();
@@ -177,8 +172,8 @@ class VrpDownloader : public QObject {
     QString filter_;
     StatusFlags status_filter_;
     QVector<AppInfo> installed_queue_;
-    QVector<GameInfo> downloads_queue_;
-    QVector<GameInfo> local_queue_;
+    GameInfoModel download_games_;
+    GameInfoModel local_games_;
     QMap<GameInfo, Status> all_games_;
     DeviceManager device_manager_;
     QString connected_device_;

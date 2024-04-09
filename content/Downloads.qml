@@ -40,10 +40,10 @@ RowLayout {
             height: parent.height - download_title.height
             anchors.top: download_title.bottom
             anchors.margins: 5
-            clip: true
             spacing: 10
+            clip: true
             snapMode: ListView.SnapToItem
-            model: app.vrp.downloadsQueue
+            model: app.vrp.downloadGamesModel()
 
             Label {
                 anchors.centerIn: downloading_list
@@ -55,30 +55,30 @@ RowLayout {
 
             delegate: DownloadDelegate {
                 height: 130
-                name: modelData.name
-                size: modelData.size
+                name: model.name
+                size: model.size
                 thumbnailPath: {
-                    let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                    let path = app.vrp.getGameThumbnailPath(model.package_name);
                     if (path === "")
                         return "Image/matrix.png";
                     else
                         return "file://" + path;
                 }
                 progress: 0
-                status: app.vrp.getStatus(modelData)
+                status: app.vrp.getStatus(model.game_info)
                 onDeleteButtonClicked: {
-                    app.vrp.removeFromDownloadQueue(modelData);
+                    downloading_list.model.remove(model.index);
                 }
 
                 Connections {
                     function onDownloadProgressChanged(release_name, progress_) {
-                        if (modelData.release_name === release_name)
+                        if (model.release_name === release_name)
                             progress = progress_;
 
                     }
 
                     function onStatusChanged(release_name, status_) {
-                        if (modelData.release_name === release_name)
+                        if (model.release_name === release_name)
                             status = status_;
 
                     }
@@ -107,8 +107,6 @@ RowLayout {
         Kirigami.CardsListView {
             id: local_list
 
-            property int oldIndex: 0
-
             width: parent.width
             height: parent.height - local_title.height
             anchors.top: local_title.bottom
@@ -116,13 +114,7 @@ RowLayout {
             spacing: 10
             clip: true
             snapMode: ListView.SnapToItem
-            model: app.vrp.localQueue
-            onModelChanged: {
-                if (count - 1 >= oldIndex)
-                    positionViewAtIndex(oldIndex, ListView.Center);
-                else
-                    positionViewAtIndex(count - 1, ListView.Center);
-            }
+            model: app.vrp.localGamesModel()
 
             Label {
                 anchors.centerIn: local_list
@@ -134,27 +126,26 @@ RowLayout {
 
             delegate: LocalDelegate {
                 height: 130
-                releaseName: modelData.release_name
-                size: modelData.size
+                releaseName: model.release_name
+                size: model.size
                 thumbnailPath: {
-                    let path = app.vrp.getGameThumbnailPath(modelData.package_name);
+                    let path = app.vrp.getGameThumbnailPath(model.package_name);
                     if (path === "")
                         return "Image/matrix.png";
                     else
                         return "file://" + path;
                 }
-                status: app.vrp.getStatus(modelData)
+                status: app.vrp.getStatus(model.game_info)
                 onInstallButtonClicked: {
-                    app.vrp.installQml(modelData);
+                    app.vrp.installQml(model.game_info);
                 }
                 onDeleteButtonClicked: {
-                    local_list.oldIndex = local_list.indexAt(x, y);
-                    app.vrp.removeFromLocalQueue(modelData);
+                    local_list.model.remove(model.index);
                 }
 
                 Connections {
                     function onStatusChanged(release_name_, status_) {
-                        if (modelData.release_name === release_name_)
+                        if (release_name === release_name_)
                             status = status_;
 
                     }
