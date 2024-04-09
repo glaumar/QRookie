@@ -33,7 +33,7 @@ RowLayout {
             font.pointSize: Qt.application.font.pointSize * 2
         }
 
-        ListView {
+        Kirigami.CardsListView {
             id: downloading_list
 
             width: parent.width
