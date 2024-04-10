@@ -22,6 +22,17 @@
     </description>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-04-11" version="0.2.1">
+            <description>
+                <p>Release description</p>
+                <ul>
+                    <li>Support copying magnet uri</li>
+                    <li>Use Kirigami to ensure consistent style across different environments</li>
+                    <li>User interface optimization</li>
+                    <li>Code structure optimization</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-03-29" version="0.2.0">
             <description>
                 <p>Release description</p>
