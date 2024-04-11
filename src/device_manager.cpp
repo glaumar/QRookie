@@ -67,6 +67,8 @@ QCoro::Task<bool> DeviceManager::restartServer() {
 void DeviceManager::updateDeviceInfo() {
     updateDeviceName();
     updateSpaceUsage();
+    updateDeviceIP();
+    updateBatteryLevel();
     updateAppList();
 }
 
@@ -173,6 +175,53 @@ QCoro::Task<void> DeviceManager::updateDeviceName() {
     }
 }
 
+QCoro::Task<void> DeviceManager::updateDeviceIP() {
+    if (!hasConnectedDevice()) {
+        setDeviceIP("");
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb", {"-s", serial, "shell", "ip", "route"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get IP for device" << serial;
+        co_return;
+    } else {
+        QString output = basic_process.readAllStandardOutput();
+        QStringList lines = output.split("\n");
+
+        for (const QString& line : lines) {
+            /* EXAMPLE OUTPUT:
+                10.15.233.8/30 dev rmnet_data2 proto kernel scope link
+               src 10.15.233.9 192.168.50.0/24 dev wlan1 proto kernel scope link
+               src 192.168.50.16
+            */
+
+            if (line.contains("wlan") && line.contains("src")) {
+                QStringList parts = line.split(QRegularExpression("\\s+"));
+                for (int i = 0; i < parts.size(); i++) {
+                    if (parts[i] == "src") {
+                        setDeviceIP(parts[i + 1]);
+                        qDebug()
+                            << "IP for device" << serial << "is" << device_ip_;
+                        co_return;
+                    }
+                }
+            }
+        }
+
+        co_return;
+    }
+}
+
 QCoro::Task<void> DeviceManager::updateSpaceUsage() {
     if (!hasConnectedDevice()) {
         setSpaceUsage(0, 0);
@@ -217,6 +266,72 @@ QCoro::Task<void> DeviceManager::updateSpaceUsage() {
         long long total_space = parts[1].toLongLong();
         long long free_space = parts[3].toLongLong();
         setSpaceUsage(total_space, free_space);
+        co_return;
+    }
+}
+
+QCoro::Task<void> DeviceManager::updateBatteryLevel() {
+    if (!hasConnectedDevice()) {
+        setBatteryLevel(0);
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb", {"-s", serial, "shell", "dumpsys", "battery"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get battery level for device" << serial;
+        co_return;
+
+    } else {
+        /* EXAMPLE OUTPUT:
+            Current Battery Service state:
+                AC powered: false
+                USB powered: true
+                Wireless powered: false
+                Max charging current: 500000
+                Max charging voltage: 5000000
+                Charge counter: 1880000
+                status: 2
+                health: 2
+                present: true
+                level: 47
+                scale: 100
+                voltage: 3874
+                temperature: 323
+                technology: Li-ion
+
+        */
+        QString output = basic_process.readAllStandardOutput();
+        QStringList lines = output.split("\n");
+        lines.removeAll("");
+
+        if (lines.isEmpty()) {
+            qWarning() << "Failed to get battery level for device" << serial;
+            co_return;
+        }
+
+        for (const QString& line : lines) {
+            if (line.contains("level:")) {
+                QStringList parts = line.split(QRegularExpression(":"));
+                if (parts.size() < 2) {
+                    qWarning()
+                        << "Failed to get battery level for device" << serial;
+                    co_return;
+                }
+                int battery_level = parts[1].toInt();
+                setBatteryLevel(battery_level / 100.0);
+                co_return;
+            }
+        }
+        qWarning() << "Failed to get battery level for device" << serial;
         co_return;
     }
 }

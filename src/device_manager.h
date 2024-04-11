@@ -32,12 +32,15 @@
 class DeviceManager : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
+    Q_PROPERTY(
+        QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
     Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE
                    connectToDevice NOTIFY connectedDeviceChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
+    Q_PROPERTY(QString deviceIP READ deviceIP NOTIFY deviceIPChanged)
     Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
     Q_PROPERTY(long long freeSpace READ freeSpace NOTIFY spaceUsageChanged)
+    Q_PROPERTY(double batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
 
    public:
     DeviceManager(QObject* parent = nullptr);
@@ -60,18 +63,20 @@ class DeviceManager : public QObject {
 
     Q_INVOKABLE QVariantList devicesList() const {
         QVariantList list;
-        for(auto& device : devices_list_) {
+        for (auto& device : devices_list_) {
             list.append(device);
         }
         return list;
     }
-    
+
     Q_INVOKABLE GameInfoModel* appListModel() { return &app_list_model_; }
 
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
+    Q_INVOKABLE QCoro::Task<void> updateDeviceIP();
     Q_INVOKABLE QCoro::Task<void> updateSpaceUsage();
+    Q_INVOKABLE QCoro::Task<void> updateBatteryLevel();
     Q_INVOKABLE QCoro::Task<void> updateAppList();
 
     Q_INVOKABLE void enableAutoUpdate(const int ms = 3000) {
@@ -91,8 +96,7 @@ class DeviceManager : public QObject {
 
     Q_INVOKABLE QString connectedDevice() const { return connected_device_; }
     Q_INVOKABLE void connectToDevice(const QString& serial) {
-        if (connectedDevice() != serial &&
-            devices_list_.contains(serial)) {
+        if (connectedDevice() != serial && devices_list_.contains(serial)) {
             connected_device_ = serial;
             emit connectedDeviceChanged();
         }
@@ -104,6 +108,12 @@ class DeviceManager : public QObject {
         emit deviceNameChanged(device_name_);
     }
 
+    Q_INVOKABLE QString deviceIP() const { return device_ip_; }
+    Q_INVOKABLE void setDeviceIP(const QString& device_ip) {
+        device_ip_ = device_ip;
+        emit deviceIPChanged(device_ip_);
+    }
+
     Q_INVOKABLE long long totalSpace() const { return total_space_; }
     Q_INVOKABLE long long freeSpace() const { return free_space_; }
     Q_INVOKABLE void setSpaceUsage(long long total_space,
@@ -113,12 +123,20 @@ class DeviceManager : public QObject {
         emit spaceUsageChanged(total_space, free_space);
     }
 
+    Q_INVOKABLE double batteryLevel() const { return battery_level_; }
+    Q_INVOKABLE void setBatteryLevel(double battery_level) {
+        battery_level_ = battery_level;
+        emit batteryLevelChanged(battery_level_);
+    }
+
    signals:
     void devicesListChanged();
     void appListChanged();
     void connectedDeviceChanged();
     void deviceNameChanged(QString device_name);
+    void deviceIPChanged(QString device_ip);
     void spaceUsageChanged(long long total_space, long long free_space);
+    void batteryLevelChanged(double battery_level);
 
    private:
     QStringList devices_list_;
@@ -126,6 +144,8 @@ class DeviceManager : public QObject {
     QTimer auto_update_timer_;
     QString connected_device_;
     QString device_name_;
+    QString device_ip_;
+    double battery_level_;
     long long total_space_;
     long long free_space_;
 };
