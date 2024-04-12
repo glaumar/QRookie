@@ -41,6 +41,11 @@ class DeviceManager : public QObject {
     Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
     Q_PROPERTY(long long freeSpace READ freeSpace NOTIFY spaceUsageChanged)
     Q_PROPERTY(double batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
+    Q_PROPERTY(QString oculusOsVersion READ oculusOsVersion NOTIFY oculusOsVersionChanged)
+    Q_PROPERTY(QString oculusVersion READ oculusVersion NOTIFY oculusVersionChanged)
+    Q_PROPERTY(QString oculusRuntimeVersion READ oculusRuntimeVersion NOTIFY oculusRuntimeVersionChanged)
+    Q_PROPERTY(int androidVersion READ androidVersion NOTIFY androidVersionChanged)
+    Q_PROPERTY(int androidSdkVersion READ androidSdkVersion NOTIFY androidSdkVersionChanged)
 
    public:
     DeviceManager(QObject* parent = nullptr);
@@ -77,7 +82,13 @@ class DeviceManager : public QObject {
     Q_INVOKABLE QCoro::Task<void> updateDeviceIP();
     Q_INVOKABLE QCoro::Task<void> updateSpaceUsage();
     Q_INVOKABLE QCoro::Task<void> updateBatteryLevel();
+    Q_INVOKABLE QCoro::Task<void> updateOculusOsVersion();
+    Q_INVOKABLE QCoro::Task<void> updateOculusVersion();
+    Q_INVOKABLE QCoro::Task<void> updateOculusRuntimeVersion();
+    Q_INVOKABLE QCoro::Task<void> updateAndroidVersion();
+    Q_INVOKABLE QCoro::Task<void> updateAndroidSdkVersion();
     Q_INVOKABLE QCoro::Task<void> updateAppList();
+
 
     Q_INVOKABLE void enableAutoUpdate(const int ms = 3000) {
         auto_update_timer_.start(ms);
@@ -129,6 +140,41 @@ class DeviceManager : public QObject {
         emit batteryLevelChanged(battery_level_);
     }
 
+    Q_INVOKABLE QString oculusOsVersion() const { return oculus_os_version_; }
+    Q_INVOKABLE void setOculusOsVersion(const QString& oculus_os_version) {
+        oculus_os_version_ = oculus_os_version;
+        emit oculusOsVersionChanged(oculus_os_version_);
+        qDebug() << "oculus_os_version_:" << oculus_os_version_;
+    }
+
+    Q_INVOKABLE QString oculusVersion() const { return oculus_version_; }
+    Q_INVOKABLE void setOculusVersion(const QString& oculus_version) {
+        oculus_version_ = oculus_version;
+        emit oculusVersionChanged(oculus_version_);
+        qDebug() << "oculus_version_:" << oculus_version_;
+    }
+
+    Q_INVOKABLE QString oculusRuntimeVersion() const { return oculus_runtime_version_; }
+    Q_INVOKABLE void setOculusRuntimeVersion(const QString& oculus_runtime_version) {
+        oculus_runtime_version_ = oculus_runtime_version;
+        emit oculusRuntimeVersionChanged(oculus_runtime_version_);
+        qDebug() << "oculus_runtime_version_:" << oculus_runtime_version_;
+    }
+
+    Q_INVOKABLE int androidVersion() const { return android_version_; }
+    Q_INVOKABLE void setAndroidVersion(int android_version) {
+        android_version_ = android_version;
+        emit androidVersionChanged(android_version_);
+        qDebug() << "android_version_:" << android_version_;
+    }
+
+    Q_INVOKABLE int androidSdkVersion() const { return android_sdk_version_; }
+    Q_INVOKABLE void setAndroidSdkVersion(int android_sdk_version) {
+        android_sdk_version_ = android_sdk_version;
+        emit androidSdkVersionChanged(android_sdk_version_);
+        qDebug() << "android_sdk_version_:" << android_sdk_version_;
+    }
+
    signals:
     void devicesListChanged();
     void appListChanged();
@@ -137,6 +183,11 @@ class DeviceManager : public QObject {
     void deviceIPChanged(QString device_ip);
     void spaceUsageChanged(long long total_space, long long free_space);
     void batteryLevelChanged(double battery_level);
+    void oculusOsVersionChanged(QString oculus_os_version);
+    void oculusVersionChanged(QString oculus_version);
+    void oculusRuntimeVersionChanged(QString oculus_runtime_version);
+    void androidVersionChanged(int android_version);
+    void androidSdkVersionChanged(int android_sdk_version);
 
    private:
     QStringList devices_list_;
@@ -148,6 +199,11 @@ class DeviceManager : public QObject {
     double battery_level_;
     long long total_space_;
     long long free_space_;
+    QString oculus_os_version_;
+    QString oculus_version_;
+    QString oculus_runtime_version_;
+    int android_version_;
+    int android_sdk_version_;
 };
 
 #endif /* QROOKIE_DEVICE_MANAGER */

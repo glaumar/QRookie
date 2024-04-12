@@ -69,6 +69,12 @@ void DeviceManager::updateDeviceInfo() {
     updateSpaceUsage();
     updateDeviceIP();
     updateBatteryLevel();
+    updateOculusOsVersion();
+    updateOculusVersion();
+    updateOculusRuntimeVersion();
+    updateAndroidVersion();
+    updateAndroidSdkVersion();
+
     updateAppList();
 }
 
@@ -210,8 +216,6 @@ QCoro::Task<void> DeviceManager::updateDeviceIP() {
                 for (int i = 0; i < parts.size(); i++) {
                     if (parts[i] == "src") {
                         setDeviceIP(parts[i + 1]);
-                        qDebug()
-                            << "IP for device" << serial << "is" << device_ip_;
                         co_return;
                     }
                 }
@@ -334,6 +338,203 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel() {
         qWarning() << "Failed to get battery level for device" << serial;
         co_return;
     }
+}
+
+QCoro::Task<void> DeviceManager::updateOculusOsVersion() {
+    if (!hasConnectedDevice()) {
+        setOculusOsVersion("");
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.display.id"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Oculus OS version for device" << serial;
+        co_return;
+    }
+
+    QString output = basic_process.readAllStandardOutput();
+    output.replace("\n", "");
+    setOculusOsVersion(output);
+}
+
+QCoro::Task<void> DeviceManager::updateOculusVersion() {
+    if (!hasConnectedDevice()) {
+        setOculusVersion("");
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package",
+                      "com.oculus.systemux"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Oculus version for device" << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+        ...
+        versionName=64.0.0.484.370
+        ...
+        versionCode=585752815 minSdk=32 targetSdk=32
+        ...
+    */
+
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+
+    QString version_name, version_code;
+    for (const QString& line : lines) {
+        if (line.contains("versionName=")) {
+            QRegularExpression re("versionName=(\\S+)");
+            auto match = re.match(line);
+            if (match.hasMatch()) {
+                version_name = match.captured(1);
+            }
+        } else if (line.contains("versionCode=")) {
+            QRegularExpression re("versionCode=(\\S+)");
+            auto match = re.match(line);
+            if (match.hasMatch()) {
+                version_code = match.captured(1);
+            }
+        }
+
+        if (!version_name.isEmpty() && !version_code.isEmpty()) {
+            setOculusVersion(version_name + "." + version_code);
+            co_return;
+        }
+    }
+
+    setOculusVersion("");
+}
+
+QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion() {
+    if (!hasConnectedDevice()) {
+        setOculusRuntimeVersion("");
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package",
+                      "com.oculus.vrshell"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Oculus runtime version for device"
+                   << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+        ...
+        versionName=64.0.0.480.368
+        ...
+        versionCode=585752889 minSdk=29 targetSdk=29
+        ...
+    */
+
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+
+    QString version_name, version_code;
+    for (const QString& line : lines) {
+        if (line.contains("versionName=")) {
+            QRegularExpression re("versionName=(\\S+)");
+            auto match = re.match(line);
+            if (match.hasMatch()) {
+                version_name = match.captured(1);
+            }
+        } else if (line.contains("versionCode=")) {
+            QRegularExpression re("versionCode=(\\S+)");
+            auto match = re.match(line);
+            if (match.hasMatch()) {
+                version_code = match.captured(1);
+            }
+        }
+
+        if (!version_name.isEmpty() && !version_code.isEmpty()) {
+            setOculusRuntimeVersion(version_name + "." + version_code);
+            co_return;
+        }
+    }
+
+    setOculusRuntimeVersion("");
+}
+
+QCoro::Task<void> DeviceManager::updateAndroidVersion() {
+    if (!hasConnectedDevice()) {
+        setAndroidVersion(-1);
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb",
+              {"-s", serial, "shell", "getprop", "ro.build.version.release"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Android version for device" << serial;
+        co_return;
+    }
+
+    QString output = basic_process.readAllStandardOutput();
+    output.replace("\n", "");
+    setAndroidVersion(output.toInt());
+}
+
+QCoro::Task<void> DeviceManager::updateAndroidSdkVersion() {
+    if (!hasConnectedDevice()) {
+        setAndroidSdkVersion(-1);
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    adb.start("adb",
+              {"-s", serial, "shell", "getprop", "ro.build.version.sdk"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit ||
+        basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Android SDK version for device" << serial;
+        co_return;
+    }
+
+    QString output = basic_process.readAllStandardOutput();
+    output.replace("\n", "");
+    setAndroidSdkVersion(output.toInt());
 }
 
 QCoro::Task<void> DeviceManager::updateAppList() {
