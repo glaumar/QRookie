@@ -23,15 +23,19 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-VrpTorrent::VrpTorrent(QObject *parent) : QObject(parent) {
+VrpTorrent::VrpTorrent(QObject *parent)
+    : QObject(parent)
+{
     // TODO: load local torrents.json
 }
 
-VrpTorrent::~VrpTorrent() {
+VrpTorrent::~VrpTorrent()
+{
     // TODO: save torrents.json
 }
 
-QCoro::Task<bool> VrpTorrent::update() {
+QCoro::Task<bool> VrpTorrent::update()
+{
     static const QString url = "https://torrents.vrpirates.wiki/torrents.json";
 
     QNetworkRequest request(url);

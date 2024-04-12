@@ -24,23 +24,26 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 
-DeviceManager::DeviceManager(QObject* parent)
-    : QObject(parent), total_space_(0), free_space_(0) {
-    connect(&auto_update_timer_, &QTimer::timeout, this,
-            &DeviceManager::updateSerials);
-    connect(this, &DeviceManager::connectedDeviceChanged, this,
-            &DeviceManager::updateDeviceInfo);
+DeviceManager::DeviceManager(QObject *parent)
+    : QObject(parent)
+    , total_space_(0)
+    , free_space_(0)
+{
+    connect(&auto_update_timer_, &QTimer::timeout, this, &DeviceManager::updateSerials);
+    connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateDeviceInfo);
 }
 
-DeviceManager::~DeviceManager() {}
+DeviceManager::~DeviceManager()
+{
+}
 
-QCoro::Task<bool> DeviceManager::startServer() {
+QCoro::Task<bool> DeviceManager::startServer()
+{
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"start-server"});
     co_await adb.waitForFinished();
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to start adb server";
         co_return false;
     } else {
@@ -49,13 +52,13 @@ QCoro::Task<bool> DeviceManager::startServer() {
     }
 }
 
-QCoro::Task<bool> DeviceManager::restartServer() {
+QCoro::Task<bool> DeviceManager::restartServer()
+{
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"kill-server"});
     co_await adb.waitForFinished();
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to kill adb server";
         co_return false;
     }
@@ -64,7 +67,8 @@ QCoro::Task<bool> DeviceManager::restartServer() {
     co_return result;
 }
 
-void DeviceManager::updateDeviceInfo() {
+void DeviceManager::updateDeviceInfo()
+{
     updateDeviceName();
     updateSpaceUsage();
     updateDeviceIP();
@@ -78,7 +82,8 @@ void DeviceManager::updateDeviceInfo() {
     updateAppList();
 }
 
-QCoro::Task<void> DeviceManager::updateSerials() {
+QCoro::Task<void> DeviceManager::updateSerials()
+{
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"devices"});
@@ -97,7 +102,7 @@ QCoro::Task<void> DeviceManager::updateSerials() {
     lines.removeFirst();
     lines.removeAll("");
     QStringList serials;
-    for (const QString& line : lines) {
+    for (const QString &line : lines) {
         if (line.contains("\tdevice")) {
             QStringList parts = line.split("\t");
             if (!parts.isEmpty()) {
@@ -117,14 +122,14 @@ QCoro::Task<void> DeviceManager::updateSerials() {
 
     if (hasConnectedDevice() && serials.contains(connectedDevice())) {
         QStringList new_devices;
-        for (auto& s : serials) {
+        for (auto &s : serials) {
             if (!devices_list_.contains(s)) {
                 new_devices.append(s);
             }
         }
 
         QStringList removed_devices;
-        for (auto& s : devices_list_) {
+        for (auto &s : devices_list_) {
             if (!serials.contains(s)) {
                 removed_devices.append(s);
             }
@@ -134,7 +139,7 @@ QCoro::Task<void> DeviceManager::updateSerials() {
             co_return;
         }
 
-        for (auto& s : removed_devices) {
+        for (auto &s : removed_devices) {
             devices_list_.removeAll(s);
         }
 
@@ -153,7 +158,8 @@ QCoro::Task<void> DeviceManager::updateSerials() {
     }
 }
 
-QCoro::Task<void> DeviceManager::updateDeviceName() {
+QCoro::Task<void> DeviceManager::updateDeviceName()
+{
     if (!hasConnectedDevice()) {
         setDeviceName("");
         co_return;
@@ -168,8 +174,7 @@ QCoro::Task<void> DeviceManager::updateDeviceName() {
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get model for device" << serial;
         co_return;
     } else {
@@ -181,7 +186,8 @@ QCoro::Task<void> DeviceManager::updateDeviceName() {
     }
 }
 
-QCoro::Task<void> DeviceManager::updateDeviceIP() {
+QCoro::Task<void> DeviceManager::updateDeviceIP()
+{
     if (!hasConnectedDevice()) {
         setDeviceIP("");
         co_return;
@@ -196,15 +202,14 @@ QCoro::Task<void> DeviceManager::updateDeviceIP() {
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get IP for device" << serial;
         co_return;
     } else {
         QString output = basic_process.readAllStandardOutput();
         QStringList lines = output.split("\n");
 
-        for (const QString& line : lines) {
+        for (const QString &line : lines) {
             /* EXAMPLE OUTPUT:
                 10.15.233.8/30 dev rmnet_data2 proto kernel scope link
                src 10.15.233.9 192.168.50.0/24 dev wlan1 proto kernel scope link
@@ -226,7 +231,8 @@ QCoro::Task<void> DeviceManager::updateDeviceIP() {
     }
 }
 
-QCoro::Task<void> DeviceManager::updateSpaceUsage() {
+QCoro::Task<void> DeviceManager::updateSpaceUsage()
+{
     if (!hasConnectedDevice()) {
         setSpaceUsage(0, 0);
         co_return;
@@ -241,8 +247,7 @@ QCoro::Task<void> DeviceManager::updateSpaceUsage() {
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get space usage for device" << serial;
         co_return;
 
@@ -274,7 +279,8 @@ QCoro::Task<void> DeviceManager::updateSpaceUsage() {
     }
 }
 
-QCoro::Task<void> DeviceManager::updateBatteryLevel() {
+QCoro::Task<void> DeviceManager::updateBatteryLevel()
+{
     if (!hasConnectedDevice()) {
         setBatteryLevel(0);
         co_return;
@@ -289,8 +295,7 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel() {
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get battery level for device" << serial;
         co_return;
 
@@ -322,12 +327,11 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel() {
             co_return;
         }
 
-        for (const QString& line : lines) {
+        for (const QString &line : lines) {
             if (line.contains("level:")) {
                 QStringList parts = line.split(QRegularExpression(":"));
                 if (parts.size() < 2) {
-                    qWarning()
-                        << "Failed to get battery level for device" << serial;
+                    qWarning() << "Failed to get battery level for device" << serial;
                     co_return;
                 }
                 int battery_level = parts[1].toInt();
@@ -340,7 +344,8 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel() {
     }
 }
 
-QCoro::Task<void> DeviceManager::updateOculusOsVersion() {
+QCoro::Task<void> DeviceManager::updateOculusOsVersion()
+{
     if (!hasConnectedDevice()) {
         setOculusOsVersion("");
         co_return;
@@ -355,8 +360,7 @@ QCoro::Task<void> DeviceManager::updateOculusOsVersion() {
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get Oculus OS version for device" << serial;
         co_return;
     }
@@ -366,7 +370,8 @@ QCoro::Task<void> DeviceManager::updateOculusOsVersion() {
     setOculusOsVersion(output);
 }
 
-QCoro::Task<void> DeviceManager::updateOculusVersion() {
+QCoro::Task<void> DeviceManager::updateOculusVersion()
+{
     if (!hasConnectedDevice()) {
         setOculusVersion("");
         co_return;
@@ -377,13 +382,11 @@ QCoro::Task<void> DeviceManager::updateOculusVersion() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package",
-                      "com.oculus.systemux"});
+    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package", "com.oculus.systemux"});
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get Oculus version for device" << serial;
         co_return;
     }
@@ -400,7 +403,7 @@ QCoro::Task<void> DeviceManager::updateOculusVersion() {
     QStringList lines = output.split("\n");
 
     QString version_name, version_code;
-    for (const QString& line : lines) {
+    for (const QString &line : lines) {
         if (line.contains("versionName=")) {
             QRegularExpression re("versionName=(\\S+)");
             auto match = re.match(line);
@@ -424,7 +427,8 @@ QCoro::Task<void> DeviceManager::updateOculusVersion() {
     setOculusVersion("");
 }
 
-QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion() {
+QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion()
+{
     if (!hasConnectedDevice()) {
         setOculusRuntimeVersion("");
         co_return;
@@ -435,15 +439,12 @@ QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package",
-                      "com.oculus.vrshell"});
+    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package", "com.oculus.vrshell"});
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
-        qWarning() << "Failed to get Oculus runtime version for device"
-                   << serial;
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get Oculus runtime version for device" << serial;
         co_return;
     }
 
@@ -459,7 +460,7 @@ QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion() {
     QStringList lines = output.split("\n");
 
     QString version_name, version_code;
-    for (const QString& line : lines) {
+    for (const QString &line : lines) {
         if (line.contains("versionName=")) {
             QRegularExpression re("versionName=(\\S+)");
             auto match = re.match(line);
@@ -483,7 +484,8 @@ QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion() {
     setOculusRuntimeVersion("");
 }
 
-QCoro::Task<void> DeviceManager::updateAndroidVersion() {
+QCoro::Task<void> DeviceManager::updateAndroidVersion()
+{
     if (!hasConnectedDevice()) {
         setAndroidVersion(-1);
         co_return;
@@ -494,13 +496,11 @@ QCoro::Task<void> DeviceManager::updateAndroidVersion() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb",
-              {"-s", serial, "shell", "getprop", "ro.build.version.release"});
+    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.version.release"});
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get Android version for device" << serial;
         co_return;
     }
@@ -510,7 +510,8 @@ QCoro::Task<void> DeviceManager::updateAndroidVersion() {
     setAndroidVersion(output.toInt());
 }
 
-QCoro::Task<void> DeviceManager::updateAndroidSdkVersion() {
+QCoro::Task<void> DeviceManager::updateAndroidSdkVersion()
+{
     if (!hasConnectedDevice()) {
         setAndroidSdkVersion(-1);
         co_return;
@@ -521,13 +522,11 @@ QCoro::Task<void> DeviceManager::updateAndroidSdkVersion() {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb",
-              {"-s", serial, "shell", "getprop", "ro.build.version.sdk"});
+    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.version.sdk"});
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get Android SDK version for device" << serial;
         co_return;
     }
@@ -537,7 +536,8 @@ QCoro::Task<void> DeviceManager::updateAndroidSdkVersion() {
     setAndroidSdkVersion(output.toInt());
 }
 
-QCoro::Task<void> DeviceManager::updateAppList() {
+QCoro::Task<void> DeviceManager::updateAppList()
+{
     if (!hasConnectedDevice()) {
         app_list_model_.clear();
         emit appListChanged();
@@ -547,13 +547,11 @@ QCoro::Task<void> DeviceManager::updateAppList() {
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages",
-                      "--show-versioncode", "-3"});
+    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages", "--show-versioncode", "-3"});
 
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get apps for device" << serial;
         co_return;
     }
@@ -568,13 +566,12 @@ QCoro::Task<void> DeviceManager::updateAppList() {
     QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
 
     app_list_model_.clear();
-    for (const QString& line : lines) {
+    for (const QString &line : lines) {
         auto match = re.match(line);
         if (match.hasMatch()) {
             QString package_name = match.captured(1);
             QString version_code = match.captured(2);
-            auto app = GameInfo{.package_name = package_name,
-                                .version_code = version_code};
+            auto app = GameInfo{.package_name = package_name, .version_code = version_code};
 
             app_list_model_.append(app);
         }
@@ -583,8 +580,8 @@ QCoro::Task<void> DeviceManager::updateAppList() {
     co_return;
 }
 
-QCoro::Task<bool> DeviceManager::installApk(const QString path,
-                                            const QString package_name) {
+QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString package_name)
+{
     if (!hasConnectedDevice()) {
         co_return false;
     }
@@ -597,8 +594,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path,
         co_return false;
     }
 
-    QStringList apk_files =
-        apk_dir.entryList(QStringList() << "*.apk", QDir::Files);
+    QStringList apk_files = apk_dir.entryList(QStringList() << "*.apk", QDir::Files);
 
     if (apk_files.isEmpty()) {
         qWarning() << "No apk file found in" << path;
@@ -607,16 +603,14 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path,
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    for (const QString& apk_file : apk_files) {
+    for (const QString &apk_file : apk_files) {
         QString apk_path = path + "/" + apk_file;
         qDebug() << "Installing" << apk_path << "on device" << serial;
         adb.start("adb", {"-s", serial, "install", "-r", apk_path});
         co_await adb.waitForFinished(-1);
 
-        if (basic_process.exitStatus() != QProcess::NormalExit ||
-            basic_process.exitCode() != 0) {
-            qWarning() << "Failed to install" << apk_path << "on device"
-                       << serial;
+        if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+            qWarning() << "Failed to install" << apk_path << "on device" << serial;
             qWarning() << basic_process.readAllStandardError();
             co_return false;
         }
@@ -625,26 +619,19 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path,
     QString obb_path = path + "/" + package_name;
     QDir obb_dir(obb_path);
     if (!package_name.isEmpty() && obb_dir.exists()) {
-        qDebug() << "Pushing obb file for" << package_name << "to device"
-                 << serial;
-        adb.start("adb", {"-s", serial, "shell", "rm", "-rf",
-                          "/sdcard/Android/obb/" + package_name});
+        qDebug() << "Pushing obb file for" << package_name << "to device" << serial;
+        adb.start("adb", {"-s", serial, "shell", "rm", "-rf", "/sdcard/Android/obb/" + package_name});
         co_await adb.waitForFinished(-1);
-        adb.start("adb", {"-s", serial, "shell", "mkdir",
-                          "/sdcard/Android/obb/" + package_name});
+        adb.start("adb", {"-s", serial, "shell", "mkdir", "/sdcard/Android/obb/" + package_name});
         co_await adb.waitForFinished(-1);
 
-        QStringList obb_files =
-            obb_dir.entryList(QStringList() << "*", QDir::Files);
-        for (const QString& obb_file : obb_files) {
+        QStringList obb_files = obb_dir.entryList(QStringList() << "*", QDir::Files);
+        for (const QString &obb_file : obb_files) {
             qDebug() << "Pushing" << obb_file << "to device" << serial;
-            adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file,
-                              "/sdcard/Android/obb/" + package_name + "/"});
+            adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file, "/sdcard/Android/obb/" + package_name + "/"});
             co_await adb.waitForFinished(-1);
-            if (basic_process.exitStatus() != QProcess::NormalExit ||
-                basic_process.exitCode() != 0) {
-                qWarning() << "Failed to push obb file for" << package_name
-                           << "on device" << serial;
+            if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+                qWarning() << "Failed to push obb file for" << package_name << "on device" << serial;
                 qWarning() << basic_process.readAllStandardError();
                 co_return false;
             }
@@ -659,7 +646,8 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path,
     co_return true;
 }
 
-QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name) {
+QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
+{
     if (!hasConnectedDevice()) {
         co_return false;
     }
@@ -671,10 +659,8 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name) {
     adb.start("adb", {"-s", serial, "uninstall", package_name});
     co_await adb.waitForFinished();
 
-    if (basic_process.exitStatus() != QProcess::NormalExit ||
-        basic_process.exitCode() != 0) {
-        qWarning() << "Failed to uninstall" << package_name << "on device"
-                   << serial;
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to uninstall" << package_name << "on device" << serial;
         qWarning() << basic_process.readAllStandardError();
         co_return false;
     }

@@ -26,19 +26,28 @@
 #include <QPair>
 #include <QString>
 
-class VrpPublic : public QObject {
+class VrpPublic : public QObject
+{
     Q_OBJECT
-   public:
+public:
     VrpPublic(QObject *parent = nullptr)
-        : QObject(parent),
-          base_url_("https://theapp.vrrookie.xyz/"),
-          password_("gL59VfgPxoHR"),
-          manager_(nullptr) {}
+        : QObject(parent)
+        , base_url_("https://theapp.vrrookie.xyz/")
+        , password_("gL59VfgPxoHR")
+        , manager_(nullptr)
+    {
+    }
     QCoro::Task<bool> update();
-    QString baseUrl() const { return base_url_; }
-    QString password() const { return password_; }
+    QString baseUrl() const
+    {
+        return base_url_;
+    }
+    QString password() const
+    {
+        return password_;
+    }
 
-   private:
+private:
     QCoro::Task<QPair<bool, QByteArray>> downloadJson(const QString url);
     QPair<QString, QString> parseJson(const QByteArray &json);
 

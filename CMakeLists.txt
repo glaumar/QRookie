@@ -23,6 +23,11 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
+find_package(ECM 6.0.0 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
+
+include(KDEClangFormat)
+include(KDEGitCommitHooks)
 
 if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
     qt_standard_project_setup()
@@ -70,3 +75,8 @@ install(FILES icons/128x128/${APPLICATION_ID}.png DESTINATION share/icons/hicolo
 install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/256x256/apps)
 install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
 install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)
+
+# Add clang-format target
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
+kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)

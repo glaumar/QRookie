@@ -24,12 +24,12 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-QCoro::Task<bool> VrpPublic::update() {
+QCoro::Task<bool> VrpPublic::update()
+{
     // TODO: save vrp-public.json to local file
     // TODO: load vrp-public.json from local file when update failed
-    static const QVector<QString> urls = {
-        "https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json",
-        "https://vrpirates.wiki/downloads/vrp-public.json"};
+    static const QVector<QString> urls = {"https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json",
+                                          "https://vrpirates.wiki/downloads/vrp-public.json"};
 
     for (auto url : urls) {
         qDebug() << "Downloading vrp-public.json from " << url;
@@ -47,8 +47,8 @@ QCoro::Task<bool> VrpPublic::update() {
     }
 }
 
-QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(
-    const QString url) {
+QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(const QString url)
+{
     QNetworkRequest request(url);
     auto *reply = manager_.get(request);
     reply->ignoreSslErrors();
@@ -63,7 +63,8 @@ QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(
     co_return QPair<bool, QByteArray>(true, data);
 }
 
-QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json) {
+QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json)
+{
     /*
     vrp-public.json example:
     {
@@ -87,10 +88,8 @@ QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json) {
 
     QString base_url = obj["baseUri"].toString();
     // password is base64 encoded
-    QString password =
-        QString(QByteArray::fromBase64(obj["password"].toString().toUtf8()));
+    QString password = QString(QByteArray::fromBase64(obj["password"].toString().toUtf8()));
 
-    qDebug() << "Parsed vrp-public.json: baseUri=" << base_url
-             << ", password=" << password;
+    qDebug() << "Parsed vrp-public.json: baseUri=" << base_url << ", password=" << password;
     return QPair<QString, QString>(base_url, password);
 }

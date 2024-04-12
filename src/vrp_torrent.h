@@ -24,18 +24,20 @@
 #include <QNetworkAccessManager>
 #include <QObject>
 
-class VrpTorrent : public QObject {
+class VrpTorrent : public QObject
+{
     Q_OBJECT
 
-   public:
+public:
     VrpTorrent(QObject *parent = nullptr);
     ~VrpTorrent();
     QCoro::Task<bool> update();
-    QString findMagnetURI(const QString &name) const {
+    QString findMagnetURI(const QString &name) const
+    {
         return magnet_uri_.value(name);
     }
 
-   private:
+private:
     QMap<QString, QString> magnet_uri_;
     QNetworkAccessManager manager_;
 };

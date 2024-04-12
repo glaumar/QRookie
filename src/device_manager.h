@@ -29,13 +29,12 @@
 
 #include "game_info_model.h"
 
-class DeviceManager : public QObject {
+class DeviceManager : public QObject
+{
     Q_OBJECT
 
-    Q_PROPERTY(
-        QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
-    Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE
-                   connectToDevice NOTIFY connectedDeviceChanged)
+    Q_PROPERTY(QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
+    Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE connectToDevice NOTIFY connectedDeviceChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
     Q_PROPERTY(QString deviceIP READ deviceIP NOTIFY deviceIPChanged)
     Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
@@ -47,34 +46,38 @@ class DeviceManager : public QObject {
     Q_PROPERTY(int androidVersion READ androidVersion NOTIFY androidVersionChanged)
     Q_PROPERTY(int androidSdkVersion READ androidSdkVersion NOTIFY androidSdkVersionChanged)
 
-   public:
-    DeviceManager(QObject* parent = nullptr);
+public:
+    DeviceManager(QObject *parent = nullptr);
     ~DeviceManager();
 
     Q_INVOKABLE QCoro::Task<bool> startServer();
     Q_INVOKABLE QCoro::Task<bool> restartServer();
-    QCoro::Task<bool> installApk(const QString path,
-                                 const QString package_name);
+    QCoro::Task<bool> installApk(const QString path, const QString package_name);
 
-    Q_INVOKABLE QCoro::QmlTask installApkQml(const QString path,
-                                             const QString package_name) {
+    Q_INVOKABLE QCoro::QmlTask installApkQml(const QString path, const QString package_name)
+    {
         return installApk(path, package_name);
     }
 
     QCoro::Task<bool> uninstallApk(const QString package_name);
-    Q_INVOKABLE QCoro::QmlTask uninstallApkQml(const QString package_name) {
+    Q_INVOKABLE QCoro::QmlTask uninstallApkQml(const QString package_name)
+    {
         return uninstallApk(package_name);
     };
 
-    Q_INVOKABLE QVariantList devicesList() const {
+    Q_INVOKABLE QVariantList devicesList() const
+    {
         QVariantList list;
-        for (auto& device : devices_list_) {
+        for (auto &device : devices_list_) {
             list.append(device);
         }
         return list;
     }
 
-    Q_INVOKABLE GameInfoModel* appListModel() { return &app_list_model_; }
+    Q_INVOKABLE GameInfoModel *appListModel()
+    {
+        return &app_list_model_;
+    }
 
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
@@ -89,93 +92,141 @@ class DeviceManager : public QObject {
     Q_INVOKABLE QCoro::Task<void> updateAndroidSdkVersion();
     Q_INVOKABLE QCoro::Task<void> updateAppList();
 
-
-    Q_INVOKABLE void enableAutoUpdate(const int ms = 3000) {
+    Q_INVOKABLE void enableAutoUpdate(const int ms = 3000)
+    {
         auto_update_timer_.start(ms);
     }
-    Q_INVOKABLE void disableAutoUpdate() { auto_update_timer_.stop(); }
+    Q_INVOKABLE void disableAutoUpdate()
+    {
+        auto_update_timer_.stop();
+    }
 
-    Q_INVOKABLE bool hasConnectedDevice() const {
+    Q_INVOKABLE bool hasConnectedDevice() const
+    {
         return !connected_device_.isEmpty();
     }
-    Q_INVOKABLE void disconnectDevice() {
-        if (!hasConnectedDevice()) return;
+    Q_INVOKABLE void disconnectDevice()
+    {
+        if (!hasConnectedDevice())
+            return;
 
         connected_device_.clear();
         emit connectedDeviceChanged();
     }
 
-    Q_INVOKABLE QString connectedDevice() const { return connected_device_; }
-    Q_INVOKABLE void connectToDevice(const QString& serial) {
+    Q_INVOKABLE QString connectedDevice() const
+    {
+        return connected_device_;
+    }
+    Q_INVOKABLE void connectToDevice(const QString &serial)
+    {
         if (connectedDevice() != serial && devices_list_.contains(serial)) {
             connected_device_ = serial;
             emit connectedDeviceChanged();
         }
     }
 
-    Q_INVOKABLE QString deviceName() const { return device_name_; }
-    Q_INVOKABLE void setDeviceName(const QString& device_name) {
+    Q_INVOKABLE QString deviceName() const
+    {
+        return device_name_;
+    }
+    Q_INVOKABLE void setDeviceName(const QString &device_name)
+    {
         device_name_ = device_name;
         emit deviceNameChanged(device_name_);
     }
 
-    Q_INVOKABLE QString deviceIP() const { return device_ip_; }
-    Q_INVOKABLE void setDeviceIP(const QString& device_ip) {
+    Q_INVOKABLE QString deviceIP() const
+    {
+        return device_ip_;
+    }
+    Q_INVOKABLE void setDeviceIP(const QString &device_ip)
+    {
         device_ip_ = device_ip;
         emit deviceIPChanged(device_ip_);
     }
 
-    Q_INVOKABLE long long totalSpace() const { return total_space_; }
-    Q_INVOKABLE long long freeSpace() const { return free_space_; }
-    Q_INVOKABLE void setSpaceUsage(long long total_space,
-                                   long long free_space) {
+    Q_INVOKABLE long long totalSpace() const
+    {
+        return total_space_;
+    }
+    Q_INVOKABLE long long freeSpace() const
+    {
+        return free_space_;
+    }
+    Q_INVOKABLE void setSpaceUsage(long long total_space, long long free_space)
+    {
         total_space_ = total_space;
         free_space_ = free_space;
         emit spaceUsageChanged(total_space, free_space);
     }
 
-    Q_INVOKABLE double batteryLevel() const { return battery_level_; }
-    Q_INVOKABLE void setBatteryLevel(double battery_level) {
+    Q_INVOKABLE double batteryLevel() const
+    {
+        return battery_level_;
+    }
+    Q_INVOKABLE void setBatteryLevel(double battery_level)
+    {
         battery_level_ = battery_level;
         emit batteryLevelChanged(battery_level_);
     }
 
-    Q_INVOKABLE QString oculusOsVersion() const { return oculus_os_version_; }
-    Q_INVOKABLE void setOculusOsVersion(const QString& oculus_os_version) {
+    Q_INVOKABLE QString oculusOsVersion() const
+    {
+        return oculus_os_version_;
+    }
+    Q_INVOKABLE void setOculusOsVersion(const QString &oculus_os_version)
+    {
         oculus_os_version_ = oculus_os_version;
         emit oculusOsVersionChanged(oculus_os_version_);
         qDebug() << "oculus_os_version_:" << oculus_os_version_;
     }
 
-    Q_INVOKABLE QString oculusVersion() const { return oculus_version_; }
-    Q_INVOKABLE void setOculusVersion(const QString& oculus_version) {
+    Q_INVOKABLE QString oculusVersion() const
+    {
+        return oculus_version_;
+    }
+    Q_INVOKABLE void setOculusVersion(const QString &oculus_version)
+    {
         oculus_version_ = oculus_version;
         emit oculusVersionChanged(oculus_version_);
         qDebug() << "oculus_version_:" << oculus_version_;
     }
 
-    Q_INVOKABLE QString oculusRuntimeVersion() const { return oculus_runtime_version_; }
-    Q_INVOKABLE void setOculusRuntimeVersion(const QString& oculus_runtime_version) {
+    Q_INVOKABLE QString oculusRuntimeVersion() const
+    {
+        return oculus_runtime_version_;
+    }
+    Q_INVOKABLE void setOculusRuntimeVersion(const QString &oculus_runtime_version)
+    {
         oculus_runtime_version_ = oculus_runtime_version;
         emit oculusRuntimeVersionChanged(oculus_runtime_version_);
         qDebug() << "oculus_runtime_version_:" << oculus_runtime_version_;
     }
 
-    Q_INVOKABLE int androidVersion() const { return android_version_; }
-    Q_INVOKABLE void setAndroidVersion(int android_version) {
+    Q_INVOKABLE int androidVersion() const
+    {
+        return android_version_;
+    }
+    Q_INVOKABLE void setAndroidVersion(int android_version)
+    {
         android_version_ = android_version;
         emit androidVersionChanged(android_version_);
         qDebug() << "android_version_:" << android_version_;
     }
 
-    Q_INVOKABLE int androidSdkVersion() const { return android_sdk_version_; }
-    Q_INVOKABLE void setAndroidSdkVersion(int android_sdk_version) {
+    Q_INVOKABLE int androidSdkVersion() const
+    {
+        return android_sdk_version_;
+    }
+    Q_INVOKABLE void setAndroidSdkVersion(int android_sdk_version)
+    {
         android_sdk_version_ = android_sdk_version;
         emit androidSdkVersionChanged(android_sdk_version_);
         qDebug() << "android_sdk_version_:" << android_sdk_version_;
     }
 
-   signals:
+signals:
     void devicesListChanged();
     void appListChanged();
     void connectedDeviceChanged();
@@ -189,7 +240,7 @@ class DeviceManager : public QObject {
     void androidVersionChanged(int android_version);
     void androidSdkVersionChanged(int android_sdk_version);
 
-   private:
+private:
     QStringList devices_list_;
     GameInfoModel app_list_model_;
     QTimer auto_update_timer_;

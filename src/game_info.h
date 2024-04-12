@@ -22,10 +22,9 @@
 #include <QString>
 
 struct GameInfo {
-    bool operator==(const GameInfo& other) const {
-        return release_name == other.release_name &&
-               package_name == other.package_name &&
-               version_code == other.version_code;
+    bool operator==(const GameInfo &other) const
+    {
+        return release_name == other.release_name && package_name == other.package_name && version_code == other.version_code;
     }
 
     QString name;
@@ -44,7 +43,8 @@ struct GameInfo {
     Q_PROPERTY(QString size MEMBER size)
 };
 
-inline bool operator<(const GameInfo& lhs, const GameInfo& rhs) {
+inline bool operator<(const GameInfo &lhs, const GameInfo &rhs)
+{
     return lhs.release_name < rhs.release_name;
 }
 

@@ -21,12 +21,14 @@
 
 #include <QAbstractListModel>
 #include <QList>
+
 #include "game_info.h"
 
-class GameInfoModel : public QAbstractListModel {
+class GameInfoModel : public QAbstractListModel
+{
     Q_OBJECT
 
-   public:
+public:
     enum RoleNames {
         nameRole = Qt::UserRole + 1,
         releaseNameRole,
@@ -37,33 +39,38 @@ class GameInfoModel : public QAbstractListModel {
         GameInfoRole,
     };
 
-    explicit GameInfoModel(QObject* parent = nullptr);
-    Q_INVOKABLE void insert(int index, const GameInfo& game);
-    Q_INVOKABLE void prepend(const GameInfo& game);
-    Q_INVOKABLE void append(const GameInfo& game);
+    explicit GameInfoModel(QObject *parent = nullptr);
+    Q_INVOKABLE void insert(int index, const GameInfo &game);
+    Q_INVOKABLE void prepend(const GameInfo &game);
+    Q_INVOKABLE void append(const GameInfo &game);
     Q_INVOKABLE void remove(int index);
-    Q_INVOKABLE void remove(const GameInfo& game);
+    Q_INVOKABLE void remove(const GameInfo &game);
     Q_INVOKABLE void clear();
 
-    size_t size() const { return games_info_.size(); }
+    size_t size() const
+    {
+        return games_info_.size();
+    }
 
-    GameInfo& operator[](size_t index) { return games_info_[index]; }
-    const GameInfo& operator[](size_t index) const {
+    GameInfo &operator[](size_t index)
+    {
+        return games_info_[index];
+    }
+    const GameInfo &operator[](size_t index) const
+    {
         return games_info_[index];
     }
 
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
 
-    virtual int rowCount(
-        const QModelIndex& parent = QModelIndex()) const override;
-    virtual QVariant data(const QModelIndex& index, int role) const override;
-
-   signals:
+signals:
     void removed(const GameInfo game);
 
-   protected:
+protected:
     virtual QHash<int, QByteArray> roleNames() const override;
 
-   private:
+private:
     QList<GameInfo> games_info_;
     QHash<int, QByteArray> role_names_;
 };

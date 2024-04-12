@@ -28,13 +28,16 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 
-HttpDownloader::HttpDownloader(QObject* parent)
-    : QObject(parent),
-      manager_(nullptr),
-      download_directory_("./"),
-      base_url_("https://theapp.vrrookie.xyz/") {}
+HttpDownloader::HttpDownloader(QObject *parent)
+    : QObject(parent)
+    , manager_(nullptr)
+    , download_directory_("./")
+    , base_url_("https://theapp.vrrookie.xyz/")
+{
+}
 
-QCoro::Task<bool> HttpDownloader::download(const QString file_path) {
+QCoro::Task<bool> HttpDownloader::download(const QString file_path)
+{
     QString filename = download_directory_ + "/" + file_path;
     QString tmp_filename = filename + ".tmp";
 
@@ -64,18 +67,13 @@ QCoro::Task<bool> HttpDownloader::download(const QString file_path) {
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::UserAgentHeader, "rclone/v1.65.2");
     if (downloaded_bytes_ > 0) {
-        request.setRawHeader(
-            "Range", QString("bytes=%1-").arg(downloaded_bytes_).toUtf8());
+        request.setRawHeader("Range", QString("bytes=%1-").arg(downloaded_bytes_).toUtf8());
     }
-    auto* reply = manager_.get(request);
-    auto device = qCoro(dynamic_cast<QIODevice*>(reply));
-    connect(reply, &QNetworkReply::downloadProgress, this,
-            [this, file_path, downloaded_bytes_](qint64 bytes_received,
-                                                 qint64 bytes_total) {
-                emit downloadProgress(file_path,
-                                      bytes_received + downloaded_bytes_,
-                                      bytes_total + downloaded_bytes_);
-            });
+    auto *reply = manager_.get(request);
+    auto device = qCoro(dynamic_cast<QIODevice *>(reply));
+    connect(reply, &QNetworkReply::downloadProgress, this, [this, file_path, downloaded_bytes_](qint64 bytes_received, qint64 bytes_total) {
+        emit downloadProgress(file_path, bytes_received + downloaded_bytes_, bytes_total + downloaded_bytes_);
+    });
 
     qDebug() << "Downloading: " << url;
     bool result = false;
@@ -112,11 +110,12 @@ QCoro::Task<bool> HttpDownloader::download(const QString file_path) {
     co_return result;
 }
 
-QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path) {
+QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path)
+{
     QUrl url = base_url_ + dir_path + "/";
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::UserAgentHeader, "rclone/v1.65.2");
-    auto* reply = co_await manager_.get(request);
+    auto *reply = co_await manager_.get(request);
     auto html = co_await qCoro(reply).readAll();
 
     QDomDocument doc;
@@ -139,7 +138,7 @@ QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path) {
 
     long long total_size = 0;
     QVector<QPair<QString, long long>> files;
-    for (const QString& line : lines) {
+    for (const QString &line : lines) {
         QRegularExpressionMatch match = re.match(line);
         if (match.hasMatch()) {
             QString name = match.captured(2);
@@ -158,15 +157,13 @@ QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path) {
 
     auto total_received = QSharedPointer<long long>::create(0);
 
-    auto conn = connect(
-        this, &HttpDownloader::downloadProgress,
-        [this, dir_path, total_size, total_received](
-            QString filename, qint64 bytes_received, qint64 bytes_total) {
-            if (filename.startsWith(dir_path)) {
-                emit downloadProgressDir(
-                    dir_path, *total_received + bytes_received, total_size);
-            }
-        });
+    auto conn = connect(this,
+                        &HttpDownloader::downloadProgress,
+                        [this, dir_path, total_size, total_received](QString filename, qint64 bytes_received, qint64 bytes_total) {
+                            if (filename.startsWith(dir_path)) {
+                                emit downloadProgressDir(dir_path, *total_received + bytes_received, total_size);
+                            }
+                        });
 
     QDir dir(downloadDirectory() + "/" + dir_path);
     if (!dir.exists()) {
@@ -174,7 +171,7 @@ QCoro::Task<bool> HttpDownloader::downloadDir(const QString dir_path) {
     }
 
     bool result = true;
-    for (const auto& [name, size] : files) {
+    for (const auto &[name, size] : files) {
         if (!co_await download(dir_path + "/" + name)) {
             qDebug() << "Download failed: " << dir_path;
             result = false;

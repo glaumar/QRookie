@@ -23,7 +23,8 @@
 #include "qrookie.h"
 #include "vrp_manager.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     QGuiApplication app(argc, argv);
     app.setApplicationName(APPLICATION_NAME);
     app.setApplicationVersion(APPLICATION_VERSION);
@@ -37,9 +38,12 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
     QObject::connect(
-        &engine, &QQmlApplicationEngine::objectCreated, &app,
+        &engine,
+        &QQmlApplicationEngine::objectCreated,
+        &app,
         [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl) QCoreApplication::exit(-1);
+            if (!obj && url == objUrl)
+                QCoreApplication::exit(-1);
         },
         Qt::QueuedConnection);
 
