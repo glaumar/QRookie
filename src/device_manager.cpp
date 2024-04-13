@@ -71,7 +71,7 @@ void DeviceManager::updateDeviceInfo()
 {
     updateDeviceName();
     updateSpaceUsage();
-    updateDeviceIP();
+    updatedeviceIp();
     updateBatteryLevel();
     updateOculusOsVersion();
     updateOculusVersion();
@@ -186,10 +186,10 @@ QCoro::Task<void> DeviceManager::updateDeviceName()
     }
 }
 
-QCoro::Task<void> DeviceManager::updateDeviceIP()
+QCoro::Task<void> DeviceManager::updatedeviceIp()
 {
     if (!hasConnectedDevice()) {
-        setDeviceIP("");
+        setdeviceIp("");
         co_return;
     }
 
@@ -220,7 +220,7 @@ QCoro::Task<void> DeviceManager::updateDeviceIP()
                 QStringList parts = line.split(QRegularExpression("\\s+"));
                 for (int i = 0; i < parts.size(); i++) {
                     if (parts[i] == "src") {
-                        setDeviceIP(parts[i + 1]);
+                        setdeviceIp(parts[i + 1]);
                         co_return;
                     }
                 }
@@ -335,7 +335,7 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel()
                     co_return;
                 }
                 int battery_level = parts[1].toInt();
-                setBatteryLevel(battery_level / 100.0);
+                setBatteryLevel(battery_level);
                 co_return;
             }
         }
@@ -402,25 +402,16 @@ QCoro::Task<void> DeviceManager::updateOculusVersion()
     QString output = basic_process.readAllStandardOutput();
     QStringList lines = output.split("\n");
 
-    QString version_name, version_code;
+    QString version_name;
     for (const QString &line : lines) {
         if (line.contains("versionName=")) {
             QRegularExpression re("versionName=(\\S+)");
             auto match = re.match(line);
             if (match.hasMatch()) {
                 version_name = match.captured(1);
+                setOculusVersion(version_name);
+                co_return;
             }
-        } else if (line.contains("versionCode=")) {
-            QRegularExpression re("versionCode=(\\S+)");
-            auto match = re.match(line);
-            if (match.hasMatch()) {
-                version_code = match.captured(1);
-            }
-        }
-
-        if (!version_name.isEmpty() && !version_code.isEmpty()) {
-            setOculusVersion(version_name + "." + version_code);
-            co_return;
         }
     }
 
@@ -459,25 +450,16 @@ QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion()
     QString output = basic_process.readAllStandardOutput();
     QStringList lines = output.split("\n");
 
-    QString version_name, version_code;
+    QString version_name;
     for (const QString &line : lines) {
         if (line.contains("versionName=")) {
             QRegularExpression re("versionName=(\\S+)");
             auto match = re.match(line);
             if (match.hasMatch()) {
                 version_name = match.captured(1);
+                setOculusRuntimeVersion(version_name);
+                co_return;
             }
-        } else if (line.contains("versionCode=")) {
-            QRegularExpression re("versionCode=(\\S+)");
-            auto match = re.match(line);
-            if (match.hasMatch()) {
-                version_code = match.captured(1);
-            }
-        }
-
-        if (!version_name.isEmpty() && !version_code.isEmpty()) {
-            setOculusRuntimeVersion(version_name + "." + version_code);
-            co_return;
         }
     }
 

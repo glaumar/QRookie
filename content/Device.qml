@@ -49,34 +49,138 @@ RowLayout {
                     device_name.text = name === "" ? "No device connected" : name;
                 }
 
+                function onDeviceIpChanged(ip) {
+                    device_ip.text = ip;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        device_ip.enabled = false;
+
+                }
+
+                function onBatteryLevelChanged(level) {
+                    battery_level.text = level > 0 ? level + "%" : "0%";
+                    if (!app.deviceManager.hasConnectedDevice())
+                        battery_level.enabled = false;
+
+                }
+
+                function onOculusOsVersionChanged(version) {
+                    oculus_os_version.text = version;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        oculus_os_version.enabled = false;
+
+                }
+
+                function onOculusVersionChanged(version) {
+                    oculus_version.text = version;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        oculus_version.enabled = false;
+
+                }
+
+                function onOculusRuntimeVersionChanged(version) {
+                    oculus_runtime_version.text = version;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        oculus_runtime_version.enabled = false;
+
+                }
+
+                function onAndroidVersionChanged(version) {
+                    android_version.text = version;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        android_version.enabled = false;
+
+                }
+
+                function onAndroidSdkVersionChanged(version) {
+                    android_sdk_version.text = version;
+                    if (!app.deviceManager.hasConnectedDevice())
+                        android_sdk_version.enabled = false;
+
+                }
+
                 target: app.deviceManager
             }
 
-            contentItem: Column {
-                spacing: 10
+            contentItem: ColumnLayout {
+                Layout.fillWidth: true
 
-                Label {
-                    id: space_usage_text
+                Column {
+                    spacing: 10
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
 
-                    width: parent.width
-                    text: "0.00 GB / 0.00 GB"
-                }
+                    Label {
+                        id: space_usage_text
 
-                ProgressBar {
-                    id: space_usage_bar
-
-                    width: parent.width
-                    value: 0
-                }
-
-                ComboBox {
-                    id: device_selector
-
-                    width: parent.width
-                    model: app.deviceManager.devicesList
-                    onActivated: (index) => {
-                        app.deviceManager.connectToDevice(textAt(index));
+                        width: parent.width
+                        text: "0.00 GB / 0.00 GB"
                     }
+
+                    ProgressBar {
+                        id: space_usage_bar
+
+                        width: parent.width
+                        value: 0
+                    }
+
+                    ComboBox {
+                        id: device_selector
+
+                        width: parent.width
+                        model: app.deviceManager.devicesList
+                        onActivated: (index) => {
+                            app.deviceManager.connectToDevice(textAt(index));
+                        }
+                    }
+
+                }
+
+                Kirigami.FormLayout {
+                    Layout.alignment: Qt.AlignBottom
+                    Layout.fillWidth: true
+
+                    Label {
+                        id: device_ip
+
+                        Kirigami.FormData.label: "IP:"
+                    }
+
+                    Label {
+                        id: battery_level
+
+                        Kirigami.FormData.label: "Battery Level:"
+                    }
+
+                    Label {
+                        id: android_version
+
+                        Kirigami.FormData.label: "Android Version:"
+                    }
+
+                    Label {
+                        id: android_sdk_version
+
+                        Kirigami.FormData.label: "Android SDK Version:"
+                    }
+
+                    Label {
+                        id: oculus_os_version
+
+                        Kirigami.FormData.label: "OS Version:"
+                    }
+
+                    Label {
+                        id: oculus_version
+
+                        Kirigami.FormData.label: "Oculus Version:"
+                    }
+
+                    Label {
+                        id: oculus_runtime_version
+
+                        Kirigami.FormData.label: "Oculus Runtime Version:"
+                    }
+
                 }
 
             }

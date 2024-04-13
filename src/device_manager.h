@@ -36,10 +36,10 @@ class DeviceManager : public QObject
     Q_PROPERTY(QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
     Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE connectToDevice NOTIFY connectedDeviceChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
-    Q_PROPERTY(QString deviceIP READ deviceIP NOTIFY deviceIPChanged)
+    Q_PROPERTY(QString deviceIp READ deviceIp NOTIFY deviceIpChanged)
     Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
     Q_PROPERTY(long long freeSpace READ freeSpace NOTIFY spaceUsageChanged)
-    Q_PROPERTY(double batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
+    Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
     Q_PROPERTY(QString oculusOsVersion READ oculusOsVersion NOTIFY oculusOsVersionChanged)
     Q_PROPERTY(QString oculusVersion READ oculusVersion NOTIFY oculusVersionChanged)
     Q_PROPERTY(QString oculusRuntimeVersion READ oculusRuntimeVersion NOTIFY oculusRuntimeVersionChanged)
@@ -82,7 +82,7 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
-    Q_INVOKABLE QCoro::Task<void> updateDeviceIP();
+    Q_INVOKABLE QCoro::Task<void> updatedeviceIp();
     Q_INVOKABLE QCoro::Task<void> updateSpaceUsage();
     Q_INVOKABLE QCoro::Task<void> updateBatteryLevel();
     Q_INVOKABLE QCoro::Task<void> updateOculusOsVersion();
@@ -136,14 +136,14 @@ public:
         emit deviceNameChanged(device_name_);
     }
 
-    Q_INVOKABLE QString deviceIP() const
+    Q_INVOKABLE QString deviceIp() const
     {
         return device_ip_;
     }
-    Q_INVOKABLE void setDeviceIP(const QString &device_ip)
+    Q_INVOKABLE void setdeviceIp(const QString &device_ip)
     {
         device_ip_ = device_ip;
-        emit deviceIPChanged(device_ip_);
+        emit deviceIpChanged(device_ip_);
     }
 
     Q_INVOKABLE long long totalSpace() const
@@ -165,7 +165,7 @@ public:
     {
         return battery_level_;
     }
-    Q_INVOKABLE void setBatteryLevel(double battery_level)
+    Q_INVOKABLE void setBatteryLevel(int battery_level)
     {
         battery_level_ = battery_level;
         emit batteryLevelChanged(battery_level_);
@@ -231,9 +231,9 @@ signals:
     void appListChanged();
     void connectedDeviceChanged();
     void deviceNameChanged(QString device_name);
-    void deviceIPChanged(QString device_ip);
+    void deviceIpChanged(QString device_ip);
     void spaceUsageChanged(long long total_space, long long free_space);
-    void batteryLevelChanged(double battery_level);
+    void batteryLevelChanged(int battery_level);
     void oculusOsVersionChanged(QString oculus_os_version);
     void oculusVersionChanged(QString oculus_version);
     void oculusRuntimeVersionChanged(QString oculus_runtime_version);
@@ -247,7 +247,7 @@ private:
     QString connected_device_;
     QString device_name_;
     QString device_ip_;
-    double battery_level_;
+    int battery_level_;
     long long total_space_;
     long long free_space_;
     QString oculus_os_version_;
