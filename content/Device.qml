@@ -46,56 +46,43 @@ RowLayout {
                 }
 
                 function onDeviceNameChanged(name) {
-                    device_name.text = name === "" ? "No device connected" : name;
+                    device_name.text = name === "" ? qsTr("No device connected") : name;
                 }
 
                 function onDeviceIpChanged(ip) {
                     device_ip.text = ip;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        device_ip.enabled = false;
-
                 }
 
                 function onBatteryLevelChanged(level) {
                     battery_level.text = level > 0 ? level + "%" : "0%";
-                    if (!app.deviceManager.hasConnectedDevice())
-                        battery_level.enabled = false;
-
                 }
 
                 function onOculusOsVersionChanged(version) {
-                    oculus_os_version.text = version;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        oculus_os_version.enabled = false;
-
+                    if (version.length > 20)
+                        oculus_os_version.text = version.substr(0, 17) + "...";
+                    else
+                        oculus_os_version.text = version;
+                    oculus_os_version.visible = !(version === "");
                 }
 
                 function onOculusVersionChanged(version) {
                     oculus_version.text = version;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        oculus_version.enabled = false;
-
+                    oculus_version.visible = !(version === "");
                 }
 
                 function onOculusRuntimeVersionChanged(version) {
                     oculus_runtime_version.text = version;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        oculus_runtime_version.enabled = false;
-
+                    oculus_runtime_version.visible = !(version === "");
                 }
 
                 function onAndroidVersionChanged(version) {
                     android_version.text = version;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        android_version.enabled = false;
-
+                    android_version.visible = version > 0;
                 }
 
                 function onAndroidSdkVersionChanged(version) {
                     android_sdk_version.text = version;
-                    if (!app.deviceManager.hasConnectedDevice())
-                        android_sdk_version.enabled = false;
-
+                    android_sdk_version.visible = version > 0;
                 }
 
                 target: app.deviceManager
@@ -136,49 +123,53 @@ RowLayout {
                 }
 
                 Kirigami.FormLayout {
+                    id: device_info_layout
+
                     Layout.alignment: Qt.AlignBottom
                     Layout.fillWidth: true
+                    visible: app.deviceManager.hasConnectedDevice
 
                     Label {
                         id: device_ip
 
-                        Kirigami.FormData.label: "IP:"
+                        Kirigami.FormData.label: qsTr("IP:")
                     }
 
                     Label {
                         id: battery_level
 
-                        Kirigami.FormData.label: "Battery Level:"
+                        Kirigami.FormData.label: qsTr("Battery Level:")
                     }
 
                     Label {
                         id: android_version
 
-                        Kirigami.FormData.label: "Android Version:"
+                        Kirigami.FormData.label: qsTr("Android Version:")
                     }
 
                     Label {
                         id: android_sdk_version
 
-                        Kirigami.FormData.label: "Android SDK Version:"
+                        Kirigami.FormData.label: qsTr("Android SDK Version:")
                     }
 
                     Label {
                         id: oculus_os_version
 
-                        Kirigami.FormData.label: "OS Version:"
+                        Kirigami.FormData.label: qsTr("OS Version:")
+                        text: ""
                     }
 
                     Label {
                         id: oculus_version
 
-                        Kirigami.FormData.label: "Oculus Version:"
+                        Kirigami.FormData.label: qsTr("Oculus Version:")
                     }
 
                     Label {
                         id: oculus_runtime_version
 
-                        Kirigami.FormData.label: "Oculus Runtime Version:"
+                        Kirigami.FormData.label: qsTr("Oculus Runtime Version:")
                     }
 
                 }
@@ -188,7 +179,7 @@ RowLayout {
             header: Label {
                 id: device_name
 
-                text: "No device connected"
+                text: qsTr("No device connected")
                 font.bold: true
                 font.pointSize: Qt.application.font.pointSize * 2
             }

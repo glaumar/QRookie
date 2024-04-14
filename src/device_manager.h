@@ -35,6 +35,7 @@ class DeviceManager : public QObject
 
     Q_PROPERTY(QVariantList devicesList READ devicesList NOTIFY devicesListChanged);
     Q_PROPERTY(QString connectedDevice READ connectedDevice WRITE connectToDevice NOTIFY connectedDeviceChanged)
+    Q_PROPERTY(bool hasConnectedDevice READ hasConnectedDevice NOTIFY connectedDeviceChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
     Q_PROPERTY(QString deviceIp READ deviceIp NOTIFY deviceIpChanged)
     Q_PROPERTY(long long totalSpace READ totalSpace NOTIFY spaceUsageChanged)
