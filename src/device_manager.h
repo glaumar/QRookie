@@ -179,7 +179,6 @@ public:
     {
         oculus_os_version_ = oculus_os_version;
         emit oculusOsVersionChanged(oculus_os_version_);
-        qDebug() << "oculus_os_version_:" << oculus_os_version_;
     }
 
     Q_INVOKABLE QString oculusVersion() const
@@ -190,7 +189,6 @@ public:
     {
         oculus_version_ = oculus_version;
         emit oculusVersionChanged(oculus_version_);
-        qDebug() << "oculus_version_:" << oculus_version_;
     }
 
     Q_INVOKABLE QString oculusRuntimeVersion() const
@@ -201,7 +199,6 @@ public:
     {
         oculus_runtime_version_ = oculus_runtime_version;
         emit oculusRuntimeVersionChanged(oculus_runtime_version_);
-        qDebug() << "oculus_runtime_version_:" << oculus_runtime_version_;
     }
 
     Q_INVOKABLE int androidVersion() const
@@ -212,7 +209,6 @@ public:
     {
         android_version_ = android_version;
         emit androidVersionChanged(android_version_);
-        qDebug() << "android_version_:" << android_version_;
     }
 
     Q_INVOKABLE int androidSdkVersion() const
@@ -223,7 +219,6 @@ public:
     {
         android_sdk_version_ = android_sdk_version;
         emit androidSdkVersionChanged(android_sdk_version_);
-        qDebug() << "android_sdk_version_:" << android_sdk_version_;
     }
 
 signals:
