@@ -253,8 +253,10 @@ void VrpManager::removeFromDownloadQueue(const GameInfo &game)
     Status s = getStatus(game);
     if (s == Status::Downloading) {
         http_downloader_.abortDownloadDir(getGameId(game.release_name));
+        setStatus(game, Status::Downloadable);
+    } else if (s == Status::Queued) {
+        setStatus(game, Status::Downloadable);
     }
-    setStatus(game, Status::Downloadable);
 }
 
 bool VrpManager::removeLocalGameFile(const GameInfo &game)
