@@ -99,7 +99,7 @@ RowLayout {
                     Label {
                         id: space_usage_text
 
-                        width: parent.width
+                        anchors.right: parent.right
                         text: "0.00 GB / 0.00 GB"
                     }
 
@@ -108,6 +108,30 @@ RowLayout {
 
                         width: parent.width
                         value: 0
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        TextField {
+                            id: wireless_adress
+
+                            width: parent.width
+                            placeholderText: qsTr("192.168.1.10:5555")
+                        }
+
+                        Button {
+                            text: qsTr("Connect")
+                            onClicked: {
+                                app.deviceManager.connectToWirelessDeviceQml(wireless_adress.text).then((connected) => {
+                                    if (!connected)
+                                        wireless_adress.text = "Failed";
+
+                                });
+                            }
+                        }
+
                     }
 
                     ComboBox {

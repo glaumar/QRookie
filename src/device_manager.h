@@ -127,6 +127,12 @@ public:
         }
     }
 
+    Q_INVOKABLE QCoro::Task<bool> connectToWirelessDevice(const QString address /*host[:port]*/);
+    Q_INVOKABLE QCoro::QmlTask connectToWirelessDeviceQml(const QString &address)
+    {
+        return connectToWirelessDevice(address);
+    }
+
     Q_INVOKABLE QString deviceName() const
     {
         return device_name_;

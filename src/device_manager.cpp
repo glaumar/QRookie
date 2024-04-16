@@ -650,3 +650,34 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
     updateDeviceInfo();
     co_return true;
 }
+
+QCoro::Task<bool> DeviceManager::connectToWirelessDevice(const QString address /*host[:port]*/)
+{
+    if (address.isEmpty()) {
+        qWarning() << "Empty address";
+        co_return false;
+    }
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start("adb", {"connect", address});
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to connect to" << address;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    auto output = basic_process.readAllStandardOutput();
+    QByteArray success_str = "connected to " + address.toLocal8Bit();
+    if (!output.startsWith(success_str)) {
+        qWarning() << "Failed to connect to" << address;
+        qWarning() << output;
+        co_return false;
+    }
+
+    connectToDevice(address);
+    co_await updateSerials();
+    co_return true;
+}
