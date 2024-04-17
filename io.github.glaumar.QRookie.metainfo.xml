@@ -22,6 +22,16 @@
     </description>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-04-17" version="0.2.2">
+            <description>
+                <p>Release description</p>
+                <ul>
+                    <li>Support connecting to devices via wireless network</li>
+                    <li>Display more device information</li>
+                    <li>Fix: Incorrect download completion status</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-04-11" version="0.2.1">
             <description>
                 <p>Release description</p>
