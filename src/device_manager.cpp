@@ -120,42 +120,15 @@ QCoro::Task<void> DeviceManager::updateSerials()
         co_return;
     }
 
-    if (hasConnectedDevice() && serials.contains(connectedDevice())) {
-        QStringList new_devices;
-        for (auto &s : serials) {
-            if (!devices_list_.contains(s)) {
-                new_devices.append(s);
-            }
-        }
-
-        QStringList removed_devices;
-        for (auto &s : devices_list_) {
-            if (!serials.contains(s)) {
-                removed_devices.append(s);
-            }
-        }
-
-        if (new_devices.isEmpty() && removed_devices.isEmpty()) {
-            co_return;
-        }
-
-        for (auto &s : removed_devices) {
-            devices_list_.removeAll(s);
-        }
-
-        devices_list_.removeAll(connectedDevice());
-        devices_list_.prepend(connectedDevice());
-
-        devices_list_.append(new_devices);
-        emit devicesListChanged();
-
-    } else {
-        // The device is disconnected or there is no connected device, connect
-        // to the first device
-        devices_list_ = serials;
-        connectToDevice(devices_list_.first());
-        emit devicesListChanged();
+    if (devices_list_ == serials) {
+        co_return;
     }
+
+    devices_list_ = serials;
+    if (!devices_list_.contains(connectedDevice())) {
+        disconnectDevice();
+    }
+    emit devicesListChanged();
 }
 
 QCoro::Task<void> DeviceManager::updateDeviceName()
@@ -204,6 +177,7 @@ QCoro::Task<void> DeviceManager::updatedeviceIp()
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to get IP for device" << serial;
+        setdeviceIp("");
         co_return;
     } else {
         QString output = basic_process.readAllStandardOutput();
@@ -227,6 +201,7 @@ QCoro::Task<void> DeviceManager::updatedeviceIp()
             }
         }
 
+        setdeviceIp("");
         co_return;
     }
 }
@@ -651,7 +626,7 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
     co_return true;
 }
 
-QCoro::Task<bool> DeviceManager::connectToWirelessDevice(const QString address /*host[:port]*/)
+QCoro::Task<bool> DeviceManager::connectToWirelessDevice(const QString address /*host:port*/)
 {
     if (address.isEmpty()) {
         qWarning() << "Empty address";
@@ -666,18 +641,47 @@ QCoro::Task<bool> DeviceManager::connectToWirelessDevice(const QString address /
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to connect to" << address;
         qWarning() << basic_process.readAllStandardError();
+
         co_return false;
     }
 
     auto output = basic_process.readAllStandardOutput();
-    QByteArray success_str = "connected to " + address.toLocal8Bit();
-    if (!output.startsWith(success_str)) {
-        qWarning() << "Failed to connect to" << address;
+
+    if (!output.startsWith("connected to " + address.toLocal8Bit()) && !output.contains("already connected to " + address.toLocal8Bit())) {
         qWarning() << output;
         co_return false;
     }
 
-    connectToDevice(address);
     co_await updateSerials();
+    connectToDevice(address);
+    co_return true;
+}
+
+QCoro::Task<bool> DeviceManager::enableTcpMode(int port)
+{
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    if (port < 1024 || port > 65535) {
+        qWarning() << "Invalid port" << port;
+        co_return false;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start("adb", {"-s", serial, "tcpip", QString::number(port)});
+    co_await adb.waitForFinished(1000);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to enable tcp mode on device" << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    qDebug() << basic_process.readAllStandardOutput();
+
     co_return true;
 }

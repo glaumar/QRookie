@@ -121,16 +121,34 @@ public:
     }
     Q_INVOKABLE void connectToDevice(const QString &serial)
     {
-        if (connectedDevice() != serial && devices_list_.contains(serial)) {
-            connected_device_ = serial;
-            emit connectedDeviceChanged();
+        if (serial.isEmpty())
+            return;
+
+        if (connectedDevice() == serial) {
+            qDebug() << "Already connected to device" << serial;
+            return;
         }
+
+        if (!devices_list_.contains(serial)) {
+            qDebug() << "Device not found" << serial;
+            return;
+        }
+
+        connected_device_ = serial;
+        qDebug() << "Connected to device" << serial;
+        emit connectedDeviceChanged();
     }
 
     Q_INVOKABLE QCoro::Task<bool> connectToWirelessDevice(const QString address /*host[:port]*/);
     Q_INVOKABLE QCoro::QmlTask connectToWirelessDeviceQml(const QString &address)
     {
         return connectToWirelessDevice(address);
+    }
+
+    Q_INVOKABLE QCoro::Task<bool> enableTcpMode(int port = 5555);
+    Q_INVOKABLE QCoro::QmlTask enableTcpModeQml(int port = 5555)
+    {
+        return enableTcpMode(port);
     }
 
     Q_INVOKABLE QString deviceName() const

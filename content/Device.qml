@@ -32,9 +32,35 @@ RowLayout {
         width: 310
 
         Kirigami.Card {
+            id: device_card
+
+            property bool autoConnect: true
+
             anchors.fill: parent
 
             Connections {
+                function onDevicesListChanged() {
+                    let model = app.deviceManager.devicesList;
+                    if (model.length <= 0) {
+                        device_selector.model = ["No devices found"];
+                        return ;
+                    }
+                    device_selector.model = model;
+                    if (app.deviceManager.hasConnectedDevice) {
+                        let i = device_selector.find(app.deviceManager.connectedDevice);
+                        device_selector.currentIndex = i;
+                    } else if (device_card.autoConnect) {
+                        app.deviceManager.connectToDevice(model[0]);
+                    }
+                }
+
+                function onConnectedDeviceChanged() {
+                    if (app.deviceManager.hasConnectedDevice) {
+                        let i = device_selector.find(app.deviceManager.connectedDevice);
+                        device_selector.currentIndex = i;
+                    }
+                }
+
                 function onSpaceUsageChanged(total_space, free_space) {
                     if (!isNaN(total_space) && !isNaN(free_space) && free_space > 0 && free_space <= total_space) {
                         space_usage_text.text = ((total_space - free_space) / 1024 / 1024).toFixed(2) + " GB / " + (total_space / 1024 / 1024).toFixed(2) + " GB";
@@ -110,6 +136,32 @@ RowLayout {
                         value: 0
                     }
 
+                    ComboBox {
+                        id: device_selector
+
+                        width: parent.width
+                        // model: app.deviceManager.devicesList
+                        onActivated: (index) => {
+                            app.deviceManager.connectToDevice(textAt(index));
+                        }
+                    }
+
+                    Label {
+                        id: wireless_label
+
+                        text: qsTr("Wireless:")
+                        font.bold: true
+                    }
+
+                    Kirigami.InlineMessage {
+                        id: wireless_error_message
+
+                        width: parent.width
+                        visible: false
+                        text: qsTr("Failed")
+                        type: Kirigami.MessageType.Error
+                    }
+
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 10
@@ -125,22 +177,41 @@ RowLayout {
                             text: qsTr("Connect")
                             onClicked: {
                                 app.deviceManager.connectToWirelessDeviceQml(wireless_adress.text).then((connected) => {
-                                    if (!connected)
-                                        wireless_adress.text = "Failed";
-
+                                    if (!connected) {
+                                        wireless_error_message.visible = true;
+                                        wireless_error_message.text = qsTr("Failed to connect to " + wireless_adress.text);
+                                    }
                                 });
                             }
                         }
 
                     }
 
-                    ComboBox {
-                        id: device_selector
+                    Button {
+                        id: wireless_mode_button
 
+                        text: qsTr("Enable Wireless Mode")
                         width: parent.width
-                        model: app.deviceManager.devicesList
-                        onActivated: (index) => {
-                            app.deviceManager.connectToDevice(textAt(index));
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("adb tcpip 5555")
+                        onClicked: {
+                            device_card.autoConnect = false;
+                            let address = app.deviceManager.deviceIp + ":5555";
+                            app.deviceManager.enableTcpModeQml(5555).then((is_enabled) => {
+                                if (is_enabled) {
+                                    app.deviceManager.connectToWirelessDeviceQml(address).then((connected) => {
+                                        if (!connected) {
+                                            wireless_error_message.visible = true;
+                                            wireless_error_message.text = qsTr("Failed to connect to " + address);
+                                        }
+                                        device_card.autoConnect = true;
+                                    });
+                                } else {
+                                    wireless_error_message.visible = true;
+                                    wireless_error_message.text = qsTr("Failed to enable wireless mode");
+                                    device_card.autoConnect = true;
+                                }
+                            });
                         }
                     }
 
