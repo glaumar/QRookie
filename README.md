@@ -44,7 +44,7 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 # FAQ
 
 ## 1. Game installation failed?
-QRookie currently does not support `install.txt`. Some games may fail to install or may not run after installation. You can find the downloaded games in `~/.var/app/io.github.glaumar.QRookie/data/QRookie/` and manually install them ([Manual-Sideloading](https://vrpirates.wiki/en/Howto/Manual-Sideloading)).
+QRookie currently does not support `install.txt`. Some games may fail to install or may not run after installation. You can find the downloaded games in `~/.var/app/io.github.glaumar.QRookie/data/QRookie/` or `~/.local/share/QRookie/` and manually install them ([ Howto: Sideload Manually](https://vrpirates.wiki/en/Howto/Manual-Sideloading)).
 
 ## 2. Are all the games provided by QRookie? Are these games infected with viruses?
 
