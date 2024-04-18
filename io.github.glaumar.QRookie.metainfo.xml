@@ -4,6 +4,14 @@
 
     <name>QRookie</name>
     <summary>Download and install Quest games</summary>
+    <summary xml:lang="zh-CN">下载和安装 Quest 游戏</summary>
+
+    <description>
+        <p>Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader
+            but for linux).</p>
+        <p xml:lang="zh-CN">从 ROOKIE 公共镜像下载和安装 Quest 游戏（类似 VRP Rookie Sideloader 但支持
+            Linux）</p>
+    </description>
 
     <metadata_license>FSFAP</metadata_license>
     <project_license>GPL-3.0-or-later</project_license>
@@ -14,12 +22,19 @@
         <email>glaumar@geekgo.tech</email>
     </developer>
 
-    <description>
-        <p>
-            Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader
-            but for linux).
-        </p>
-    </description>
+    <categories>
+        <category>Game</category>
+        <category>Utility</category>
+    </categories>
+    <keywords>
+        <keyword>Kirigami</keyword>
+        <keyword>Qt</keyword>
+        <keyword>VR</keyword>
+        <keyword>Quest</keyword>
+    </keywords>
+    <provides>
+        <binary>qrookie</binary>
+    </provides>
     <content_rating type="oars-1.1" />
     <releases>
         <release date="2024-04-17" version="0.2.2">
@@ -82,13 +97,11 @@
             <image>
                 https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot1.png</image>
             <caption>Games</caption>
-
         </screenshot>
         <screenshot>
             <image>
                 https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot2.png</image>
             <caption>Downloads</caption>
-
         </screenshot>
         <screenshot>
             <image>
@@ -96,4 +109,8 @@
             <caption>Devices</caption>
         </screenshot>
     </screenshots>
+    <branding>
+        <color type="primary" scheme_preference="light">#ffbe6f</color>
+        <color type="primary" scheme_preference="dark">#b35031</color>
+    </branding>
 </component>
