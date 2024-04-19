@@ -595,10 +595,18 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
         }
     }
 
-    updateDeviceInfo();
+    // https://vrpirates.wiki/en/Howto/Manual-Sideloading
+    // Some applications have an install.txt file that needs to be executed.
+    // Arbitrary support for install.txt has potential security issues and is only adapted for specific applications
 
-    // TODO: support for install.txt
-    //  https://vrpirates.wiki/en/Howto/Manual-Sideloading
+    if (package_name == QStringLiteral("tdg.oculuswirelessadb")) {
+        adb.start("adb", {"-s", serial, "shell", "pm", "grant", package_name, "android.permission.WRITE_SECURE_SETTINGS"});
+        co_await adb.waitForFinished();
+        adb.start("adb", {"-s", serial, "shell", "pm", "grant", package_name, "android.permission.READ_LOGS"});
+        co_await adb.waitForFinished();
+    }
+
+    updateDeviceInfo();
 
     co_return true;
 }
