@@ -199,6 +199,11 @@ RowLayout {
                             let address = app.deviceManager.deviceIp + ":5555";
                             app.deviceManager.enableTcpModeQml(5555).then((is_enabled) => {
                                 if (is_enabled) {
+                                    // device ip is empty
+                                    if (address === ":5555") {
+                                        device_card.autoConnect = true;
+                                        return;
+                                    }
                                     app.deviceManager.connectToWirelessDeviceQml(address).then((connected) => {
                                         if (!connected) {
                                             wireless_error_message.visible = true;
