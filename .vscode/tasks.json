@@ -9,7 +9,7 @@
 				"qrookie"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": []
 		},
 		{
 			"type": "shell",
@@ -104,6 +104,7 @@
 				"cwd": "${workspaceFolder}/src"
 			},
 			"group": "none",
+			"problemMatcher": []
 		},
 		{
 			"label": "check metainfo.xml file",
@@ -112,8 +113,7 @@
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
-			"group": "none",
+			"group": "none"
 		}
-
 	]
 }
