@@ -24,6 +24,14 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
+VrpPublic::VrpPublic(QObject *parent)
+    : QObject(parent)
+    , base_url_("https://theapp.vrrookie.xyz/")
+    , password_("gL59VfgPxoHR")
+    , manager_(nullptr)
+{
+}
+
 QCoro::Task<bool> VrpPublic::update()
 {
     // TODO: save vrp-public.json to local file

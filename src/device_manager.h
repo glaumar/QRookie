@@ -18,16 +18,11 @@
 #pragma once
 #ifndef QROOKIE_DEVICE_MANAGER
 #define QROOKIE_DEVICE_MANAGER
-#include <QCoroProcess>
-#include <QCoroQmlTask>
-#include <QObject>
-#include <QStringListModel>
-#include <QTimer>
-#include <QVariantList>
-#include <QVariantMap>
-#include <QVector>
 
 #include "game_info_model.h"
+#include <QCoroProcess>
+#include <QCoroQmlTask>
+#include <QVariantList>
 
 class DeviceManager : public QObject
 {

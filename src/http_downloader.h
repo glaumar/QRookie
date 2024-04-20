@@ -19,9 +19,9 @@
 #define QROOKIE_HTTP_DOWNLOADER
 #include <QCoroTask>
 #include <QNetworkAccessManager>
-#include <QObject>
 #include <QStack>
-#include <QString>
+
+class QString;
 
 class HttpDownloader : public QObject
 {

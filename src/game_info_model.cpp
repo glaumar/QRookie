@@ -16,8 +16,7 @@
  */
 
 #include "game_info_model.h"
-
-#include "vrp_manager.h"
+#include "game_info.h"
 
 GameInfoModel::GameInfoModel(QObject *parent)
     : QAbstractListModel(parent)

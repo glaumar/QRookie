@@ -18,8 +18,7 @@
 #pragma once
 #ifndef QROOKIE_GAME_INFO
 #define QROOKIE_GAME_INFO
-#include <QObject>
-#include <QString>
+class QString;
 
 struct GameInfo {
     bool operator==(const GameInfo &other) const

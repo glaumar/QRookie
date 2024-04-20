@@ -17,6 +17,7 @@
 
 #include "device_manager.h"
 
+#include "game_info.h"
 #include <QCoroTask>
 #include <QDir>
 #include <QFile>

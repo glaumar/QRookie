@@ -22,7 +22,6 @@
 #include <QCoroTask>
 #include <QMap>
 #include <QNetworkAccessManager>
-#include <QObject>
 
 class VrpTorrent : public QObject
 {

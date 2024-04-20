@@ -19,21 +19,19 @@
 #ifndef QROOKIE_VRP_DOWNLOADER
 #define QROOKIE_VRP_DOWNLOADER
 
-#include <QCoroTask>
-#include <QCryptographicHash>
-#include <QMap>
-#include <QMetaEnum>
-#include <QMultiMap>
-#include <QProcess>
-#include <QTimer>
-#include <QVariant>
-
 #include "device_manager.h"
 #include "game_info.h"
 #include "game_info_model.h"
 #include "http_downloader.h"
 #include "vrp_public.h"
 #include "vrp_torrent.h"
+#include <QCoroTask>
+#include <QCryptographicHash>
+#include <QMap>
+#include <QMetaEnum>
+#include <QMultiMap>
+#include <QProcess>
+#include <QVariant>
 
 class VrpManager : public QObject
 {

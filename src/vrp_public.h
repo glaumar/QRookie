@@ -19,24 +19,15 @@
 #ifndef QROOKIE_VRP_PUBLIC
 #define QROOKIE_VRP_PUBLIC
 
-#include <QByteArray>
 #include <QCoroTask>
 #include <QNetworkAccessManager>
-#include <QObject>
 #include <QPair>
-#include <QString>
 
 class VrpPublic : public QObject
 {
     Q_OBJECT
 public:
-    VrpPublic(QObject *parent = nullptr)
-        : QObject(parent)
-        , base_url_("https://theapp.vrrookie.xyz/")
-        , password_("gL59VfgPxoHR")
-        , manager_(nullptr)
-    {
-    }
+    VrpPublic(QObject *parent = nullptr);
     QCoro::Task<bool> update();
     QString baseUrl() const
     {
