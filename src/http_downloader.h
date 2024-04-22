@@ -27,7 +27,7 @@ class HttpDownloader : public QObject
 {
     Q_OBJECT
 public:
-    HttpDownloader(QObject *parent = nullptr);
+    explicit HttpDownloader(QObject *parent = nullptr);
     QString baseUrl() const
     {
         return base_url_;

@@ -61,7 +61,7 @@ public:
     Q_DECLARE_FLAGS(StatusFlags, Status)
     Q_FLAG(Status)
 
-    VrpManager(QObject *parent = nullptr);
+    explicit VrpManager(QObject *parent = nullptr);
     ~VrpManager();
     QCoro::Task<bool> updateMetadata();
     Q_INVOKABLE QCoro::QmlTask updateMetadataQml()

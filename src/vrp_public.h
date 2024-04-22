@@ -27,7 +27,7 @@ class VrpPublic : public QObject
 {
     Q_OBJECT
 public:
-    VrpPublic(QObject *parent = nullptr);
+    explicit VrpPublic(QObject *parent = nullptr);
     QCoro::Task<bool> update();
     QString baseUrl() const
     {

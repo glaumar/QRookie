@@ -43,7 +43,7 @@ class DeviceManager : public QObject
     Q_PROPERTY(int androidSdkVersion READ androidSdkVersion NOTIFY androidSdkVersionChanged)
 
 public:
-    DeviceManager(QObject *parent = nullptr);
+    explicit DeviceManager(QObject *parent = nullptr);
     ~DeviceManager();
 
     Q_INVOKABLE QCoro::Task<bool> startServer();

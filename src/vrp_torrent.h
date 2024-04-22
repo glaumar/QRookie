@@ -28,7 +28,7 @@ class VrpTorrent : public QObject
     Q_OBJECT
 
 public:
-    VrpTorrent(QObject *parent = nullptr);
+    explicit VrpTorrent(QObject *parent = nullptr);
     ~VrpTorrent();
     QCoro::Task<bool> update();
     QString findMagnetURI(const QString &name) const
