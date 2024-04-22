@@ -31,6 +31,9 @@ ColumnLayout {
         Layout.rightMargin: 10
         Layout.bottomMargin: 10
         height: 40
+        Component.onCompleted: {
+            filter_field.forceActiveFocus();
+        }
 
         RowLayout {
             anchors.fill: parent
