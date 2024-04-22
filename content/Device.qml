@@ -175,6 +175,7 @@ RowLayout {
 
                         Button {
                             text: qsTr("Connect")
+                            enabled: wireless_adress.text !== ""
                             onClicked: {
                                 app.deviceManager.connectToWirelessDeviceQml(wireless_adress.text).then((connected) => {
                                     if (!connected) {
@@ -194,6 +195,7 @@ RowLayout {
                         width: parent.width
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("adb tcpip 5555")
+                        enabled: app.deviceManager.hasConnectedDevice
                         onClicked: {
                             device_card.autoConnect = false;
                             let address = app.deviceManager.deviceIp + ":5555";
@@ -202,7 +204,7 @@ RowLayout {
                                     // device ip is empty
                                     if (address === ":5555") {
                                         device_card.autoConnect = true;
-                                        return;
+                                        return ;
                                     }
                                     app.deviceManager.connectToWirelessDeviceQml(address).then((connected) => {
                                         if (!connected) {
