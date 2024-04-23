@@ -301,6 +301,21 @@ RowLayout {
         cellHeight: 220
         model: app.deviceManager.appListModel()
 
+        Dialog {
+            id: confirm_dialog
+
+            property string packageName: ""
+            property int index: -1
+
+            anchors.centerIn: parent
+            title: "Uninstall " + packageName
+            standardButtons: Dialog.Ok | Dialog.Cancel
+            onAccepted: {
+                apps_info.model.remove(index);
+                app.deviceManager.uninstallApkQml(packageName);
+            }
+        }
+
         ScrollBar.vertical: ScrollBar {
             visible: true
         }
@@ -317,9 +332,9 @@ RowLayout {
                     return "file://" + path;
             }
             onUninstallButtonClicked: {
-                let package_name = model.package_name;
-                apps_info.model.remove(index);
-                app.deviceManager.uninstallApkQml(package_name);
+                confirm_dialog.packageName = model.package_name;
+                confirm_dialog.index = index;
+                confirm_dialog.open();
             }
         }
 
