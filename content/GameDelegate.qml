@@ -23,12 +23,12 @@ import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
-    property var name
-    property var releaseName
-    property var size
-    property var lastUpdated
-    property var thumbnailPath
-    property var progress
+    property string name
+    property string releaseName
+    property int size
+    property string lastUpdated
+    property string thumbnailPath
+    property double progress
     property var status
 
 

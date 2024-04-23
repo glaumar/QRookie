@@ -22,8 +22,8 @@ import VrpManager
 import org.kde.kirigami as Kirigami
 
 Kirigami.Card {
-    property var name
-    property var thumbnailPath
+    property string name
+    property string thumbnailPath
 
     signal uninstallButtonClicked()
 

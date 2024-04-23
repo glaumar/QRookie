@@ -24,9 +24,9 @@ import org.kde.kirigami as Kirigami
 Kirigami.Card {
     id: game_info
 
-    property var size
-    property var releaseName
-    property var thumbnailPath
+    property int size
+    property string releaseName
+    property string thumbnailPath
     property var status
 
     signal installButtonClicked()

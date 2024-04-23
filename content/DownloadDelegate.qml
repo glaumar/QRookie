@@ -24,10 +24,10 @@ import org.kde.kirigami as Kirigami
 Kirigami.Card {
     id: game_info
 
-    property var name
-    property var size
-    property var thumbnailPath
-    property var progress
+    property string name
+    property int size
+    property string thumbnailPath
+    property double progress
     property var status
 
     signal deleteButtonClicked()
