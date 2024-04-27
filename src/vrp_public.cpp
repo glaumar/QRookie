@@ -53,6 +53,8 @@ QCoro::Task<bool> VrpPublic::update()
             co_return true;
         }
     }
+
+    co_return false;
 }
 
 QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(const QString url)
