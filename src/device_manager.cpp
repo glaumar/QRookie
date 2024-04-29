@@ -623,7 +623,7 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"-s", serial, "uninstall", package_name});
-    co_await adb.waitForFinished();
+    co_await adb.waitForFinished(-1);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to uninstall" << package_name << "on device" << serial;
@@ -682,7 +682,7 @@ QCoro::Task<bool> DeviceManager::enableTcpMode(int port)
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start("adb", {"-s", serial, "tcpip", QString::number(port)});
-    co_await adb.waitForFinished(1000);
+    co_await adb.waitForFinished(5000);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to enable tcp mode on device" << serial;
