@@ -323,7 +323,7 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
                              << "-aoa" // Overwrite All existing files without prompt.
                              << QString("-o%1").arg(data_path_) << QString("-p%1").arg(vrp_public_.password()));
 
-    co_await p7za.waitForFinished();
+    co_await p7za.waitForFinished(-1);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning("Error: %s\n %s", basic_process.readAllStandardOutput().data(), basic_process.readAllStandardError().data());
