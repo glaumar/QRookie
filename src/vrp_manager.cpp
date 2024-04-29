@@ -235,6 +235,11 @@ bool VrpManager::addToDownloadQueue(const GameInfo game)
         return false;
     }
 
+    // Decompression failure is most likely due to a corrupted download file, delete the cache and start downloading from scratch
+    if (s == Status::DecompressionError) {
+        cleanCache(game.release_name);
+    }
+
     download_games_->remove(game);
     setStatus(game, Status::Queued);
     download_games_->append(game);
@@ -246,6 +251,12 @@ bool VrpManager::addToDownloadQueue(const GameInfo game)
     }
 
     return true;
+}
+
+void VrpManager::cleanCache(const QString &release_name) const
+{
+    QDir dir(cache_path_ + "/" + getGameId(release_name));
+    dir.removeRecursively();
 }
 
 void VrpManager::removeFromDownloadQueue(const GameInfo &game)
@@ -346,9 +357,7 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
             install(game);
         }
 
-        // clean up cache
-        QDir dir(cache_path_ + "/" + getGameId(game.release_name));
-        dir.removeRecursively();
+        cleanCache(game.release_name);
         co_return true;
     }
 }

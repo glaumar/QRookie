@@ -106,6 +106,7 @@ public:
         return vrp_torrent_.findMagnetURI(release_name);
     }
     Q_INVOKABLE bool addToDownloadQueue(const GameInfo game);
+    Q_INVOKABLE void cleanCache(const QString &release_name) const;
     void removeFromDownloadQueue(const GameInfo &game);
     bool removeLocalGameFile(const GameInfo &game);
 
