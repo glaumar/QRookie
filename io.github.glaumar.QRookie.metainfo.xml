@@ -37,6 +37,29 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-04-29" version="0.2.3">
+            <description>
+                <p>Changes in version 0.2.3</p>
+                <ul>
+                    <li>fix(backend): Start installing and clearing cache before decompression is
+                        complete</li>
+                    <li>fix(backend): Clear the cache before re-downloading after decompression
+                        fails</li>
+                    <li>fix(UI): Automatically connect when the device IP is empty</li>
+                    <li>feat(backend): Add support for granting permissions to oculus-wireless-adb</li>
+                    <li>feat(UI): Make error messages more concise</li>
+                    <li>feat(UI): Add uninstall icon</li>
+                    <li>feat(UI): Add uninstall confirmation dialog</li>
+                    <li>feat(UI): Automatically disable the wireless mode button when conditions are
+                        not met</li>
+                    <li>feat(UI): Autofocus filter filter field</li>
+                    <li>feat(desktop): Update application icons</li>
+                    <li>feat(desktop): Add zh-CN Name/Comment to desktop file</li>
+                    <li>feat(desktop): Add categories, keywords, provides, branding color, zh-CN
+                        summary/description to appstream</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-04-17" version="0.2.2">
             <description>
                 <p>Release description</p>
