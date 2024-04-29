@@ -110,17 +110,17 @@ Kirigami.Card {
             action_button.icon.source = "install";
             break;
         case VrpManager.DownloadError:
-            action_button.text = qsTr("DownloadError, Click to Try Again");
+            action_button.text = qsTr("Re-download (DownloadError)");
             action_button.enabled = true;
             action_button.icon.source = "error";
             break;
         case VrpManager.DecompressionError:
-            action_button.text = qsTr("DecompressionError, Click to Try Again");
+            action_button.text = qsTr("Re-download (DecompressionError)");
             action_button.enabled = true;
             action_button.icon.source = "error";
             break;
         case VrpManager.InstallError:
-            action_button.text = qsTr("InstallError, Click to Try Again");
+            action_button.text = qsTr("Reinstall (InstallError)");
             action_button.enabled = true;
             action_button.icon.source = "error";
             break;

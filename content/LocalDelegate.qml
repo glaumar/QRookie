@@ -55,7 +55,7 @@ Kirigami.Card {
             install_button.enabled = true;
             break;
         case VrpManager.InstallError:
-            install_button.text = qsTr("Error, Click to Try Again");
+            install_button.text = qsTr("Reinstall (InstallError)");
             install_button.enabled = true;
             install_button.icon.source = "error";
             break;
