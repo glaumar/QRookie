@@ -31,6 +31,8 @@
 VrpManager::VrpManager(QObject *parent)
     : QObject(parent)
     , status_filter_(Status::Unknown)
+    , sort_type_(SortType::SortByDate)
+    , sort_order_(Qt::AscendingOrder)
     , local_games_(new GameInfoModel(this))
     , download_games_(new GameInfoModel(this))
     , device_manager_(new DeviceManager(this))
@@ -70,7 +72,7 @@ VrpManager::~VrpManager()
 
 QVariantList VrpManager::gamesInfo() const
 {
-    QVariantList list;
+    QList<GameInfo> games;
 
     for (auto it = all_games_.constBegin(); it != all_games_.constEnd(); ++it) {
         QString name = it.key().name;
@@ -80,10 +82,34 @@ QVariantList VrpManager::gamesInfo() const
         }
 
         if (filter_.isEmpty() || name.remove(" ").contains(filter_, Qt::CaseInsensitive)) {
-            list.append(QVariant::fromValue(it.key()));
+            games.append(it.key());
         }
     }
 
+    std::sort(games.begin(), games.end(), [this](const GameInfo &a, const GameInfo &b) {
+        switch (sort_type_) {
+        case SortType::SortByName: {
+            auto name_a = a.name.toLower();
+            auto name_b = b.name.toLower();
+            return sort_order_ == Qt::AscendingOrder ? name_a < name_b : name_a > name_b;
+        }
+        case SortType::SortBySize: {
+            long long size_a = a.size.toLongLong();
+            long long size_b = b.size.toLongLong();
+            return sort_order_ == Qt::AscendingOrder ? size_a < size_b : size_a > size_b;
+        }
+        case SortType::SortByDate:
+            // Sort by most recently updated, with the latest updates at the front
+            return sort_order_ == Qt::AscendingOrder ? a.last_updated > b.last_updated : a.last_updated < b.last_updated;
+        default:
+            return false;
+        }
+    });
+
+    QVariantList list;
+    for (auto &game : games) {
+        list.append(QVariant::fromValue(game));
+    }
     return list;
 }
 

@@ -37,6 +37,7 @@ class VrpManager : public QObject
 {
     Q_OBJECT
     Q_ENUMS(Status)
+    Q_ENUMS(SortType)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
 
@@ -61,6 +62,8 @@ public:
     Q_DECLARE_FLAGS(StatusFlags, Status)
     Q_FLAG(Status)
 
+    enum SortType { SortByDate, SortByName, SortBySize };
+
     explicit VrpManager(QObject *parent = nullptr);
     ~VrpManager();
     QCoro::Task<bool> updateMetadata();
@@ -78,6 +81,13 @@ public:
     Q_INVOKABLE void filterGamesByStatus(const StatusFlags status_filter)
     {
         status_filter_ = status_filter;
+        emit gamesInfoChanged();
+    }
+
+    Q_INVOKABLE void sortGames(SortType sort_type, Qt::SortOrder order = Qt::AscendingOrder)
+    {
+        sort_type_ = sort_type;
+        sort_order_ = order;
         emit gamesInfoChanged();
     }
     Q_INVOKABLE GameInfoModel *localGamesModel()
@@ -147,6 +157,8 @@ private:
     QString data_path_;
     QString filter_;
     StatusFlags status_filter_;
+    SortType sort_type_;
+    Qt::SortOrder sort_order_;
     DeviceManager *device_manager_;
     GameInfoModel *download_games_;
     GameInfoModel *local_games_;

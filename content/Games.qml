@@ -38,6 +38,35 @@ ColumnLayout {
         RowLayout {
             anchors.fill: parent
 
+            Button {
+                id: sort_button
+
+                property int sortOrder: Qt.AscendingOrder
+
+                flat: true
+                Layout.fillHeight: true
+                icon.source: "view-sort-ascending"
+                onClicked: {
+                    if (sortOrder === Qt.AscendingOrder) {
+                        icon.source = "view-sort-descending";
+                        sortOrder = Qt.DescendingOrder;
+                    } else {
+                        icon.source = "view-sort-ascending";
+                        sortOrder = Qt.AscendingOrder;
+                    }
+                    app.vrp.sortGames(sort_field.currentIndex, sortOrder);
+                }
+            }
+
+            ComboBox {
+                id: sort_field
+
+                flat: true
+                Layout.fillHeight: true
+                onActivated: app.vrp.sortGames(currentIndex, sort_button.sortOrder)
+                model: ["Update Date", "Name", "Size"]
+            }
+
             TextField {
                 id: filter_field
 
@@ -45,6 +74,15 @@ ColumnLayout {
                 Layout.fillHeight: true
                 placeholderText: qsTr("Filter by name...")
                 onTextChanged: app.vrp.filterGamesByName(text)
+                Layout.rightMargin: 0
+
+                Button {
+                    height: parent.height
+                    anchors.right: parent.right
+                    flat: true
+                    icon.source: "search"
+                }
+
             }
 
             RadioButton {
