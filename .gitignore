@@ -1,4 +1,5 @@
 build/
+builddir/
 CmakeLists.txt.user
 .directory
 build_flatpak/
