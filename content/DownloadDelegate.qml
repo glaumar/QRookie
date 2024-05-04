@@ -32,6 +32,50 @@ Kirigami.Card {
 
     signal deleteButtonClicked()
 
+    onProgressChanged: function() {
+        progress_bar.indeterminate = false;
+        let downloaded = progress * size;
+        let downloaded_unit = downloaded < 1024 ? "MB" : "GB";
+        downloaded = downloaded < 1024 ? downloaded : downloaded / 1024;
+        let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
+        status_label.text = downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
+    }
+    onStatusChanged: function() {
+        if (status === VrpManager.Queued) {
+            progress_bar.indeterminate = false;
+            delete_button.enabled = true;
+            status_label.color = Kirigami.Theme.textColor;
+            status_label.text = qsTr("Queued");
+        } else if (status === VrpManager.Decompressing) {
+            progress_bar.indeterminate = true;
+            delete_button.enabled = false;
+            status_label.color = Kirigami.Theme.textColor;
+            status_label.text = qsTr("Decompressing");
+        } else if (status === VrpManager.Downloading) {
+            delete_button.enabled = true;
+            status_label.color = Kirigami.Theme.textColor;
+            if (isNaN(progress) || progress <= 0) {
+                progress_bar.indeterminate = true;
+                status_label.text = qsTr("Starting Downloading");
+            }
+        } else if (status === VrpManager.DownloadError) {
+            delete_button.enabled = true;
+            progress_bar.indeterminate = false;
+            status_label.color = "red";
+            status_label.text = qsTr("DownloadError");
+        } else if (status === VrpManager.DecompressionError) {
+            delete_button.enabled = true;
+            progress_bar.indeterminate = false;
+            status_label.color = "red";
+            status_label.text = qsTr("DecompressionError");
+        } else {
+            delete_button.enabled = false;
+            progress_bar.indeterminate = false;
+            console.log("Unknown status: " + status);
+            status_label.text = qsTr("Unknown Status");
+        }
+    }
+
     Image {
         id: thumbnail
 
@@ -72,47 +116,7 @@ Kirigami.Card {
         anchors.margins: 10
         anchors.right: progress_bar.right
         anchors.bottom: progress_bar.top
-        text: {
-            if (status === VrpManager.Queued) {
-                progress_bar.indeterminate = false;
-                delete_button.enabled = true;
-                status_label.color = Kirigami.Theme.textColor;
-                return qsTr("Queued");
-            } else if (status === VrpManager.Decompressing) {
-                progress_bar.indeterminate = true;
-                delete_button.enabled = false;
-                status_label.color = Kirigami.Theme.textColor;
-                return qsTr("Decompressing");
-            } else if (status === VrpManager.Downloading) {
-                delete_button.enabled = true;
-                status_label.color = Kirigami.Theme.textColor;
-                if (isNaN(progress) || progress <= 1e-36) {
-                    progress_bar.indeterminate = true;
-                    return qsTr("Starting Downloading");
-                } else {
-                    progress_bar.indeterminate = false;
-                    let downloaded = progress * size;
-                    let downloaded_unit = downloaded < 1024 ? "MB" : "GB";
-                    downloaded = downloaded < 1024 ? downloaded : downloaded / 1024;
-                    let total_size = size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB";
-                    return downloaded.toFixed(2) + " " + downloaded_unit + " / " + total_size;
-                }
-            } else if (status === VrpManager.DownloadError) {
-                delete_button.enabled = true;
-                progress_bar.indeterminate = false;
-                status_label.color = "red";
-                return qsTr("DownloadError");
-            } else if (status === VrpManager.DecompressionError) {
-                delete_button.enabled = true;
-                progress_bar.indeterminate = false;
-                status_label.color = "red";
-                return qsTr("DecompressionError");
-            } else {
-                delete_button.enabled = false;
-                progress_bar.indeterminate = false;
-                return qsTr("Unknown Status");
-            }
-        }
+        text: "Unknown Status"
     }
 
     Button {

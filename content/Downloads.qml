@@ -18,6 +18,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import VrpManager
 import org.kde.kirigami as Kirigami
 
 RowLayout {
@@ -74,6 +75,9 @@ RowLayout {
                     function onDownloadProgressChanged(release_name, progress_) {
                         if (model.release_name === release_name)
                             progress = progress_;
+
+                        if (status !== VrpManager.Downloading)
+                            status = app.vrp.getStatus(model.game_info);
 
                     }
 
