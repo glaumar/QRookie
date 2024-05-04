@@ -516,7 +516,7 @@ void VrpManager::updateGameStatusWithDevice()
     auto apps_model = device_manager_->appListModel();
     StatusFlags remote_flags = {Status::UpdatableRemotely, Status::InstalledAndRemotely};
 
-    StatusFlags local_flags = {Status::UpdatableLocally, Status::InstalledAndLocally, Status::Installable};
+    StatusFlags local_flags = {Status::UpdatableLocally, Status::InstalledAndLocally, Status::Installable, Status::InstallError, Status::Installing};
 
     if (apps_model->rowCount() == 0) {
         // Update Status
