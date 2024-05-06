@@ -127,7 +127,7 @@ ColumnLayout {
         snapMode: GridView.SnapToRow
         model: app.vrp.gamesInfo
         cellWidth: 310
-        cellHeight: 300
+        cellHeight: 310
 
         ScrollBar.vertical: ScrollBar {
             visible: true
@@ -142,6 +142,7 @@ ColumnLayout {
             releaseName: modelData.release_name
             size: modelData.size
             lastUpdated: modelData.last_updated
+            versionCode: modelData.version_code
             thumbnailPath: {
                 let path = app.vrp.getGameThumbnailPath(modelData.package_name);
                 if (path === "")

@@ -27,10 +27,10 @@ Kirigami.Card {
     property string releaseName
     property int size
     property string lastUpdated
+    property string versionCode
     property string thumbnailPath
     property double progress
     property var status
-
 
     signal installButtonClicked()
     signal downloadButtonClicked()
@@ -134,11 +134,15 @@ Kirigami.Card {
     }
 
     contentItem: ColumnLayout {
-        Layout.margins: 5
+        Layout.margins: 10
+
+        Label {
+            text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
+        }
 
         Label {
             Layout.alignment: Qt.AlignRight
-            text: size > 1024 ? (size / 1024).toFixed(2) + " GB" : size + " MB"
+            text: "Version: " + versionCode
         }
 
         Label {
