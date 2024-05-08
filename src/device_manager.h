@@ -55,10 +55,10 @@ public:
         return installApk(path, package_name);
     }
 
-    QCoro::Task<bool> uninstallApk(const QString package_name);
+    QCoro::Task<bool> uninstallApk(const QString package_name, bool update_device_info = true);
     Q_INVOKABLE QCoro::QmlTask uninstallApkQml(const QString package_name)
     {
-        return uninstallApk(package_name);
+        return uninstallApk(package_name, true);
     };
 
     Q_INVOKABLE QVariantList devicesList() const

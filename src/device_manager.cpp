@@ -568,9 +568,27 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
         co_await adb.waitForFinished(-1);
 
         if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
-            qWarning() << "Failed to install" << apk_path << "on device" << serial;
-            qWarning() << basic_process.readAllStandardError();
-            co_return false;
+            QString err_msg = basic_process.readAllStandardError();
+
+            // if the signatures do not match previously installed version, try to uninstall the app first
+            if (err_msg.contains("signatures do not match previously installed version")) {
+                qWarning() << "Signatures do not match previously installed version, try uninstall the app first";
+                qWarning() << "Uninstalling" << package_name << "on device" << serial;
+                if (co_await uninstallApk(package_name, false)) {
+                    qDebug() << "Reinstalling" << apk_path << "on device" << serial;
+                    adb.start("adb", {"-s", serial, "install", "-r", apk_path});
+                    co_await adb.waitForFinished(-1);
+                    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+                        qWarning() << "Failed to reinstall" << apk_path << "on device" << serial;
+                        qWarning() << basic_process.readAllStandardError();
+                        co_return false;
+                    }
+                }
+            } else {
+                qWarning() << "Failed to install" << apk_path << "on device" << serial;
+                qWarning() << err_msg;
+                co_return false;
+            }
         }
     }
 
@@ -612,7 +630,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
     co_return true;
 }
 
-QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
+QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name, bool update_device_info)
 {
     if (!hasConnectedDevice()) {
         co_return false;
@@ -631,7 +649,9 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name)
         co_return false;
     }
 
-    updateDeviceInfo();
+    if (update_device_info) {
+        updateDeviceInfo();
+    }
     co_return true;
 }
 
