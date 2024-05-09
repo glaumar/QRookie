@@ -171,6 +171,10 @@ RowLayout {
 
                             width: parent.width
                             placeholderText: qsTr("192.168.1.10:5555")
+                            Component.onCompleted: {
+                                text = app.vrp.settings.lastWirelessAddr;
+                                console.log("lastWirelessAddr: " + text);
+                            }
                         }
 
                         Button {
@@ -178,7 +182,9 @@ RowLayout {
                             enabled: wireless_adress.text !== ""
                             onClicked: {
                                 app.deviceManager.connectToWirelessDeviceQml(wireless_adress.text).then((connected) => {
-                                    if (!connected) {
+                                    if (connected) {
+                                        app.vrp.settings.lastWirelessAddr = wireless_adress.text;
+                                    } else {
                                         wireless_error_message.visible = true;
                                         wireless_error_message.text = qsTr("Failed to connect to " + wireless_adress.text);
                                     }
