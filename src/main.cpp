@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
     app.setDesktopFileName(APPLICATION_ID);
 
     qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");
-    // qmlRegisterType<GameInfoModel>("GameInfoModel", 1, 0, "GameInfoModel");
     qmlRegisterType<DeviceManager>("DeviceManager", 1, 0, "DeviceManager");
     QCoro::Qml::registerTypes();
 

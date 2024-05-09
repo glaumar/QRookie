@@ -379,7 +379,7 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
         download_games_->remove(game);
         local_games_->prepend(game);
 
-        if (device_manager_->hasConnectedDevice()) {
+        if (settings()->autoInstall() && device_manager_->hasConnectedDevice()) {
             install(game);
         }
 

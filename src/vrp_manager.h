@@ -19,6 +19,7 @@
 #ifndef QROOKIE_VRP_DOWNLOADER
 #define QROOKIE_VRP_DOWNLOADER
 
+#include "app_settings.h"
 #include "device_manager.h"
 #include "game_info.h"
 #include "game_info_model.h"
@@ -40,6 +41,7 @@ class VrpManager : public QObject
     Q_ENUMS(SortType)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
+    Q_PROPERTY(AppSettings *settings READ settings)
 
 public:
     enum Status {
@@ -90,14 +92,18 @@ public:
         sort_order_ = order;
         emit gamesInfoChanged();
     }
+
+    // TODO: as property
     Q_INVOKABLE GameInfoModel *localGamesModel()
     {
         return local_games_;
     }
+    // TODO: as property
     Q_INVOKABLE GameInfoModel *downloadGamesModel()
     {
         return download_games_;
     }
+    // TODO: as property
     Q_INVOKABLE DeviceManager *deviceManager()
     {
         return device_manager_;
@@ -135,6 +141,10 @@ public:
     }
 
     QVariantList gamesInfo() const;
+    Q_INVOKABLE AppSettings *settings() const
+    {
+        return AppSettings::instance();
+    }
 signals:
     void gamesInfoChanged();
     void statusChanged(QString release_name, Status status);

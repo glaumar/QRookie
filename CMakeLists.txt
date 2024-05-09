@@ -18,10 +18,12 @@ set(APP_BINARY_NAME "qrookie")
 
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
-find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
+
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
+find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
+find_package(KF6Kirigami)
 
 include(KDEClangFormat)
 include(KDEGitCommitHooks)
@@ -40,7 +42,8 @@ qt_add_executable(${APP_BINARY_NAME} src/main.cpp
                              src/device_manager.cpp src/device_manager.h
                              src/http_downloader.cpp src/http_downloader.h
                              src/game_info_model.cpp src/game_info_model.h 
-                             src/game_info.h)
+                             src/game_info.h
+                             src/app_settings.cpp src/app_settings.h)
 
 qt_add_resources(${APP_BINARY_NAME} "configuration"
     PREFIX "/"

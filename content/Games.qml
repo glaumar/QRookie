@@ -111,8 +111,47 @@ ColumnLayout {
                 text: qsTr("Installed")
                 onClicked: app.vrp.filterGamesByStatus(VrpManager.InstalledAndLocally | VrpManager.InstalledAndRemotely)
                 enabled: app.deviceManager.connectedDevice.length > 0
-                Layout.rightMargin: 10
             }
+
+            Button {
+                id: settings_button
+
+                flat: true
+                Layout.fillHeight: true
+                icon.source: "settings-configure"
+                onClicked: settings_sheet.open()
+            }
+
+        }
+
+    }
+
+    Kirigami.OverlaySheet {
+        id: settings_sheet
+
+        title: "Settings"
+        implicitHeight: 300
+        implicitWidth: 500
+
+        Kirigami.FormLayout {
+            id: settings_form
+
+            anchors.fill: parent
+
+            Switch {
+                Kirigami.FormData.label: qsTr("Auto Install:")
+                Component.onCompleted: {
+                    checked = app.vrp.settings.autoInstall;
+                }
+                onClicked: {
+                    app.vrp.settings.autoInstall = checked;
+                }
+            }
+
+            // ComboBox {
+            //     model: ["Update Date", "Name", "Size"]
+            //     Kirigami.FormData.label: qsTr("Default Sort By:")
+            // }
 
         }
 
