@@ -36,19 +36,9 @@ VrpManager::VrpManager(QObject *parent)
     , local_games_(new GameInfoModel(this))
     , download_games_(new GameInfoModel(this))
     , device_manager_(new DeviceManager(this))
+    , cache_path_(AppSettings::instance()->cachePath())
+    , data_path_(AppSettings::instance()->dataPath())
 {
-    // TODO: using AppSettings
-    // Create cache and data directories
-    QDir dir;
-    cache_path_ = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    data_path_ = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!dir.exists(cache_path_)) {
-        dir.mkpath(cache_path_);
-    }
-    if (!dir.exists(data_path_)) {
-        dir.mkpath(data_path_);
-    }
-
     http_downloader_.setDownloadDirectory(cache_path_);
 
     connect(device_manager_, &DeviceManager::appListChanged, this, &VrpManager::updateGameStatusWithDevice);

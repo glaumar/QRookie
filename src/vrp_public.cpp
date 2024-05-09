@@ -34,8 +34,6 @@ VrpPublic::VrpPublic(QObject *parent)
 
 QCoro::Task<bool> VrpPublic::update()
 {
-    // TODO: save vrp-public.json to local file
-    // TODO: load vrp-public.json from local file when update failed
     static const QVector<QString> urls = {"https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json",
                                           "https://vrpirates.wiki/downloads/vrp-public.json"};
 
