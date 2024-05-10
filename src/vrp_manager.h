@@ -145,6 +145,13 @@ public:
     {
         return AppSettings::instance();
     }
+
+    QCoro::Task<bool> openGameFolder(const QString release_name);
+    Q_INVOKABLE QCoro::QmlTask openGameFolderQml(const QString &release_name)
+    {
+        return openGameFolder(release_name);
+    }
+
 signals:
     void gamesInfoChanged();
     void statusChanged(QString release_name, Status status);

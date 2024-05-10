@@ -31,6 +31,7 @@ Kirigami.Card {
 
     signal installButtonClicked()
     signal deleteButtonClicked()
+    signal nameTextClicked()
 
     onStatusChanged: function() {
         install_button.enabled = false;
@@ -89,6 +90,18 @@ Kirigami.Card {
         wrapMode: Text.WordWrap
         height: font.pixelSize * 2.5
         font.pointSize: Qt.application.font.pointSize * 1.3
+        color: name_text_mouse_area.containsMouse ? Kirigami.Theme.hoverColor : Kirigami.Theme.textColor
+
+        MouseArea {
+            id: name_text_mouse_area
+
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                nameTextClicked();
+            }
+        }
+
     }
 
     Label {

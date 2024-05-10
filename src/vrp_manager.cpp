@@ -585,3 +585,17 @@ GameInfo VrpManager::getFirstQueuedGame() const
     }
     return {};
 }
+
+QCoro::Task<bool> VrpManager::openGameFolder(const QString release_name)
+{
+    QProcess basic_process;
+    auto xdg_open = qCoro(basic_process);
+    xdg_open.start("xdg-open", {getLocalGamePath(release_name)});
+    co_await xdg_open.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning("Error: %s\n %s", basic_process.readAllStandardOutput().data(), basic_process.readAllStandardError().data());
+        co_return false;
+    }
+    co_return true;
+}

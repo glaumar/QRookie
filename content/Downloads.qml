@@ -146,6 +146,9 @@ RowLayout {
                 onDeleteButtonClicked: {
                     local_list.model.remove(model.index);
                 }
+                onNameTextClicked: {
+                    app.vrp.openGameFolderQml(model.release_name);
+                }
 
                 Connections {
                     function onStatusChanged(release_name_, status_) {
