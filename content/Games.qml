@@ -130,15 +130,15 @@ ColumnLayout {
         id: settings_sheet
 
         title: "Settings"
-        implicitHeight: 300
-        implicitWidth: 500
+        implicitHeight: 100
+        implicitWidth: 300
 
         Kirigami.FormLayout {
             id: settings_form
 
             anchors.fill: parent
 
-            Switch {
+            CheckBox {
                 Kirigami.FormData.label: qsTr("Auto Install:")
                 Component.onCompleted: {
                     checked = app.vrp.settings.autoInstall;
@@ -146,12 +146,10 @@ ColumnLayout {
                 onClicked: {
                     app.vrp.settings.autoInstall = checked;
                 }
+                text: qsTr("Enable")
+                ToolTip.text: qsTr("Automatically install after the download is complete when a device is connected.")
+                ToolTip.visible: hovered
             }
-
-            // ComboBox {
-            //     model: ["Update Date", "Name", "Size"]
-            //     Kirigami.FormData.label: qsTr("Default Sort By:")
-            // }
 
         }
 
