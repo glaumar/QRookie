@@ -26,6 +26,7 @@ AppSettings::AppSettings(QObject *parent)
     : QObject(parent)
     , settings_(new QSettings(APPLICATION_NAME, APPLICATION_NAME, this))
     , auto_install_(true)
+    , auto_clean_cache_(true)
     , cache_path_(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
     , data_path_(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
     , last_wireless_addr(QString())
@@ -46,6 +47,7 @@ AppSettings *AppSettings::instance()
 void AppSettings::loadAppSettings()
 {
     auto_install_ = settings_->value("auto_install", auto_install_).toBool();
+    auto_clean_cache_ = settings_->value("auto_clean_cache", auto_clean_cache_).toBool();
 
     QDir dir;
     cache_path_ = settings_->value("cache_path", cache_path_).toString();
@@ -66,6 +68,13 @@ void AppSettings::setAutoInstall(bool auto_install)
     auto_install_ = auto_install;
     settings_->setValue("auto_install", auto_install_);
     emit autoInstallChanged(auto_install);
+}
+
+void AppSettings::setAutoCleanCache(bool auto_clean_cache)
+{
+    auto_clean_cache_ = auto_clean_cache;
+    settings_->setValue("auto_clean_cache", auto_clean_cache_);
+    emit autoCleanCacheChanged(auto_clean_cache);
 }
 
 void AppSettings::setCachePath(const QString &cache_path)

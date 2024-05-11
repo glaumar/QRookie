@@ -74,8 +74,6 @@ ColumnLayout {
                 Layout.fillHeight: true
                 placeholderText: qsTr("Filter by name...")
                 onTextChanged: app.vrp.filterGamesByName(text)
-                Layout.rightMargin: 0
-
                 Button {
                     height: parent.height
                     anchors.right: parent.right
@@ -148,6 +146,19 @@ ColumnLayout {
                 }
                 text: qsTr("Enable")
                 ToolTip.text: qsTr("Automatically install after the download is complete when a device is connected.")
+                ToolTip.visible: hovered
+            }
+
+            CheckBox {
+                Kirigami.FormData.label: qsTr("Auto Clean Cache:")
+                Component.onCompleted: {
+                    checked = app.vrp.settings.autoCleanCache;
+                }
+                onClicked: {
+                    app.vrp.settings.autoCleanCache = checked;
+                }
+                text: qsTr("Enable")
+                ToolTip.text: qsTr("Automatically clean the cache when the game is decompressed.")
                 ToolTip.visible: hovered
             }
 

@@ -373,7 +373,9 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
             install(game);
         }
 
-        cleanCache(game.release_name);
+        if (settings()->autoCleanCache()) {
+            cleanCache(game.release_name);
+        }
         co_return true;
     }
 }
