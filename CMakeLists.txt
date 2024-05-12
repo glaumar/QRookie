@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(QRookie
-    VERSION 0.2.3
+    VERSION 0.2.4
     DESCRIPTION "Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader but for linux)"
     HOMEPAGE_URL https://github.com/glaumar/QRookie
     LANGUAGES CXX)

@@ -37,6 +37,22 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-05-12" version="0.2.4">
+            <description>
+                <p>Changes in version 0.2.4</p>
+                <ul>
+                    <li>feat(UI,backend): Support opening the game folder by clicking on the local
+                        game name</li>
+                    <li>feat(UI,backend): Remeber the last conneted wireless address</li>
+                    <li>feat(UI,backend): Add app settings and settings sheet</li>
+                    <li>feat(UI, backend): Supports sorting by name, size or date</li>
+                    <li>feat(UI): Display version code</li>
+                    <li>feat(backend): Support for updating with packages of inconsistent signatures</li>
+                    <li>fix(UI): UnkownStatus in download queue</li>
+                    <li>fix(backend): Device disconnect does not update the InstallError status</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-04-29" version="0.2.3">
             <description>
                 <p>Changes in version 0.2.3</p>
