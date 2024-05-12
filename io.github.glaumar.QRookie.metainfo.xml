@@ -134,17 +134,20 @@
     <screenshots>
         <screenshot type="default">
             <image>
-                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot1.png</image>
+                https://media.githubusercontent.com/media/glaumar/QRookie/main/screenshots/Screenshot1.png
+            </image>
             <caption>Games</caption>
         </screenshot>
         <screenshot>
             <image>
-                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot2.png</image>
+                https://media.githubusercontent.com/media/glaumar/QRookie/main/screenshots/Screenshot2.png
+            </image>
             <caption>Downloads</caption>
         </screenshot>
         <screenshot>
             <image>
-                https://raw.githubusercontent.com/glaumar/QRookie/main/screenshots/Screenshot3.png</image>
+                https://media.githubusercontent.com/media/glaumar/QRookie/main/screenshots/Screenshot3.png
+            </image>
             <caption>Devices</caption>
         </screenshot>
     </screenshots>
