@@ -3,11 +3,17 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
 
 # Screenshots
 
-![](./screenshots/Screenshot1.png) 
+<div align="center">
+  <img src="screenshots/Screenshot1.png" width="640"/>
+</div>
+<details>
+<summary>Click for more screenshots</summary>
+    <div align="center">
+        <img src="screenshots/Screenshot2.png" width="640"/>
+        <img src="screenshots/Screenshot3.png" width="640"/>
+    </div>
+</details>
 
-![](./screenshots/Screenshot2.png)
-
-![](./screenshots/Screenshot3.png)
 
 # Download
 
