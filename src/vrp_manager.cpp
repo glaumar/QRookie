@@ -387,7 +387,7 @@ QCoro::Task<bool> VrpManager::install(const GameInfo game)
     }
     qDebug() << "Installing: " << game.release_name;
     setStatus(game, Status::Installing);
-    bool result = co_await device_manager_->installApk(getLocalGamePath(game.release_name), game.package_name);
+    bool result = co_await device_manager_->installApk(getLocalGamePath(game.release_name), game.package_name, settings()->renamePackage());
 
     if (result) {
         qDebug() << "Install finished: " << game.release_name;

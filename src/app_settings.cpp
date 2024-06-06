@@ -27,6 +27,7 @@ AppSettings::AppSettings(QObject *parent)
     , settings_(new QSettings(APPLICATION_NAME, APPLICATION_NAME, this))
     , auto_install_(true)
     , auto_clean_cache_(true)
+    , rename_package_(false)
     , cache_path_(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
     , data_path_(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
     , last_wireless_addr(QString())
@@ -75,6 +76,13 @@ void AppSettings::setAutoCleanCache(bool auto_clean_cache)
     auto_clean_cache_ = auto_clean_cache;
     settings_->setValue("auto_clean_cache", auto_clean_cache_);
     emit autoCleanCacheChanged(auto_clean_cache);
+}
+
+void AppSettings::setRenamePackage(bool rename_package)
+{
+    rename_package_ = rename_package;
+    settings_->setValue("rename_package", rename_package_);
+    emit renamePackageChanged(rename_package);
 }
 
 void AppSettings::setCachePath(const QString &cache_path)

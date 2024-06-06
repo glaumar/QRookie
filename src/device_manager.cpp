@@ -538,7 +538,112 @@ QCoro::Task<void> DeviceManager::updateAppList()
     co_return;
 }
 
-QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString package_name)
+bool replaceInFile(const QString &file_path, const QString &old_text, const QString &new_text)
+{
+    QFile file(file_path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open" << file_path;
+        return false;
+    }
+
+    QString content = file.readAll();
+    file.close();
+
+    content.replace(old_text, new_text);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open" << file_path;
+        return false;
+    }
+
+    file.write(content.toUtf8());
+    file.close();
+    return true;
+}
+
+QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QString package_name, const QString new_package_name)
+{
+    if (!apk_file.exists()) {
+        qWarning() << apk_file << "does not exist";
+        co_return false;
+    }
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+
+    // Decode the apk
+    const QString temp_dir = apk_file.absolutePath() + "/.temp/";
+    const QString extra_dir = temp_dir + package_name;
+    adb.start("apktool", {"d", "-f", apk_file.absoluteFilePath(), "-o", extra_dir});
+    co_await adb.waitForFinished(-1);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to decode" << apk_file;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    // rename the package name in AndroidManifest.xml
+    const QString manifest_file = extra_dir + "/AndroidManifest.xml";
+    if (!QFile::exists(manifest_file)) {
+        qWarning() << manifest_file << "does not exist";
+        co_return false;
+    }
+
+    if (!replaceInFile(manifest_file, package_name, new_package_name)) {
+        qWarning() << "Failed to rename package name in" << manifest_file;
+        co_return false;
+    }
+
+    // rename the package name in  apktool.yml
+    const QString apktool_file = extra_dir + "/apktool.yml";
+    if (!QFile::exists(apktool_file)) {
+        qWarning() << apktool_file << "does not exist";
+        co_return false;
+    }
+
+    if (!replaceInFile(apktool_file, package_name, new_package_name)) {
+        qWarning() << "Failed to rename package name in" << apktool_file;
+        co_return false;
+    }
+
+    // repack the apk
+    const QString unsigned_apk_file = temp_dir + new_package_name + "-unsigned.apk";
+    adb.start("apktool", {"b", "-o", unsigned_apk_file, extra_dir});
+    co_await adb.waitForFinished(-1);
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to recompile" << apk_file;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    // 4k align the apk
+    const QString new_apk_file = temp_dir + new_package_name + ".apk";
+    adb.start("zipalign", {"-f", "-v", "4", unsigned_apk_file, new_apk_file});
+    co_await adb.waitForFinished(-1);
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to align" << unsigned_apk_file;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    // sign the apk
+    // TODO: change the keystore path
+    adb.start(
+        "apksigner",
+        {"sign", "--ks", "../key/qrookie.keystore", "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file});
+
+    co_await adb.waitForFinished(-1);
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to sign" << new_apk_file;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    co_return true;
+}
+
+QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString package_name, bool rename_package)
 {
     if (!hasConnectedDevice()) {
         co_return false;
@@ -559,10 +664,27 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
         co_return false;
     }
 
+    QString new_package_name;
+    if (rename_package) {
+        new_package_name = package_name + ".qrookie";
+        QFileInfo apk_file(path + "/" + package_name + ".apk");
+        if (!co_await renameApk(apk_file, package_name, new_package_name)) {
+            qWarning() << "Failed to rename package name for" << apk_file;
+            co_return false;
+        }
+    }
+
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     for (const QString &apk_file : apk_files) {
-        QString apk_path = path + "/" + apk_file;
+        QString apk_path;
+
+        if (rename_package && apk_file == package_name + ".apk") {
+            apk_path = path + "/.temp/" + new_package_name + ".apk";
+        } else {
+            apk_path = path + "/" + apk_file;
+        }
+
         qDebug() << "Installing" << apk_path << "on device" << serial;
         adb.start("adb", {"-s", serial, "install", "-r", apk_path});
         co_await adb.waitForFinished(-1);
@@ -572,9 +694,10 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
 
             // if the signatures do not match previously installed version, try to uninstall the app first
             if (err_msg.contains("signatures do not match previously installed version")) {
+                QString pkg_name = rename_package ? new_package_name : package_name;
                 qWarning() << "Signatures do not match previously installed version, try uninstall the app first";
-                qWarning() << "Uninstalling" << package_name << "on device" << serial;
-                if (co_await uninstallApk(package_name, false)) {
+                qWarning() << "Uninstalling" << pkg_name << "on device" << serial;
+                if (co_await uninstallApk(pkg_name, false)) {
                     qDebug() << "Reinstalling" << apk_path << "on device" << serial;
                     adb.start("adb", {"-s", serial, "install", "-r", apk_path});
                     co_await adb.waitForFinished(-1);
@@ -594,20 +717,27 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
 
     QString obb_path = path + "/" + package_name;
     QDir obb_dir(obb_path);
+    QString pkg_name = rename_package ? new_package_name : package_name;
     if (!package_name.isEmpty() && obb_dir.exists()) {
-        qDebug() << "Pushing obb file for" << package_name << "to device" << serial;
-        adb.start("adb", {"-s", serial, "shell", "rm", "-rf", "/sdcard/Android/obb/" + package_name});
+        qDebug() << "Pushing obb file for" << pkg_name << "to device" << serial;
+        adb.start("adb", {"-s", serial, "shell", "rm", "-rf", "/sdcard/Android/obb/" + pkg_name});
         co_await adb.waitForFinished(-1);
-        adb.start("adb", {"-s", serial, "shell", "mkdir", "/sdcard/Android/obb/" + package_name});
+        adb.start("adb", {"-s", serial, "shell", "mkdir", "/sdcard/Android/obb/" + pkg_name});
         co_await adb.waitForFinished(-1);
 
         QStringList obb_files = obb_dir.entryList(QStringList() << "*", QDir::Files);
         for (const QString &obb_file : obb_files) {
             qDebug() << "Pushing" << obb_file << "to device" << serial;
-            adb.start("adb", {"-s", serial, "push", obb_path + "/" + obb_file, "/sdcard/Android/obb/" + package_name + "/"});
+            QString src = obb_path + "/" + obb_file;
+            QString dst_file_name = obb_file;
+            if (rename_package)
+                dst_file_name.replace(package_name, pkg_name);
+            QString dst = "/sdcard/Android/obb/" + pkg_name + "/" + dst_file_name;
+
+            adb.start("adb", {"-s", serial, "push", src, dst});
             co_await adb.waitForFinished(-1);
             if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
-                qWarning() << "Failed to push obb file for" << package_name << "on device" << serial;
+                qWarning() << "Failed to push obb file for" << pkg_name << "on device" << serial;
                 qWarning() << basic_process.readAllStandardError();
                 co_return false;
             }
@@ -619,9 +749,9 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
     // Arbitrary support for install.txt has potential security issues and is only adapted for specific applications
 
     if (package_name == QStringLiteral("tdg.oculuswirelessadb")) {
-        adb.start("adb", {"-s", serial, "shell", "pm", "grant", package_name, "android.permission.WRITE_SECURE_SETTINGS"});
+        adb.start("adb", {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.WRITE_SECURE_SETTINGS"});
         co_await adb.waitForFinished();
-        adb.start("adb", {"-s", serial, "shell", "pm", "grant", package_name, "android.permission.READ_LOGS"});
+        adb.start("adb", {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.READ_LOGS"});
         co_await adb.waitForFinished();
     }
 

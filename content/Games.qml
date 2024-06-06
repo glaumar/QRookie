@@ -128,7 +128,7 @@ ColumnLayout {
         id: settings_sheet
 
         title: "Settings"
-        implicitHeight: 100
+        implicitHeight: 120
         implicitWidth: 300
 
         Kirigami.FormLayout {

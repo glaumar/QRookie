@@ -100,12 +100,40 @@ RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        Label {
-            id: local_title
+        RowLayout {
+            id: local_title_row
 
-            text: qsTr("Local") + " (" + local_list.count + ")"
-            font.bold: true
-            font.pointSize: Qt.application.font.pointSize * 2
+            width: parent.width
+
+            Label {
+                id: local_title
+
+                Layout.alignment: Qt.AlignLeft
+                text: qsTr("Local") + " (" + local_list.count + ")"
+                font.bold: true
+                font.pointSize: Qt.application.font.pointSize * 2
+            }
+
+            Row {
+                Layout.alignment: Qt.AlignRight
+                Layout.rightMargin: 10
+
+                CheckBox {
+                    id: rename_checkbox
+
+                    Component.onCompleted: {
+                        checked = app.vrp.settings.renamePackage;
+                    }
+                    onClicked: {
+                        app.vrp.settings.renamePackage = checked;
+                    }
+                    text: qsTr("Rename pkg")
+                    ToolTip.text: qsTr("Rename the package before installing the game.This is useful when Quest prevents you from launching an game whose free trial has expired.")
+                    ToolTip.visible: hovered
+                }
+
+            }
+
         }
 
         Kirigami.CardsListView {
@@ -113,7 +141,7 @@ RowLayout {
 
             width: parent.width
             height: parent.height - local_title.height
-            anchors.top: local_title.bottom
+            anchors.top: local_title_row.bottom
             anchors.margins: 5
             spacing: 10
             clip: true

@@ -27,6 +27,7 @@ class AppSettings : public QObject
 
     Q_PROPERTY(bool autoInstall READ autoInstall WRITE setAutoInstall NOTIFY autoInstallChanged)
     Q_PROPERTY(bool autoCleanCache READ autoCleanCache WRITE setAutoCleanCache NOTIFY autoCleanCacheChanged)
+    Q_PROPERTY(bool renamePackage READ renamePackage WRITE setRenamePackage NOTIFY renamePackageChanged)
     Q_PROPERTY(QString cachePath READ cachePath WRITE setCachePath NOTIFY cachePathChanged)
     Q_PROPERTY(QString dataPath READ dataPath WRITE setDataPath NOTIFY dataPathChanged)
     Q_PROPERTY(QString lastWirelessAddr READ lastWirelessAddr WRITE setLastWirelessAddr NOTIFY lastWirelessAddrChanged)
@@ -49,6 +50,12 @@ public:
     }
     void setAutoCleanCache(bool auto_clean_cache);
 
+    bool renamePackage() const
+    {
+        return rename_package_;
+    }
+    void setRenamePackage(bool rename_package);
+
     QString cachePath() const
     {
         return cache_path_;
@@ -70,6 +77,7 @@ public:
 signals:
     void autoInstallChanged(bool auto_install);
     void autoCleanCacheChanged(bool auto_clean_cache);
+    void renamePackageChanged(bool rename_package);
     void cachePathChanged(QString cache_path);
     void dataPathChanged(QString data_path);
     void lastWirelessAddrChanged(QString addr);
@@ -80,6 +88,7 @@ private:
     QSettings *settings_;
     bool auto_install_;
     bool auto_clean_cache_;
+    bool rename_package_;
     QString cache_path_;
     QString data_path_;
     QString last_wireless_addr;

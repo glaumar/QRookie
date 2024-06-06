@@ -173,7 +173,6 @@ RowLayout {
                             placeholderText: qsTr("192.168.1.10:5555")
                             Component.onCompleted: {
                                 text = app.vrp.settings.lastWirelessAddr;
-                                console.log("lastWirelessAddr: " + text);
                             }
                         }
 

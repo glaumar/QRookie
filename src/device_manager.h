@@ -24,6 +24,8 @@
 #include <QCoroQmlTask>
 #include <QVariantList>
 
+class QFileInfo;
+
 class DeviceManager : public QObject
 {
     Q_OBJECT
@@ -48,7 +50,8 @@ public:
 
     Q_INVOKABLE QCoro::Task<bool> startServer();
     Q_INVOKABLE QCoro::Task<bool> restartServer();
-    QCoro::Task<bool> installApk(const QString path, const QString package_name);
+    QCoro::Task<bool> renameApk(const QFileInfo apk_file, const QString package_name, const QString new_package_name);
+    QCoro::Task<bool> installApk(const QString path, const QString package_name, bool rename_package = false);
 
     Q_INVOKABLE QCoro::QmlTask installApkQml(const QString path, const QString package_name)
     {
