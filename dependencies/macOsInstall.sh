@@ -40,8 +40,7 @@ install_dependency() {
 
 # Instalar ferramentas necessárias via Homebrew
 echo "Instalando ferramentas via Homebrew..."
-# brew install cmake extra-cmake-modules qt vulkan-headers
-brew install cmake extra-cmake-modules vulkan-headers
+brew install cmake extra-cmake-modules qt vulkan-headers ninja vulkan-loader molten-vk pkg-config node glib python@3.12
 
 # Instalar dependências
 install_dependency "https://github.com/danvratil/qcoro.git" v0.10.0

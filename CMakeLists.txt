@@ -23,6 +23,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 if(APPLE)
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/qcoro")
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/kirigami")
+    add_definitions(-DPROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)

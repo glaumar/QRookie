@@ -18,7 +18,6 @@
 #include <QCoroQml>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QDir>
 #include <QDebug>
 
 #include "device_manager.h"
@@ -38,11 +37,12 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    // Adicionar caminhos QML
-    QString projectDir = QCoreApplication::applicationDirPath() + "/../../../../../";
-    qDebug() << "Project Directory:" << projectDir; // Linha de debug
+    #if defined(Q_OS_MAC)
+        QString projectDir = QString(PROJECT_SOURCE_DIR);
+        qDebug() << "Project Directory:" << projectDir; // Linha de debug
+        engine.addImportPath(projectDir + "/dependencies/install/kirigami/lib/qml");
 
-    engine.addImportPath(projectDir + "/dependencies/install/kirigami/lib/qml");
+    #endif
 
     const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
     QObject::connect(
