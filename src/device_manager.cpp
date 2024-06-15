@@ -24,6 +24,11 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QSharedPointer>
+#include <QStandardPaths>
+
+#ifndef ADB_PATH
+#define ADB_PATH "adb"
+#endif
 
 DeviceManager::DeviceManager(QObject *parent)
     : QObject(parent)
@@ -42,7 +47,7 @@ QCoro::Task<bool> DeviceManager::startServer()
 {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"start-server"});
+    adb.start(ADB_PATH, {"start-server"});
     co_await adb.waitForFinished();
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to start adb server";
@@ -57,7 +62,7 @@ QCoro::Task<bool> DeviceManager::restartServer()
 {
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"kill-server"});
+    adb.start(ADB_PATH, {"kill-server"});
     co_await adb.waitForFinished();
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to kill adb server";
@@ -85,12 +90,16 @@ void DeviceManager::updateDeviceInfo()
 
 QCoro::Task<void> DeviceManager::updateSerials()
 {
+
+    qDebug() << "ADB Path:" << ADB_PATH;
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"devices"});
+    adb.start(ADB_PATH, {"devices"});
 
     if (!co_await adb.waitForFinished()) {
-        qWarning() << "Failed to get devices";
+        qWarning() << "Failed to get devices with ";
+        qWarning() << "Standard Output:" << basic_process.readAllStandardOutput();
+        qWarning() << "Standard Error:" << basic_process.readAllStandardError();
         co_return;
     }
     /* EXAMPLE OUTPUT:
@@ -144,7 +153,7 @@ QCoro::Task<void> DeviceManager::updateDeviceName()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.product.model"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "getprop", "ro.product.model"});
 
     co_await adb.waitForFinished();
 
@@ -172,7 +181,7 @@ QCoro::Task<void> DeviceManager::updatedeviceIp()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "ip", "route"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "ip", "route"});
 
     co_await adb.waitForFinished();
 
@@ -219,7 +228,7 @@ QCoro::Task<void> DeviceManager::updateSpaceUsage()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "df", "/sdcard"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "df", "/sdcard"});
 
     co_await adb.waitForFinished();
 
@@ -267,7 +276,7 @@ QCoro::Task<void> DeviceManager::updateBatteryLevel()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "dumpsys", "battery"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "dumpsys", "battery"});
 
     co_await adb.waitForFinished();
 
@@ -332,7 +341,7 @@ QCoro::Task<void> DeviceManager::updateOculusOsVersion()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.display.id"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "getprop", "ro.build.display.id"});
 
     co_await adb.waitForFinished();
 
@@ -358,7 +367,7 @@ QCoro::Task<void> DeviceManager::updateOculusVersion()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package", "com.oculus.systemux"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "dumpsys", "package", "com.oculus.systemux"});
 
     co_await adb.waitForFinished();
 
@@ -406,7 +415,7 @@ QCoro::Task<void> DeviceManager::updateOculusRuntimeVersion()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "dumpsys", "package", "com.oculus.vrshell"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "dumpsys", "package", "com.oculus.vrshell"});
 
     co_await adb.waitForFinished();
 
@@ -454,7 +463,7 @@ QCoro::Task<void> DeviceManager::updateAndroidVersion()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.version.release"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "getprop", "ro.build.version.release"});
 
     co_await adb.waitForFinished();
 
@@ -480,7 +489,7 @@ QCoro::Task<void> DeviceManager::updateAndroidSdkVersion()
     QProcess basic_process;
     auto adb = qCoro(basic_process);
 
-    adb.start("adb", {"-s", serial, "shell", "getprop", "ro.build.version.sdk"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "getprop", "ro.build.version.sdk"});
 
     co_await adb.waitForFinished();
 
@@ -505,7 +514,7 @@ QCoro::Task<void> DeviceManager::updateAppList()
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "shell", "pm", "list", "packages", "--show-versioncode", "-3"});
+    adb.start(ADB_PATH, {"-s", serial, "shell", "pm", "list", "packages", "--show-versioncode", "-3"});
 
     co_await adb.waitForFinished();
 
@@ -686,7 +695,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
         }
 
         qDebug() << "Installing" << apk_path << "on device" << serial;
-        adb.start("adb", {"-s", serial, "install", "-r", apk_path});
+        adb.start(ADB_PATH, {"-s", serial, "install", "-r", apk_path});
         co_await adb.waitForFinished(-1);
 
         if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
@@ -699,7 +708,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
                 qWarning() << "Uninstalling" << pkg_name << "on device" << serial;
                 if (co_await uninstallApk(pkg_name, false)) {
                     qDebug() << "Reinstalling" << apk_path << "on device" << serial;
-                    adb.start("adb", {"-s", serial, "install", "-r", apk_path});
+                    adb.start(ADB_PATH, {"-s", serial, "install", "-r", apk_path});
                     co_await adb.waitForFinished(-1);
                     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
                         qWarning() << "Failed to reinstall" << apk_path << "on device" << serial;
@@ -720,9 +729,9 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
     QString pkg_name = rename_package ? new_package_name : package_name;
     if (!package_name.isEmpty() && obb_dir.exists()) {
         qDebug() << "Pushing obb file for" << pkg_name << "to device" << serial;
-        adb.start("adb", {"-s", serial, "shell", "rm", "-rf", "/sdcard/Android/obb/" + pkg_name});
+        adb.start(ADB_PATH, {"-s", serial, "shell", "rm", "-rf", "/sdcard/Android/obb/" + pkg_name});
         co_await adb.waitForFinished(-1);
-        adb.start("adb", {"-s", serial, "shell", "mkdir", "/sdcard/Android/obb/" + pkg_name});
+        adb.start(ADB_PATH, {"-s", serial, "shell", "mkdir", "/sdcard/Android/obb/" + pkg_name});
         co_await adb.waitForFinished(-1);
 
         QStringList obb_files = obb_dir.entryList(QStringList() << "*", QDir::Files);
@@ -734,7 +743,7 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
                 dst_file_name.replace(package_name, pkg_name);
             QString dst = "/sdcard/Android/obb/" + pkg_name + "/" + dst_file_name;
 
-            adb.start("adb", {"-s", serial, "push", src, dst});
+            adb.start(ADB_PATH, {"-s", serial, "push", src, dst});
             co_await adb.waitForFinished(-1);
             if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
                 qWarning() << "Failed to push obb file for" << pkg_name << "on device" << serial;
@@ -749,9 +758,9 @@ QCoro::Task<bool> DeviceManager::installApk(const QString path, const QString pa
     // Arbitrary support for install.txt has potential security issues and is only adapted for specific applications
 
     if (package_name == QStringLiteral("tdg.oculuswirelessadb")) {
-        adb.start("adb", {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.WRITE_SECURE_SETTINGS"});
+        adb.start(ADB_PATH, {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.WRITE_SECURE_SETTINGS"});
         co_await adb.waitForFinished();
-        adb.start("adb", {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.READ_LOGS"});
+        adb.start(ADB_PATH, {"-s", serial, "shell", "pm", "grant", pkg_name, "android.permission.READ_LOGS"});
         co_await adb.waitForFinished();
     }
 
@@ -770,7 +779,7 @@ QCoro::Task<bool> DeviceManager::uninstallApk(const QString package_name, bool u
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "uninstall", package_name});
+    adb.start(ADB_PATH, {"-s", serial, "uninstall", package_name});
     co_await adb.waitForFinished(-1);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
@@ -794,7 +803,7 @@ QCoro::Task<bool> DeviceManager::connectToWirelessDevice(const QString address /
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"connect", address});
+    adb.start(ADB_PATH, {"connect", address});
     co_await adb.waitForFinished();
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
@@ -831,7 +840,7 @@ QCoro::Task<bool> DeviceManager::enableTcpMode(int port)
 
     QProcess basic_process;
     auto adb = qCoro(basic_process);
-    adb.start("adb", {"-s", serial, "tcpip", QString::number(port)});
+    adb.start(ADB_PATH, {"-s", serial, "tcpip", QString::number(port)});
     co_await adb.waitForFinished(5000);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {

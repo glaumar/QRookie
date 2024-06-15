@@ -24,7 +24,19 @@ if(APPLE)
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/qcoro")
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/kirigami")
     add_definitions(-DPROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+    # Detectar a arquitetura do sistema
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+        set(ADB_PATH "${CMAKE_SOURCE_DIR}/dependencies/adb/arm64/adb")
+    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+        set(ADB_PATH "${CMAKE_SOURCE_DIR}/dependencies/adb/x86/adb")
+    else()
+        message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+
+    add_definitions(-DADB_PATH="${ADB_PATH}")
 endif()
+
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
