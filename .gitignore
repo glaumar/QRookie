@@ -12,3 +12,7 @@ QRookie.flatpak
 .flatpak
 _build/
 io.github.glaumar.QRookie.flatpak
+
+# MacOs Dependencies
+/dependencies/*
+!/dependencies/macOsInstall.sh

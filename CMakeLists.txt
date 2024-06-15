@@ -20,6 +20,10 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/qcoro")
+    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/dependencies/install/kirigami")
+endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
@@ -41,7 +45,7 @@ qt_add_executable(${APP_BINARY_NAME} src/main.cpp
                              src/vrp_manager.cpp src/vrp_manager.h
                              src/device_manager.cpp src/device_manager.h
                              src/http_downloader.cpp src/http_downloader.h
-                             src/game_info_model.cpp src/game_info_model.h 
+                             src/game_info_model.cpp src/game_info_model.h
                              src/game_info.h
                              src/app_settings.cpp src/app_settings.h)
 
@@ -65,16 +69,35 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
-install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
-install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
-install(FILES icons/16x16/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/16x16/apps)
-install(FILES icons/32x32/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/32x32/apps)
-install(FILES icons/48x48/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/48x48/apps)
-install(FILES icons/64x64/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/64x64/apps)
-install(FILES icons/128x128/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/128x128/apps)
-install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/256x256/apps)
-install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
-install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)
+if(APPLE)
+    set_target_properties(${APP_BINARY_NAME} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+    )
+
+    install(TARGETS ${APP_BINARY_NAME} BUNDLE DESTINATION /Applications)
+    install(FILES ${DESKTOP_FILE_NAME} DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources)
+    install(FILES icons/16x16/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/16x16/apps)
+    install(FILES icons/32x32/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/32x32/apps)
+    install(FILES icons/48x48/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/48x48/apps)
+    install(FILES icons/64x64/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/64x64/apps)
+    install(FILES icons/128x128/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/128x128/apps)
+    install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/256x256/apps)
+    install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/icons/hicolor/scalable/apps)
+    install(FILES ${METAINFO_FILE_NAME} DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources/metainfo)
+    install(FILES resources/adb DESTINATION /Applications/${APPLICATION_NAME}.app/Contents/Resources)
+else()
+    install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
+    install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
+    install(FILES icons/16x16/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/16x16/apps)
+    install(FILES icons/32x32/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/32x32/apps)
+    install(FILES icons/48x48/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/48x48/apps)
+    install(FILES icons/64x64/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/64x64/apps)
+    install(FILES icons/128x128/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/128x128/apps)
+    install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/256x256/apps)
+    install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
+    install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)
+endif()
 
 # Add clang-format target
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
