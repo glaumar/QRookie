@@ -14,7 +14,7 @@ set(APPLICATION_ID "io.github.glaumar.QRookie")
 set(DESKTOP_FILE_NAME ${APPLICATION_ID}.desktop)
 set(APPLICATION_ICON_BASE_NAME ${APPLICATION_ID})
 set(METAINFO_FILE_NAME ${APPLICATION_ID}.metainfo.xml)
-set(APP_BINARY_NAME "qrookie")
+set(APP_BINARY_NAME "QRookie")
 
 set(CMAKE_AUTOMOC ON)
 
