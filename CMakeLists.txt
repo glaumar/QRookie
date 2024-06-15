@@ -75,6 +75,7 @@ install(FILES icons/128x128/${APPLICATION_ID}.png DESTINATION share/icons/hicolo
 install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/256x256/apps)
 install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
 install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)
+install(FILES key/qrookie.keystore DESTINATION share/QRookie)
 
 # Add clang-format target
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
