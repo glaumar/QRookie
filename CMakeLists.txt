@@ -114,16 +114,6 @@ if(APPLE)
         message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
     endif()
 
-    # Adicionar rpath para garantir que as bibliotecas sejam encontradas
-    set_target_properties(${APP_BINARY_NAME} PROPERTIES
-        INSTALL_RPATH "@loader_path/../Frameworks"
-    )
-
-    # Executar macdeployqt após a construção
-    add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-        COMMAND /path/to/Qt/6.7.0/clang_64/bin/macdeployqt "${BUILD_DIR}/QRookie.app"
-    )
-
 else()
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
     install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
