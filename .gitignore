@@ -14,5 +14,5 @@ _build/
 io.github.glaumar.QRookie.flatpak
 
 # MacOs Dependencies
-/dependencies/*
-!/dependencies/macOsInstall.sh
+/macOs/dependencies
+/macOs/build

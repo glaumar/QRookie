@@ -91,15 +91,12 @@ void DeviceManager::updateDeviceInfo()
 QCoro::Task<void> DeviceManager::updateSerials()
 {
 
-    qDebug() << "ADB Path:" << ADB_PATH;
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start(ADB_PATH, {"devices"});
 
     if (!co_await adb.waitForFinished()) {
         qWarning() << "Failed to get devices with ";
-        qWarning() << "Standard Output:" << basic_process.readAllStandardOutput();
-        qWarning() << "Standard Error:" << basic_process.readAllStandardError();
         co_return;
     }
     /* EXAMPLE OUTPUT:
