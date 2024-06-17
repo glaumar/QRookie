@@ -27,10 +27,14 @@
 #include <QStandardPaths>
 
 #ifndef MACOS
-#define ADB_PATH "../Resources/adb"
+#define RESOURCE_PATH ""
 #else
-#define ADB_PATH "adb"
+#define RESOURCE_PATH "../Resources/"
 #endif
+#define ZIPALIGN_PATH RESOURCE_PATH "zipalign"
+#define ADB_PATH RESOURCE_PATH "adb"
+#define APKTOOL_PATH RESOURCE_PATH "apktool"
+#define APKSIGNER_PATH RESOURCE_PATH "apksigner"
 
 DeviceManager::DeviceManager(QObject *parent)
     : QObject(parent)
@@ -582,7 +586,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
     // Decode the apk
     const QString temp_dir = apk_file.absolutePath() + "/.temp/";
     const QString extra_dir = temp_dir + package_name;
-    adb.start("apktool", {"d", "-f", apk_file.absoluteFilePath(), "-o", extra_dir});
+    adb.start(APKTOOL_PATH, {"d", "-f", apk_file.absoluteFilePath(), "-o", extra_dir});
     co_await adb.waitForFinished(-1);
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
@@ -617,7 +621,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
 
     // repack the apk
     const QString unsigned_apk_file = temp_dir + new_package_name + "-unsigned.apk";
-    adb.start("apktool", {"b", "-o", unsigned_apk_file, extra_dir});
+    adb.start(APKTOOL_PATH, {"b", "-o", unsigned_apk_file, extra_dir});
     co_await adb.waitForFinished(-1);
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to recompile" << apk_file;
@@ -627,7 +631,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
 
     // 4k align the apk
     const QString new_apk_file = temp_dir + new_package_name + ".apk";
-    adb.start("zipalign", {"-f", "-v", "4", unsigned_apk_file, new_apk_file});
+    adb.start(ZIPALIGN_PATH, {"-f", "-v", "4", unsigned_apk_file, new_apk_file});
     co_await adb.waitForFinished(-1);
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
         qWarning() << "Failed to align" << unsigned_apk_file;
@@ -638,7 +642,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
     // sign the apk
     // TODO: change the keystore path
     adb.start(
-        "apksigner",
+        APKSIGNER_PATH,
         {"sign", "--ks", "../key/qrookie.keystore", "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file});
 
     co_await adb.waitForFinished(-1);

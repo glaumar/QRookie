@@ -26,8 +26,10 @@ if(APPLE)
 
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
         set(MAC_ARCH "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
     else()
         set(MAC_ARCH "i386")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
     endif()
 
     set(PROJECT_DIR ${CMAKE_SOURCE_DIR})

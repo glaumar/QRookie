@@ -30,8 +30,10 @@
 
 #ifndef MACOS
 #define S7Z_PATH "../Resources/7za"
+#define OPEN_PATH "open"
 #else
 #define S7Z_PATH "7za"
+#define OPEN_PATH "xdg-open"
 #endif
 
 VrpManager::VrpManager(QObject *parent)
@@ -598,7 +600,7 @@ QCoro::Task<bool> VrpManager::openGameFolder(const QString release_name)
 {
     QProcess basic_process;
     auto xdg_open = qCoro(basic_process);
-    xdg_open.start("xdg-open", {getLocalGamePath(release_name)});
+    xdg_open.start(OPEN_PATH, {getLocalGamePath(release_name)});
     co_await xdg_open.waitForFinished();
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {

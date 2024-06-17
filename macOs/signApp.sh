@@ -21,7 +21,6 @@ mkdir -p "${APP_PATH}/Contents/Resources"
 cp -r "/opt/homebrew/Cellar/qt/6.7.0_1/share/qt/qml" "${APP_PATH}/Contents/Resources/"
 
 macdeployqt "${APP_PATH}"
-macdeployqt "${APP_PATH}"
 
 echo "Signing main executable..."
 sign_item "${APP_PATH}/Contents/MacOS/QRookie"
@@ -44,6 +43,6 @@ spctl --assess --type exec -vv "${APP_PATH}"
 codesign --verify --deep --strict --verbose=2 "${APP_PATH}"
 
 rm -rf "$WORKING_DIR/QRookie_${ARCH}.app"
-cp -r "$APP_PATH" "$WORKING_DIR/QRookie_${ARCH}.app"
+zip -r "$APP_PATH" "$WORKING_DIR/QRookie_${ARCH}.zip"
 
 echo "Signing completed."
