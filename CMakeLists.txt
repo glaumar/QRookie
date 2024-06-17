@@ -22,17 +22,22 @@ find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 if(APPLE)
-    # Define as variáveis do projeto
+    add_definitions(-DMACOS)
+
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
         set(MAC_ARCH "arm64")
-    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+    else()
         set(MAC_ARCH "i386")
     endif()
-    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install_${MAC_ARCH}")
 
+    set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
+    set(BUILD_DIR "${CMAKE_BINARY_DIR}")
+    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install_${MAC_ARCH}")
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${INSTALL_DIR}/qcoro")
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${INSTALL_DIR}/kirigami")
-    add_definitions(-DMACOS)
+
+    message("INSTALL_DIR: ${INSTALL_DIR}")
+    message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Xml DBus)
@@ -94,10 +99,6 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
 if(APPLE)
-    set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
-    set(BUILD_DIR "${CMAKE_BINARY_DIR}")
-    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install_${MAC_ARCH}")
-
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist

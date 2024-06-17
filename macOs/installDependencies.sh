@@ -59,7 +59,7 @@ echo "Instalando ferramentas via Homebrew..."
 set_brew_path
 
 echo -e "\033[34mUsing these binary paths:\033[0m"
-commands=("cmake" "make" "brew" "7za" "adb" "macdeployqt")
+commands=("cmake" "make" "brew" "7za" "adb" "macdeployqt" "codesign")
 for cmd in "${commands[@]}"; do
     path=$(which $cmd)
     echo -e "\033[33m$cmd:\033[0m $path"
