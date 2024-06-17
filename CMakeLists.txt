@@ -92,6 +92,7 @@ if(APPLE)
     )
     add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
+        COMMAND ${CMAKE_COMMAND} -E copy "${BUILD_DIR}/../../icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${INSTALL_DIR}/kirigami/lib/qml"
             "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
