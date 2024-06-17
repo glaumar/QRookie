@@ -17,6 +17,11 @@ sign_item() {
 # Empacotamento do app bundle
 echo "Packaging the app bundle... Dir = ${BUILD_DIR}"
 cd "${BUILD_DIR}"
+
+mkdir -p "${APP_PATH}/Contents/Resources"
+cp -r "/opt/homebrew/Cellar/qt/6.7.0_1/share/qt/qml" "${APP_PATH}/Contents/Resources/"
+
+macdeployqt "${APP_PATH}"
 macdeployqt "${APP_PATH}"
 
 # Assinar o executável principal

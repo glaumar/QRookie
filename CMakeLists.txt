@@ -17,8 +17,6 @@ set(METAINFO_FILE_NAME ${APPLICATION_ID}.metainfo.xml)
 set(APP_BINARY_NAME "QRookie")
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
@@ -29,9 +27,9 @@ if(APPLE)
     set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/macOS/dependencies/install/kirigami")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Network Xml DBus)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Xml DBus)
 find_package(Qt6 REQUIRED COMPONENTS Qml QmlWorkerScript)
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickLayouts QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickLayouts QuickControls2 QuickTemplates2 Widgets Svg)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(KF6Kirigami)
 
@@ -47,13 +45,13 @@ configure_file(src/qrookie.h.in qrookie.h)
 
 qt_add_executable(${APP_BINARY_NAME} 
     src/main.cpp
-    src/vrp_public.cpp src/vrp_public.h
-    src/vrp_torrent.cpp src/vrp_torrent.h
-    src/vrp_manager.cpp src/vrp_manager.h
-    src/device_manager.cpp src/device_manager.h
-    src/http_downloader.cpp src/http_downloader.h
-    src/game_info_model.cpp src/game_info_model.h
-    src/game_info.h
+                             src/vrp_public.cpp src/vrp_public.h
+                             src/vrp_torrent.cpp src/vrp_torrent.h
+                             src/vrp_manager.cpp src/vrp_manager.h
+                             src/device_manager.cpp src/device_manager.h
+                             src/http_downloader.cpp src/http_downloader.h
+                             src/game_info_model.cpp src/game_info_model.h
+                             src/game_info.h
     src/app_settings.cpp src/app_settings.h
 )
 
@@ -71,12 +69,18 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Quick
     Qt6::QuickLayouts
     Qt6::QuickControls2
+    Qt6::QuickTemplates2
     Qt6::Network
     Qt6::Xml
     Qt6::DBus
-    QCoro6::Core
-    QCoro6::Qml
+    Qt6::Widgets
+    Qt6::Svg
     QCoro6::Network
+    QCoro6::Core
+    QCoro6::Coro
+    QCoro6::Qml
+    KF6Kirigami
+    KF6::Kirigami
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
@@ -88,11 +92,11 @@ if(APPLE)
 
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
     )
     add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
-        COMMAND ${CMAKE_COMMAND} -E copy "${BUILD_DIR}/../../icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${INSTALL_DIR}/kirigami/lib/qml"
             "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
@@ -114,6 +118,11 @@ if(APPLE)
     else()
         message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
     endif()
+
+    # Adicionar rpath para garantir que as bibliotecas sejam encontradas
+    set_target_properties(${APP_BINARY_NAME} PROPERTIES
+        INSTALL_RPATH "@loader_path/../Frameworks"
+    )
 
 else()
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
