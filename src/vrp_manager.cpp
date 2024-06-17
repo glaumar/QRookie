@@ -27,6 +27,7 @@
 #include <QStandardPaths>
 
 #include "qrookie.h"
+#include "resource_locator.h"
 
 #ifndef MACOS
 #define S7Z_PATH "../Resources/7za"
@@ -141,7 +142,7 @@ QCoro::Task<bool> VrpManager::downloadMetadata()
         auto p7za = qCoro(basic_process);
 
         // Decompress meta.7z
-        p7za.start(S7Z_PATH,
+        p7za.start(resolvePrefix(S7Z_PATH),
                    QStringList() << "x" << QString("%1/meta.7z").arg(http_downloader_.downloadDirectory())
                                  << "-aoa" // Overwrite All existing files without prompt.
                                  << QString("-o%1").arg(data_path_) << QString("-p%1").arg(vrp_public_.password()));
@@ -353,7 +354,7 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
     auto p7za = qCoro(basic_process);
 
     // Decompress
-    p7za.start(S7Z_PATH,
+    p7za.start(resolvePrefix(S7Z_PATH),
                QStringList() << "x" << QString("%1/%2/%2.7z.001").arg(cache_path_, getGameId(game.release_name))
                              << "-aoa" // Overwrite All existing files without prompt.
                              << QString("-o%1").arg(data_path_) << QString("-p%1").arg(vrp_public_.password()));
