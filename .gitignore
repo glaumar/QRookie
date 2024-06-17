@@ -17,4 +17,4 @@ io.github.glaumar.QRookie.flatpak
 /macOs/dependencies
 /macOs/build*
 *.app
-*.zip
+*.dmg
