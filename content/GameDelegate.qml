@@ -160,6 +160,7 @@ Kirigami.Card {
                 id: magnet_button
 
                 icon.source: "kt-magnet"
+                text: "magnet"
                 onClicked: {
                     textEdit.text = app.vrp.getMagnetURI(releaseName);
                     textEdit.selectAll();

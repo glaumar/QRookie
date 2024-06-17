@@ -30,7 +30,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.rightMargin: 10
         Layout.bottomMargin: 10
-        height: 40
+        height: 50
         Component.onCompleted: {
             filter_field.forceActiveFocus();
         }
@@ -46,6 +46,7 @@ ColumnLayout {
                 flat: true
                 Layout.fillHeight: true
                 icon.source: "view-sort-ascending"
+                text: "Order"
                 onClicked: {
                     if (sortOrder === Qt.AscendingOrder) {
                         icon.source = "view-sort-descending";
@@ -78,6 +79,7 @@ ColumnLayout {
                     height: parent.height
                     anchors.right: parent.right
                     flat: true
+                    text: "Search"
                     icon.source: "search"
                 }
 
@@ -116,6 +118,7 @@ ColumnLayout {
 
                 flat: true
                 Layout.fillHeight: true
+                text: "Settings"
                 icon.source: "settings-configure"
                 onClicked: settings_sheet.open()
             }
