@@ -28,10 +28,11 @@
 
 #include "qrookie.h"
 
-#ifndef S7Z_PATH
+#ifndef MACOS
+#define S7Z_PATH "../Resources/7za"
+#else
 #define S7Z_PATH "7za"
 #endif
-
 
 VrpManager::VrpManager(QObject *parent)
     : QObject(parent)

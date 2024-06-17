@@ -26,7 +26,9 @@
 #include <QSharedPointer>
 #include <QStandardPaths>
 
-#ifndef ADB_PATH
+#ifndef MACOS
+#define ADB_PATH "../Resources/adb"
+#else
 #define ADB_PATH "adb"
 #endif
 

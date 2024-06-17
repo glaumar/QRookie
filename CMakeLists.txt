@@ -23,8 +23,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 if(APPLE)
     # Define as variáveis do projeto
-    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/macOS/dependencies/install/qcoro")
-    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/macOS/dependencies/install/kirigami")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+        set(MAC_ARCH "arm64")
+    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+        set(MAC_ARCH "i386")
+    endif()
+    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install_${MAC_ARCH}")
+
+    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${INSTALL_DIR}/qcoro")
+    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${INSTALL_DIR}/kirigami")
+    add_definitions(-DMACOS)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Xml DBus)
@@ -88,7 +96,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 if(APPLE)
     set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
     set(BUILD_DIR "${CMAKE_BINARY_DIR}")
-    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install")
+    set(INSTALL_DIR "${PROJECT_DIR}/macOs/dependencies/install_${MAC_ARCH}")
 
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -102,24 +110,6 @@ if(APPLE)
             "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
     )
 
-    # Detectar a arquitetura do sistema
-    if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
-        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-                "${PROJECT_DIR}/macOs/adb/arm64/adb"
-                "${BUILD_DIR}/QRookie.app/Contents/Resources/adb"
-        )
-    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
-        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-                "${PROJECT_DIR}/macOs/adb/x86/adb"
-                "${BUILD_DIR}/QRookie.app/Contents/Resources/adb"
-        )
-    else()
-        message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
-    endif()
-
-    # Adicionar rpath para garantir que as bibliotecas sejam encontradas
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         INSTALL_RPATH "@loader_path/../Frameworks"
     )
