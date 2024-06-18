@@ -28,7 +28,7 @@ if(APPLE)
         set(MAC_ARCH "arm64")
         set(CMAKE_OSX_ARCHITECTURES "arm64")
     else()
-        set(MAC_ARCH "i386")
+        set(MAC_ARCH "x86_64")
         set(CMAKE_OSX_ARCHITECTURES "x86_64")
     endif()
 

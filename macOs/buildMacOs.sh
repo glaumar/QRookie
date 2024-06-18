@@ -1,5 +1,6 @@
 # Description: This script is used to build the project on MacOS
-ARCH=$(arch)
+source ./projectConfig.sh
+
 PROJECT_DIR="$(pwd)/.."
 BUILD_DIR="$(pwd)/build_${ARCH}"
 INSTALL_DIR="$(pwd)/dependencies/install_${ARCH}"
@@ -32,7 +33,7 @@ fi
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 rm -rf QRookie.app
-cmake ../../  -DCMAKE_OSX_ARCHITECTURES=$ARCH_NAME
+cmake ../../  -DCMAKE_OSX_ARCHITECTURES=$ARCH_NAME -DCMAKE_OSX_DEPLOYMENT_TARGET=$OS_TARGET
 make
 
 copy_binary() {

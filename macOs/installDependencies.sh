@@ -1,20 +1,12 @@
 #!/bin/bash
 
 # Definir diretórios de instalação
-ARCH=$(arch)
-ARCH_NAME=$(echo $ARCH | sed 's/[^a-zA-Z]//g')
+source ./projectConfig.sh
+
 WORKING_DIR="$(pwd)"
 DEP_DIR="${WORKING_DIR}/dependencies"
-BUILD_DIR="${DEP_DIR}/build_${ARCH}"
-INSTALL_DIR="${DEP_DIR}/install_${ARCH}"
-
-if [[ "$ARCH" == "arm64" ]]; then
-    echo "Apple Silicon (arm64) detected."
-    ARCH_NAME="arm64"
-else
-    echo "Intel (x86_64) detected."
-    ARCH_NAME="x86_64"
-fi
+BUILD_DIR="${DEP_DIR}/build_${ARCH_NAME}"
+INSTALL_DIR="${DEP_DIR}/install_${ARCH_NAME}"
 
 mkdir -p "${DEP_DIR}"
 mkdir -p "${BUILD_DIR}"
@@ -41,7 +33,7 @@ install_dependency() {
 
         mkdir -p "${BUILD_DIR}/${REPO_NAME}"
         cd "${BUILD_DIR}/${REPO_NAME}"
-        cmake "$REPO_DIR" -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/${REPO_NAME}" -DCMAKE_OSX_ARCHITECTURES=$ARCH_NAME
+        cmake "$REPO_DIR" -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/${REPO_NAME}" -DCMAKE_OSX_ARCHITECTURES=$ARCH_NAME -DCMAKE_OSX_DEPLOYMENT_TARGET=$OS_TARGET
         make
         make install
         cd "$WORKING_DIR"
@@ -50,21 +42,8 @@ install_dependency() {
     fi
 }
 
-set_brew_path() {
-    if [ "$(arch)" = "arm64" ]; then
-        # Definir PATH para Homebrew em /opt/homebrew (Apple Silicon)
-        export PATH="/opt/homebrew/bin:$PATH"
-        echo "Using Homebrew for Apple Silicon (arm64) at /opt/homebrew/bin"
-    else
-        # Definir PATH para Homebrew em /usr/local (Intel)
-        export PATH="/usr/local/bin:$PATH"
-        echo "Using Homebrew for Intel (x86_64) at /usr/local/bin"
-    fi
-}
-
 # Install Homebrew dependencies
 echo "Instalando ferramentas via Homebrew..."
-set_brew_path
 brew install cmake make extra-cmake-modules qt vulkan-headers ninja vulkan-loader molten-vk pkg-config node glib python@3.12 p7zip android-platform-tools apktool
 
 # Install cmake dependencies
