@@ -40,10 +40,17 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle("Imagine");
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (env.contains("XDG_DATA_DIRS")) {
-        QString xdgDataDirs = env.value("XDG_DATA_DIRS");
-        QStringList iconDirs = xdgDataDirs.split(QDir::listSeparator());
-        iconDirs.replaceInStrings(QRegularExpression("$"), "/icons");
-        QIcon::setThemeSearchPaths(iconDirs);
+        QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
+        QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
+        QStringList icon_dirs;
+        for (auto dir : data_dirs) {
+            auto icon_dir = dir + "/icons";
+            if (QDir(icon_dir).exists()) {
+                icon_dirs.append(icon_dir);
+            }
+        }
+        icon_dirs += ":/icons";
+        QIcon::setThemeSearchPaths(icon_dirs);
     }
     QIcon::setThemeName("WhiteSur");
 #endif
