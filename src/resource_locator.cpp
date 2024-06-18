@@ -5,26 +5,19 @@ QString resourcePrefix = "";
 
 QString resolvePrefix(QString cmd)
 {
+#ifdef MACOS
     if (resourcePrefix.isEmpty()) {
-#ifdef MACOS
         resourcePrefix = QCoreApplication::applicationDirPath() + "/../Resources/";
-#endif
     }
 
-    QString resPath;
-#ifdef MACOS
-    resPath = resourcePrefix;
-#else
-    resPath = "";
-#endif
-
-    QString cmdPath = resPath + cmd;
+    QString cmdPath = resourcePrefix + cmd;
     QFile adbFile(cmdPath);
-#ifdef MACOS
     if (!adbFile.exists()) {
-        qWarning() << cmd << " executable does not exist at:" << resPath;
+        qWarning() << cmd << " executable does not exist at:" << cmdPath;
     }
-#endif
 
     return cmdPath;
+#else
+    return cmd;
+#endif
 }

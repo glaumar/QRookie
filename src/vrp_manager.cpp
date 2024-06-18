@@ -30,12 +30,11 @@
 #include "resource_locator.h"
 
 #ifdef MACOS
-#define S7Z_PATH "../Resources/7za"
 #define OPEN_PATH "open"
 #else
-#define S7Z_PATH "7za"
 #define OPEN_PATH "xdg-open"
 #endif
+#define S7Z_PATH "7za"
 
 VrpManager::VrpManager(QObject *parent)
     : QObject(parent)
