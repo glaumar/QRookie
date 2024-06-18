@@ -29,7 +29,7 @@
 #include "qrookie.h"
 #include "resource_locator.h"
 
-#ifndef MACOS
+#ifdef MACOS
 #define S7Z_PATH "../Resources/7za"
 #define OPEN_PATH "open"
 #else
