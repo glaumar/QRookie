@@ -16,8 +16,12 @@
  */
 
 #include <QCoroQml>
+#include <QDir>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
+#include <QQuickStyle>
+#include <QRegularExpression>
 
 #include "device_manager.h"
 #include "qrookie.h"
@@ -29,6 +33,20 @@ int main(int argc, char *argv[])
     app.setApplicationName(APPLICATION_NAME);
     app.setApplicationVersion(APPLICATION_VERSION);
     app.setDesktopFileName(APPLICATION_ID);
+
+#ifdef Q_OS_LINUX
+    QQuickStyle::setStyle("org.kde.breeze");
+#elif defined(Q_OS_MAC)
+    QQuickStyle::setStyle("Imagine");
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    if (env.contains("XDG_DATA_DIRS")) {
+        QString xdgDataDirs = env.value("XDG_DATA_DIRS");
+        QStringList iconDirs = xdgDataDirs.split(QDir::listSeparator());
+        iconDirs.replaceInStrings(QRegularExpression("$"), "/icons");
+        QIcon::setThemeSearchPaths(iconDirs);
+    }
+    QIcon::setThemeName("WhiteSur");
+#endif
 
     qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");
     qmlRegisterType<DeviceManager>("DeviceManager", 1, 0, "DeviceManager");

@@ -125,7 +125,7 @@ Kirigami.Card {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 10
-        icon.source: "delete"
+        icon.name: "delete"
         onClicked: {
             deleteButtonClicked();
         }

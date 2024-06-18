@@ -21,7 +21,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml QuickControls2)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(KF6Kirigami)
 
@@ -58,6 +58,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Quick
     Qt6::Network
     Qt6::Xml
+    Qt6::QuickControls2
     QCoro6::Core
     QCoro6::Qml
     QCoro6::Network

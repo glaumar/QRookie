@@ -45,13 +45,13 @@ ColumnLayout {
 
                 flat: true
                 Layout.fillHeight: true
-                icon.source: "view-sort-ascending"
+                icon.name: "view-sort-ascending"
                 onClicked: {
                     if (sortOrder === Qt.AscendingOrder) {
-                        icon.source = "view-sort-descending";
+                        icon.name = "view-sort-descending";
                         sortOrder = Qt.DescendingOrder;
                     } else {
-                        icon.source = "view-sort-ascending";
+                        icon.name = "view-sort-ascending";
                         sortOrder = Qt.AscendingOrder;
                     }
                     app.vrp.sortGames(sort_field.currentIndex, sortOrder);
@@ -78,7 +78,7 @@ ColumnLayout {
                     height: parent.height
                     anchors.right: parent.right
                     flat: true
-                    icon.source: "search"
+                    icon.name: "search"
                 }
 
             }
@@ -116,7 +116,7 @@ ColumnLayout {
 
                 flat: true
                 Layout.fillHeight: true
-                icon.source: "settings-configure"
+                icon.name: "settings-configure"
                 onClicked: settings_sheet.open()
             }
 
