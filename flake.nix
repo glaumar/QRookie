@@ -41,7 +41,7 @@
               kdePackages.qtdeclarative
               kdePackages.qcoro
               kdePackages.kirigami
-            ] ++ (if (system == "aarch64-linux")
+            ] ++ (if (system == "x86_64-linux" || system == "aarch64-linux")
             then [ kdePackages.qqc2-breeze-style ]
             else [
               (whitesur-icon-theme.overrideAttrs
@@ -101,26 +101,26 @@
               jdk21_headless
             ] ++ (if (system == "x86_64-linux" || system == "aarch64-linux")
             then [ gdb kdePackages.qqc2-breeze-style ]
-            else [ 
-	    (whitesur-icon-theme.overrideAttrs
-	     (finalAttrs: previousAttrs: {
-	      nativeBuildInputs = [ gtk3 fdupes ];
-	      installPhase = ''
-	      runHook preInstall
+            else [
+              (whitesur-icon-theme.overrideAttrs
+                (finalAttrs: previousAttrs: {
+                  nativeBuildInputs = [ gtk3 fdupes ];
+                  installPhase = ''
+                    runHook preInstall
 
-	      ./install.sh --dest $out/share/icons \
-	      --name WhiteSur \
-	      --theme ${builtins.toString themeVariants} \
-	      ${lib.optionalString alternativeIcons "--alternative"} \
-	      ${lib.optionalString boldPanelIcons "--bold"} \
-	      ${lib.optionalString blackPanelIcons "--black"}
+                    ./install.sh --dest $out/share/icons \
+                      --name WhiteSur \
+                      --theme ${builtins.toString themeVariants} \
+                      ${lib.optionalString alternativeIcons "--alternative"} \
+                      ${lib.optionalString boldPanelIcons "--bold"} \
+                      ${lib.optionalString blackPanelIcons "--black"}
 
-	      fdupes --symlinks --recurse $out/share
+                    fdupes --symlinks --recurse $out/share
 
-	      runHook postInstall
-	      '';
-	      }))
-	    ]);
+                    runHook postInstall
+                  '';
+                }))
+            ]);
 
             shellHook = ''
               PATH="${zipAlignPath}:$PATH"
