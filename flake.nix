@@ -41,6 +41,8 @@
               kdePackages.qtdeclarative
               kdePackages.qcoro
               kdePackages.kirigami
+              kdePackages.qtsvg
+              kdePackages.qtimageformats
             ] ++ (if (system == "x86_64-linux" || system == "aarch64-linux")
             then [ kdePackages.qqc2-breeze-style ]
             else [
@@ -93,6 +95,8 @@
               kdePackages.qtdeclarative
               kdePackages.qcoro
               kdePackages.kirigami
+              kdePackages.qtsvg
+              kdePackages.qtimageformats
               p7zip
               apktool
               xdg-utils
