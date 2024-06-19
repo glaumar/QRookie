@@ -6,18 +6,6 @@ BUILD_DIR="$(pwd)/build_${ARCH}"
 INSTALL_DIR="$(pwd)/dependencies/install_${ARCH}"
 APP_RESOURCES_DIR="$BUILD_DIR/QRookie.app/Contents/Resources"
 
-set_android_tools() {
-    if [ ! -d "$ANDROID_SDK_DIR" ]; then
-        echo -e "\033[31mError:\033[0m BuildTools directory not found in $BUILD_TOOLS_DIR, using default path."
-        export ANDROID_SDK_DIR="$HOME/Library/Android/sdk"
-        echo "Using Android SDK at $ANDROID_SDK_DIR"
-    fi
-    local BUILD_TOOLS_DIR="$ANDROID_SDK_DIR/build-tools"
-    local BUILD_TOOLS_VERSION=$(ls "$BUILD_TOOLS_DIR" | sort -r | head -n 1)
-    local BUILD_TOOLS_BIN="$BUILD_TOOLS_DIR/$BUILD_TOOLS_VERSION"
-    echo -e "\033[34mUsing Android Build Tools at $BUILD_TOOLS_BIN\033[0m"
-    export PATH="$PATH:$BUILD_TOOLS_BIN"
-}
 # Build dependencies
 ./installDependencies.sh
 
@@ -39,7 +27,7 @@ make
 copy_binary() {
     local BINARY_NAME=$1
     local DEST_DIR=$2
-    local BINARY_PATH=$(which "$BINARY_NAME")
+    local BINARY_PATH=$(which "$BINARY_NAME" | head -n 1)
 
     if [ -x "$BINARY_PATH" ]; then
         echo "Found $BINARY_NAME at $BINARY_PATH"
@@ -65,10 +53,11 @@ done
 
 
 copy_binary "adb" "$APP_RESOURCES_DIR"
-copy_binary "7za" "$APP_RESOURCES_DIR"
-copy_binary "apktool" "$APP_RESOURCES_DIR"
-copy_binary "zipalign" "$APP_RESOURCES_DIR"
+copy_binary ${HOMEBREW_CELLAR}/p7zip/*/lib/p7zip/7za "$APP_RESOURCES_DIR"
+# Need Android SDK configured
 copy_binary "apksigner" "$APP_RESOURCES_DIR"
+cp -r "$BUILD_TOOLS_BIN/lib" "$APP_RESOURCES_DIR"
+copy_binary "zipalign" "$APP_RESOURCES_DIR"
 
-# Run
-# open QRookie.app
+# Need user brew install
+copy_binary "apktool" "$APP_RESOURCES_DIR"
