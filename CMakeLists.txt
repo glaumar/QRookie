@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(QRookie
-    VERSION 0.2.4
+    VERSION 0.3.0
     DESCRIPTION "Download and install Quest games from ROOKIE Public Mirror (like VRP Rookie Sideloader but for linux)"
     HOMEPAGE_URL https://github.com/glaumar/QRookie
     LANGUAGES CXX)
@@ -90,34 +90,24 @@ else()
     unset(INSTALL_DIR)
 endif()
 
-if(APPLE)
+if(APPLE AND DEFINED INSTALL_DIR)
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
     )
 
-    if(DEFINED INSTALL_DIR)
-        set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
-        set_target_properties(${APP_BINARY_NAME} PROPERTIES
-            INSTALL_RPATH "@loader_path/../Frameworks"
-        )
-        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${INSTALL_DIR}/kirigami/lib/qml"
-                "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
-        )
-    else()
-        set_target_properties(${APP_BINARY_NAME} PROPERTIES
-            INSTALL_RPATH "@executable_path/../Frameworks"
-        )
-        install(TARGETS ${APP_BINARY_NAME} DESTINATION ./)
-        install(FILES icons/icon.icns DESTINATION QRookie.app/Contents/Resources)
-        install(FILES key/qrookie.keystore DESTINATION QRookie.app/Contents/Resources)
-    endif()
-
+    set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
+    set_target_properties(${APP_BINARY_NAME} PROPERTIES
+        INSTALL_RPATH "@loader_path/../Frameworks"
+    )
+    add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${INSTALL_DIR}/kirigami/lib/qml"
+            "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
+    )
 else()
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
     install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
