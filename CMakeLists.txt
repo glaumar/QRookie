@@ -40,7 +40,8 @@ if(APPLE)
     message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Network Xml QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Qml QmlWorkerScript)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(KF6Kirigami)
 
@@ -76,6 +77,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Xml
     Qt6::DBus
     Qt6::QuickControls2
+    Qt6::QmlWorkerScript
     QCoro6::Core
     QCoro6::Qml
     QCoro6::Network
@@ -91,6 +93,7 @@ else()
 endif()
 
 if(APPLE AND DEFINED INSTALL_DIR)
+    add_definitions(-DMACOS_BUNDLE)
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist

@@ -5,7 +5,7 @@ QString resourcePrefix = "";
 
 QString resolvePrefix(QString cmd)
 {
-#ifdef Q_OS_MAC
+#ifdef MACOS_BUNDLE
     if (resourcePrefix.isEmpty()) {
         resourcePrefix = QCoreApplication::applicationDirPath() + "/../Resources/";
     }
