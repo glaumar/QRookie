@@ -74,6 +74,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Quick
     Qt6::Network
     Qt6::Xml
+    Qt6::DBus
     Qt6::QuickControls2
     QCoro6::Core
     QCoro6::Qml
@@ -82,22 +83,40 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
+if(EXISTS "${INSTALL_DIR}")
+    message(STATUS "Directory ${INSTALL_DIR} exists. Setting INSTALL_DIR.")
+else()
+    message(WARNING "Directory ${INSTALL_DIR} does not exist. INSTALL_DIR not set.")
+    unset(INSTALL_DIR)
+endif()
+
 if(APPLE)
     set_target_properties(${APP_BINARY_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
     )
-    add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${INSTALL_DIR}/kirigami/lib/qml"
-            "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
-    )
 
-    set_target_properties(${APP_BINARY_NAME} PROPERTIES
-        INSTALL_RPATH "@loader_path/../Frameworks"
-    )
+    if(DEFINED INSTALL_DIR)
+        set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
+        set_target_properties(${APP_BINARY_NAME} PROPERTIES
+            INSTALL_RPATH "@loader_path/../Frameworks"
+        )
+        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${INSTALL_DIR}/kirigami/lib/qml"
+                "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
+        )
+    else()
+        set_target_properties(${APP_BINARY_NAME} PROPERTIES
+            INSTALL_RPATH "@executable_path/../Frameworks"
+        )
+        install(TARGETS ${APP_BINARY_NAME} DESTINATION ./)
+        install(FILES icons/icon.icns DESTINATION QRookie.app/Contents/Resources)
+        install(FILES key/qrookie.keystore DESTINATION QRookie.app/Contents/Resources)
+    endif()
 
 else()
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
