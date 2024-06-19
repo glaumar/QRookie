@@ -51,17 +51,17 @@ Kirigami.Card {
         progress_bar.indeterminate = false;
         progress_bar.visible = false;
         action_button.enabled = false;
-        action_button.icon.source = "";
+        action_button.icon.name = "";
         switch (status) {
         case VrpManager.UpdatableRemotely:
             action_button.text = qsTr("Download and Update");
             action_button.enabled = true;
-            action_button.icon.source = "download";
+            action_button.icon.name = "download";
             break;
         case VrpManager.Downloadable:
             action_button.text = qsTr("Download");
             action_button.enabled = true;
-            action_button.icon.source = "download";
+            action_button.icon.name = "download";
             break;
         case VrpManager.Queued:
             action_button.text = qsTr("Queued");
@@ -71,7 +71,7 @@ Kirigami.Card {
                 action_button.text = qsTr("Starting Downloading");
                 progress_bar.indeterminate = true;
                 progress_bar.visible = true;
-                action_button.icon.source = "download";
+                action_button.icon.name = "download";
             }
             break;
         case VrpManager.Decompressing:
@@ -83,19 +83,19 @@ Kirigami.Card {
             action_button.text = qsTr("No Connected Device");
             progress_bar.value = 1;
             progress_bar.visible = true;
-            action_button.icon.source = "install";
+            action_button.icon.name = "install";
             break;
         case VrpManager.UpdatableLocally:
             action_button.text = qsTr("Update");
             action_button.enabled = true;
-            action_button.icon.source = "install";
+            action_button.icon.name = "install";
             break;
         case VrpManager.Installable:
             action_button.text = qsTr("Install");
             action_button.enabled = true;
             progress_bar.visible = true;
             progress_bar.value = 1;
-            action_button.icon.source = "install";
+            action_button.icon.name = "install";
             break;
         case VrpManager.Installing:
             action_button.text = qsTr("Installing");
@@ -107,22 +107,22 @@ Kirigami.Card {
             action_button.text = qsTr("Installed");
             progress_bar.value = 1;
             progress_bar.visible = true;
-            action_button.icon.source = "install";
+            action_button.icon.name = "install";
             break;
         case VrpManager.DownloadError:
             action_button.text = qsTr("Re-download (DownloadError)");
             action_button.enabled = true;
-            action_button.icon.source = "error";
+            action_button.icon.name = "error";
             break;
         case VrpManager.DecompressionError:
             action_button.text = qsTr("Re-download (DecompressionError)");
             action_button.enabled = true;
-            action_button.icon.source = "error";
+            action_button.icon.name = "error";
             break;
         case VrpManager.InstallError:
             action_button.text = qsTr("Reinstall (InstallError)");
             action_button.enabled = true;
-            action_button.icon.source = "error";
+            action_button.icon.name = "error";
             break;
         }
     }
@@ -159,8 +159,8 @@ Kirigami.Card {
             Button {
                 id: magnet_button
 
-                icon.source: "kt-magnet"
-                text: "magnet"
+                text: "Get Magnet"
+                icon.name: "kt-magnet"
                 onClicked: {
                     textEdit.text = app.vrp.getMagnetURI(releaseName);
                     textEdit.selectAll();

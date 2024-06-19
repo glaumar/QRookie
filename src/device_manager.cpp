@@ -603,7 +603,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
         co_return false;
     }
 
-    // rename the package name in  apktool.yml
+    // rename the package name in apktool.yml
     const QString apktool_file = extra_dir + "/apktool.yml";
     if (!QFile::exists(apktool_file)) {
         qWarning() << apktool_file << "does not exist";
@@ -636,10 +636,16 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
     }
 
     // sign the apk
-    // TODO: change the keystore path
+    // TODO: get key_path from settings
+    QString key_path = QStandardPaths::locate(QStandardPaths::AppDataLocation, "qrookie.keystore");
+    if (key_path.isEmpty()) {
+        qWarning() << "Failed to locate qrookie.keystore";
+        co_return false;
+    }
     adb.start(
         resolvePrefix(APKSIGNER_PATH),
-        {"sign", "--ks", "../key/qrookie.keystore", "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file});
+        {"sign", "--ks", key_path, "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file}
+    );
 
     co_await adb.waitForFinished(-1);
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {

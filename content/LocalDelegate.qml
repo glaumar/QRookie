@@ -35,7 +35,7 @@ Kirigami.Card {
 
     onStatusChanged: function() {
         install_button.enabled = false;
-        install_button.icon.source = "install";
+        install_button.icon.name = "install";
         switch (status) {
         case VrpManager.Local:
             install_button.text = qsTr("No Connected Device");
@@ -58,7 +58,7 @@ Kirigami.Card {
         case VrpManager.InstallError:
             install_button.text = qsTr("Reinstall (InstallError)");
             install_button.enabled = true;
-            install_button.icon.source = "error";
+            install_button.icon.name = "error";
             break;
         default:
             install_button.text = qsTr("Unknown Status");
@@ -130,8 +130,8 @@ Kirigami.Card {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 10
-        icon.source: "delete"
-        text: "delete"
+        text: "Delete"
+        icon.name: "delete"
         onClicked: {
             deleteButtonClicked();
         }

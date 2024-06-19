@@ -29,7 +29,7 @@
 #include "qrookie.h"
 #include "resource_locator.h"
 
-#ifdef MACOS
+#ifdef Q_OS_MAC
 #define OPEN_PATH "open"
 #else
 #define OPEN_PATH "xdg-open"

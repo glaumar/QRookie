@@ -22,8 +22,6 @@ find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 if(APPLE)
-    add_definitions(-DMACOS)
-
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
         set(MAC_ARCH "arm64")
         set(CMAKE_OSX_ARCHITECTURES "arm64")
@@ -42,9 +40,7 @@ if(APPLE)
     message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Xml DBus)
-find_package(Qt6 REQUIRED COMPONENTS Qml QmlWorkerScript)
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickLayouts QuickControls2 QuickTemplates2 Widgets Svg)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network Xml QuickControls2)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(KF6Kirigami)
 
@@ -71,32 +67,17 @@ qt_add_executable(${APP_BINARY_NAME}
     src/app_settings.cpp src/app_settings.h
 )
 
-qt_add_resources(${APP_BINARY_NAME} "configuration"
-    PREFIX "/"
-    FILES
-        qtquickcontrols2.conf
-)
-
 target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
-    Qt6::QmlWorkerScript
     Qt6::Quick
-    Qt6::QuickLayouts
-    Qt6::QuickControls2
-    Qt6::QuickTemplates2
     Qt6::Network
     Qt6::Xml
-    Qt6::DBus
-    Qt6::Widgets
-    Qt6::Svg
-    QCoro6::Network
+    Qt6::QuickControls2
     QCoro6::Core
-    QCoro6::Coro
     QCoro6::Qml
-    KF6Kirigami
-    KF6::Kirigami
+    QCoro6::Network
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
@@ -129,6 +110,7 @@ else()
     install(FILES icons/256x256/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/256x256/apps)
     install(FILES icons/scalable/${APPLICATION_ID}.svg DESTINATION share/icons/hicolor/scalable/apps)
     install(FILES ${METAINFO_FILE_NAME} DESTINATION share/metainfo)
+    install(FILES key/qrookie.keystore DESTINATION share/QRookie)
 endif()
 
 # Add clang-format target
