@@ -113,7 +113,7 @@ RowLayout {
 
                 function onUserInfoChanged() {
                     oculus_runing_user.text = app.deviceManager.runningUserName;
-                    oculus_runing_user.visible = !(user === "");
+                    oculus_runing_user.visible = !(app.deviceManager.runningUserName === "");
                 }
                 
                 target: app.deviceManager

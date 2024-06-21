@@ -83,6 +83,8 @@ Kirigami.ApplicationWindow {
 
         TabButton {
             text: qsTr("Users")
+            visible: app.deviceManager.usersList.length > 1
+            width: visible ? undefined : 0
         }
 
     }

@@ -32,7 +32,7 @@ RowLayout {
                 function onUserInfoChanged() {
                     user_name.text = app.deviceManager.selectedUserName;
                     user_id.text = app.deviceManager.selectedUserId;
-                    user_running.text = app.deviceManager.selectedUserRunning
+                    user_running.text = app.deviceManager.selectedUserIsLogged
                         ? qsTr("Yes")
                         : qsTr("No");
                     installed_apps.text = app.deviceManager.selectedUsersInstalledApps;
