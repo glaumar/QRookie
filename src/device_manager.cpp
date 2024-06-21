@@ -887,10 +887,9 @@ QCoro::Task<void> DeviceManager::updateUsers()
 
     QRegularExpression re(R"(UserInfo\{(\d+):([^:]+):([^}]+)\})");
 
+    int selected_user_id = -1;
     for (const QString &line : lines) {
         auto match = re.match(line);
-        int selected_user_id = -1;
-        User running_user;
         if (match.hasMatch()) {
             User user = User(
                 match.captured(1).toInt(),
@@ -907,14 +906,8 @@ QCoro::Task<void> DeviceManager::updateUsers()
             
             if(user.running) {
                 running_user_name_ = user.name;
-                running_user = user;
             }
         }
-    }
-
-    // debug users
-    for (const User &user : users_list_) {
-        qDebug() << "id: " << user.id << "name: " << user.name << "active: " << user.running;
     }
 
     if (users_list_.isEmpty()) {
