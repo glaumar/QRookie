@@ -93,25 +93,33 @@ else()
     unset(INSTALL_DIR)
 endif()
 
-if(APPLE AND DEFINED INSTALL_DIR)
-    add_definitions(-DMACOS_BUNDLE)
-    set_target_properties(${APP_BINARY_NAME} PROPERTIES
-        MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
-    )
+if(APPLE)
+    if(DEFINED INSTALL_DIR)
+        add_definitions(-DMACOS_BUNDLE)
+        set_target_properties(${APP_BINARY_NAME} PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
+        )
 
-    set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
-    set_target_properties(${APP_BINARY_NAME} PROPERTIES
-        INSTALL_RPATH "@loader_path/../Frameworks"
-    )
-    add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${INSTALL_DIR}/kirigami/lib/qml"
-            "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
-    )
+        set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
+        set_target_properties(${APP_BINARY_NAME} PROPERTIES
+            INSTALL_RPATH "@loader_path/../Frameworks"
+        )
+        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${INSTALL_DIR}/kirigami/lib/qml"
+                "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
+        )
+    else()
+        # for nix darwin
+        install(TARGETS ${APP_BINARY_NAME} DESTINATION Applications/QRookie.app/Contents)
+        install(FILES macOs/Info.plist DESTINATION Applications/QRookie.app/Contents)
+        install(FILES key/qrookie.keystore DESTINATION  Applications/QRookie.app/Contents/Resources)
+        install(FILES icons/icon.icns DESTINATION Applications/QRookie.app/Contents/Resources) 
+    endif()
 else()
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
     install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)

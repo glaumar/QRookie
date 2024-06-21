@@ -4,7 +4,7 @@ runtime-version: "6.6"
 sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk21
-command: qrookie
+command: QRookie
 finish-args:
   - --socket=wayland
   - --socket=fallback-x11
@@ -40,7 +40,6 @@ modules:
         url: https://dl.google.com/android/repository/platform-tools_r34.0.0-linux.zip
         sha256: 8137c2834dea05cb64c1a8bc041ea00fcd43e3a8a29429ad4f25b8ee51efebf6
 
-  # TODO: fix "Error: Invalid or corrupt jarfile /app/share/android-apktool/apktool.jar\n"
   - name: android-apktool
     buildsystem: simple
     build-commands:
