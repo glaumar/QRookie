@@ -40,6 +40,7 @@ DeviceManager::DeviceManager(QObject *parent)
     connect(&auto_update_timer_, &QTimer::timeout, this, &DeviceManager::updateSerials);
     connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateDeviceInfo);
     connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateUsers);
+    connect(this, &DeviceManager::userInfoChanged, this, &DeviceManager::listPackagesForUser);
 }
 
 DeviceManager::~DeviceManager()
@@ -881,6 +882,11 @@ QCoro::Task<void> DeviceManager::updateUsers()
         co_return;
     }
 
+    /* EXAMPLE OUTPUT:
+    Users:
+        UserInfo{0:Victor Wads:c13} running
+        UserInfo{10:Afonso Ivo Cunha:410}
+    */
     QString output = basic_process.readAllStandardOutput();
     QStringList lines = output.split("\n");
     lines.removeAll("");
@@ -928,4 +934,52 @@ QCoro::Task<void> DeviceManager::selectUser(int index) {
 
     selected_user_ = &users_list_[index];
     emit userInfoChanged();
+}
+
+QCoro::Task<void> DeviceManager::listPackagesForUser()
+{
+    
+    user_apps_list_model_.clear();
+    if (!hasConnectedDevice()) {
+        emit userAppsListChanged();
+        co_return;
+    }
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    QString id = QString::number(selected_user_->id);
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "list", "packages", "--user", id, "--show-versioncode", "-3"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get apps for device" << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+        package:com.facebook.arvr.quillplayer versionCode:135
+        package:com.oculus.mobile_mrc_setup versionCode:1637173263
+    */
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
+
+    user_apps_list_model_.clear();
+    for (const QString &line : lines) {
+        auto match = re.match(line);
+        if (match.hasMatch()) {
+            QString package_name = match.captured(1);
+            QString version_code = match.captured(2);
+            auto app = GameInfo{.package_name = package_name, .version_code = version_code};
+
+            user_apps_list_model_.append(app);
+        }
+    }
+    selected_user_->installedApps = user_apps_list_model_.size();
+
+    emit userAppsListChanged();
+    co_return;
 }

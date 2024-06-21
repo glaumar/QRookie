@@ -22,6 +22,11 @@ import QtQuick.Layouts
 import VrpManager
 import org.kde.kirigami as Kirigami
 
+import "Tabs/Games/"
+import "Tabs/Downloads/"
+import "Tabs/Devices/"
+import "Tabs/Users/"
+
 Kirigami.ApplicationWindow {
     id: app
 

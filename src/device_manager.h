@@ -86,6 +86,11 @@ public:
         return &app_list_model_;
     }
 
+    Q_INVOKABLE GameInfoModel *userAppsListModel()
+    {
+        return &user_apps_list_model_;
+    }
+
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
@@ -100,6 +105,7 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateAppList();
     Q_INVOKABLE QCoro::Task<void> updateUsers();
     Q_INVOKABLE QCoro::Task<void> selectUser(int index);
+    Q_INVOKABLE QCoro::Task<void> listPackagesForUser();
 
     Q_INVOKABLE QString selectedUserName() const
     {
@@ -118,7 +124,7 @@ public:
 
     Q_INVOKABLE int selectedUsersInstalledApps() const
     {
-        return 0;
+        return selected_user_ ? selected_user_->installedApps : -1;
     }
 
     Q_INVOKABLE QString runningUserName() const
@@ -301,12 +307,14 @@ signals:
     void oculusRuntimeVersionChanged(QString oculus_runtime_version);
     void androidVersionChanged(int android_version);
     void androidSdkVersionChanged(int android_sdk_version);
+    void userAppsListChanged();
     void usersListChanged();
     void userInfoChanged();
 
 private:
     QStringList devices_list_;
     GameInfoModel app_list_model_;
+    GameInfoModel user_apps_list_model_;
     QTimer auto_update_timer_;
     QString connected_device_;
     QString device_name_;

@@ -35,7 +35,13 @@ RowLayout {
                     user_running.text = app.deviceManager.selectedUserIsLogged
                         ? qsTr("Yes")
                         : qsTr("No");
-                    installed_apps.text = app.deviceManager.selectedUsersInstalledApps;
+                    onUserAppsListChanged();
+                }
+
+                function onUserAppsListChanged() {
+                    installed_apps.text = app.deviceManager.selectedUsersInstalledApps > -1
+                        ? app.deviceManager.selectedUsersInstalledApps
+                        : qsTr("loading...");
                 }
 
                 target: app.deviceManager
@@ -105,5 +111,55 @@ RowLayout {
                 }
             }
         }
+    }
+
+    GridView {
+        id: apps_info
+
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+        snapMode: GridView.SnapToRow
+        clip: true
+        cellWidth: 220
+        cellHeight: 180
+        model: app.deviceManager.userAppsListModel()
+
+        Dialog {
+            id: confirm_dialog
+
+            property string packageName: ""
+            property int index: -1
+
+            anchors.centerIn: parent
+            title: "Uninstall " + packageName
+            standardButtons: Dialog.Ok | Dialog.Cancel
+            onAccepted: {
+                apps_info.model.remove(index);
+                app.deviceManager.uninstallApkQml(packageName);
+            }
+        }
+
+        ScrollBar.vertical: ScrollBar {
+            visible: true
+        }
+
+        delegate: UsersInstalledDelegate {
+            width: apps_info.cellWidth - 10
+            height: apps_info.cellHeight - 10
+            name: model.package_name
+            thumbnailPath: {
+                let path = app.vrp.getGameThumbnailPath(model.package_name);
+                if (path === "")
+                    return "qrc:/qt/qml/content/Image/matrix.png";
+                else
+                    return "file://" + path;
+            }
+            // onUninstallButtonClicked: {
+            //     confirm_dialog.packageName = model.package_name;
+            //     confirm_dialog.index = index;
+            //     confirm_dialog.open();
+            // }
+        }
+
     }
 }

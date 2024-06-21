@@ -5,14 +5,16 @@ qt6_add_qml_module(content
     RESOURCE_PREFIX "/qt/qml"
     QML_FILES
         App.qml
-        Games.qml
-        GameDelegate.qml
-        Downloads.qml
-        DownloadDelegate.qml
-        LocalDelegate.qml
-        Device.qml
-        Users.qml
-        ApplicationDelegate.qml
+        Tabs/Games/Games.qml
+        Tabs/Games/GameDelegate.qml
+        Tabs/Downloads/Downloads.qml
+        Tabs/Downloads/DownloadDelegate.qml
+        Tabs/Downloads/LocalDelegate.qml
+        Tabs/Devices/Device.qml
+        Tabs/Devices/ApplicationDelegate.qml
+        Tabs/Users/Users.qml
+        Tabs/Users/UsersInstalledDelegate.qml
+        Tabs/Users/UsersToAddDelegate.qml
     RESOURCES
         fonts/fonts.txt
         Image/matrix.png
