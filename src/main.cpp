@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_LINUX
     QQuickStyle::setStyle("org.kde.breeze");
 #elif defined(Q_OS_MAC)
-    QQuickStyle::setStyle("Imagine");
+    QQuickStyle::setStyle("Material");
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (env.contains("XDG_DATA_DIRS")) {
         QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
@@ -60,6 +60,12 @@ int main(int argc, char *argv[])
     QCoro::Qml::registerTypes();
 
     QQmlApplicationEngine engine;
+
+#if defined(Q_OS_MAC)
+    QString projectDir = QCoreApplication::applicationDirPath() + "/../Resources";
+    engine.addImportPath(projectDir + "/kirigami");
+#endif
+
     const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
     QObject::connect(
         &engine,

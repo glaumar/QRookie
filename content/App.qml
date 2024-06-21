@@ -55,6 +55,10 @@ Kirigami.ApplicationWindow {
             id: device_tab
         }
 
+        Users {
+            id: users_tab
+        }
+
     }
 
     vrp: VrpManager {
@@ -75,6 +79,10 @@ Kirigami.ApplicationWindow {
 
         TabButton {
             text: qsTr("Devices")
+        }
+
+        TabButton {
+            text: qsTr("Users")
         }
 
     }

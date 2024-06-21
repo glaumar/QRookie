@@ -11,6 +11,7 @@ qt6_add_qml_module(content
         DownloadDelegate.qml
         LocalDelegate.qml
         Device.qml
+        Users.qml
         ApplicationDelegate.qml
     RESOURCES
         fonts/fonts.txt

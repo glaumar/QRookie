@@ -37,6 +37,17 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-06-20" version="0.3.0">
+            <description>
+                <p>Changes in version 0.3.0</p>
+                <ul>
+                    <li>add MacOs nix and bundled support</li>
+                    <li>feat(UI,backend): List quest Users</li>
+                    <li>feat(UI,backend): List games for each Users</li>
+                    <li>feat(UI,backend): Add games to other Users</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-05-12" version="0.2.4">
             <description>
                 <p>Changes in version 0.2.4</p>
