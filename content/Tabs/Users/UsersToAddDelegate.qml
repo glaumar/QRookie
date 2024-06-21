@@ -20,7 +20,7 @@ Kirigami.Card {
     footer: Button {
         id: action_button
         icon.name: "install"
-        text: qsTr("Remove from user")
+        text: qsTr("Add to User")
         onClicked: {
             addButtonClicked();
         }

@@ -18,7 +18,7 @@ Kirigami.Card {
 
     footer: Button {
         id: action_button
-        icon.name: "uninstall"
+        icon.name: "delete"
         text: qsTr("Remove from user")
         enabled: false
         onClicked: {

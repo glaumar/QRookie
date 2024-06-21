@@ -51,6 +51,7 @@ class DeviceManager : public QObject
     Q_PROPERTY(QString selectedUserId READ selectedUserId NOTIFY userInfoChanged)
     Q_PROPERTY(bool selectedUserIsLogged READ selectedUserIsLogged NOTIFY userInfoChanged)
     Q_PROPERTY(int selectedUsersInstalledApps READ selectedUsersInstalledApps NOTIFY userInfoChanged)
+    Q_PROPERTY(int avaliableAppsCount READ avaliableAppsCount)
     Q_PROPERTY(QString runningUserName READ runningUserName NOTIFY userInfoChanged)
 public:
     explicit DeviceManager(QObject *parent = nullptr);
@@ -91,6 +92,11 @@ public:
         return &user_apps_list_model_;
     }
 
+    Q_INVOKABLE GameInfoModel *userAppsAvailableListModel()
+    {
+        return &user_apps_available_list_model_;
+    }
+
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
@@ -106,6 +112,7 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateUsers();
     Q_INVOKABLE QCoro::Task<void> selectUser(int index);
     Q_INVOKABLE QCoro::Task<void> listPackagesForUser();
+    Q_INVOKABLE QCoro::Task<void> updateAvailableAppsList();
 
     Q_INVOKABLE QString selectedUserName() const
     {
@@ -125,6 +132,11 @@ public:
     Q_INVOKABLE int selectedUsersInstalledApps() const
     {
         return selected_user_ ? selected_user_->installedApps : -1;
+    }
+
+    Q_INVOKABLE int avaliableAppsCount() const
+    {
+        return user_apps_available_list_model_.size();
     }
 
     Q_INVOKABLE QString runningUserName() const
@@ -315,6 +327,7 @@ private:
     QStringList devices_list_;
     GameInfoModel app_list_model_;
     GameInfoModel user_apps_list_model_;
+    GameInfoModel user_apps_available_list_model_;
     QTimer auto_update_timer_;
     QString connected_device_;
     QString device_name_;

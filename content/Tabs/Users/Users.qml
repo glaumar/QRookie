@@ -32,16 +32,17 @@ RowLayout {
                 function onUserInfoChanged() {
                     user_name.text = app.deviceManager.selectedUserName;
                     user_id.text = app.deviceManager.selectedUserId;
-                    user_running.text = app.deviceManager.selectedUserIsLogged
-                        ? qsTr("Yes")
-                        : qsTr("No");
+                    user_running.text = app.deviceManager.selectedUserIsLogged ? qsTr("Yes") : qsTr("No");
+                    bar.currentIndex = 0;
                     onUserAppsListChanged();
                 }
 
                 function onUserAppsListChanged() {
-                    installed_apps.text = app.deviceManager.selectedUsersInstalledApps > -1
+                    installed_apps_number.text = app.deviceManager.selectedUsersInstalledApps > -1
                         ? app.deviceManager.selectedUsersInstalledApps
                         : qsTr("loading...");
+                    installed_tab.text = qsTr("Installed (") + app.deviceManager.selectedUsersInstalledApps + qsTr(")");
+                    available_tab.text = qsTr("Available (") + app.deviceManager.avaliableAppsCount + qsTr(")");
                 }
 
                 target: app.deviceManager
@@ -103,63 +104,131 @@ RowLayout {
                         }
 
                         Label {
-                            id: installed_apps
+                            id: installed_apps_number
                             Kirigami.FormData.label: qsTr("Installed Apps:")
                         }
-
                     }
                 }
             }
         }
     }
 
-    GridView {
-        id: apps_info
+    ColumnLayout {
+        StackLayout {
+            currentIndex: bar.currentIndex
 
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        snapMode: GridView.SnapToRow
-        clip: true
-        cellWidth: 220
-        cellHeight: 180
-        model: app.deviceManager.userAppsListModel()
+            //anchors.fill: parent
 
-        Dialog {
-            id: confirm_dialog
+            GridView {
+                id: installed_apps
 
-            property string packageName: ""
-            property int index: -1
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                snapMode: GridView.SnapToRow
+                clip: true
+                cellWidth: 220
+                cellHeight: 180
+                model: app.deviceManager.userAppsListModel()
 
-            anchors.centerIn: parent
-            title: "Uninstall " + packageName
-            standardButtons: Dialog.Ok | Dialog.Cancel
-            onAccepted: {
-                apps_info.model.remove(index);
-                app.deviceManager.uninstallApkQml(packageName);
+                Dialog {
+                    id: remove_confirm_dialog
+
+                    property string packageName: ""
+                    property int index: -1
+
+                    anchors.centerIn: parent
+                    title: "Uninstall " + packageName
+                    standardButtons: Dialog.Ok | Dialog.Cancel
+                    onAccepted: {
+                        installed_apps.model.remove(index);
+                        app.deviceManager.uninstallApkQml(packageName);
+                    }
+                }
+
+                ScrollBar.vertical: ScrollBar {
+                    visible: true
+                }
+
+                delegate: UsersInstalledDelegate {
+                    width: installed_apps.cellWidth - 10
+                    height: installed_apps.cellHeight - 10
+                    name: model.package_name
+                    thumbnailPath: {
+                        let path = app.vrp.getGameThumbnailPath(model.package_name);
+                        if (path === "")
+                            return "qrc:/qt/qml/content/Image/matrix.png";
+                        else
+                            return "file://" + path;
+                    }
+                    // onUninstallButtonClicked: {
+                    //     confirm_dialog.packageName = model.package_name;
+                    //     confirm_dialog.index = index;
+                    //     confirm_dialog.open();
+                    // }
+                }
+            }
+            GridView {
+                id: avaliable_apps
+
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                snapMode: GridView.SnapToRow
+                clip: true
+                cellWidth: 220
+                cellHeight: 180
+                model: app.deviceManager.userAppsAvailableListModel()
+
+                Dialog {
+                    id: confirm_dialog
+
+                    property string packageName: ""
+                    property int index: -1
+
+                    anchors.centerIn: parent
+                    title: "Uninstall " + packageName
+                    standardButtons: Dialog.Ok | Dialog.Cancel
+                    onAccepted: {
+                        avaliable_apps.model.remove(index);
+                        app.deviceManager.uninstallApkQml(packageName);
+                    }
+                }
+
+                ScrollBar.vertical: ScrollBar {
+                    visible: true
+                }
+
+                delegate: UsersToAddDelegate {
+                    width: avaliable_apps.cellWidth - 10
+                    height: avaliable_apps.cellHeight - 10
+                    name: model.package_name
+                    thumbnailPath: {
+                        let path = app.vrp.getGameThumbnailPath(model.package_name);
+                        if (path === "")
+                            return "qrc:/qt/qml/content/Image/matrix.png";
+                        else
+                            return "file://" + path;
+                    }
+                    // onUninstallButtonClicked: {
+                    //     confirm_dialog.packageName = model.package_name;
+                    //     confirm_dialog.index = index;
+                    //     confirm_dialog.open();
+                    // }
+                }
             }
         }
+        TabBar {
+            id: bar
+            Layout.fillWidth: true
 
-        ScrollBar.vertical: ScrollBar {
-            visible: true
-        }
-
-        delegate: UsersInstalledDelegate {
-            width: apps_info.cellWidth - 10
-            height: apps_info.cellHeight - 10
-            name: model.package_name
-            thumbnailPath: {
-                let path = app.vrp.getGameThumbnailPath(model.package_name);
-                if (path === "")
-                    return "qrc:/qt/qml/content/Image/matrix.png";
-                else
-                    return "file://" + path;
+            TabButton {
+                id: installed_tab
+                text: qsTr("Installed")
             }
-            // onUninstallButtonClicked: {
-            //     confirm_dialog.packageName = model.package_name;
-            //     confirm_dialog.index = index;
-            //     confirm_dialog.open();
-            // }
-        }
 
+            TabButton {
+                id: available_tab
+                text: qsTr("Available")
+            }
+        }
     }
 }

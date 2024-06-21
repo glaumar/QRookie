@@ -980,6 +980,26 @@ QCoro::Task<void> DeviceManager::listPackagesForUser()
     }
     selected_user_->installedApps = user_apps_list_model_.size();
 
+    updateAvailableAppsList();
     emit userAppsListChanged();
+    co_return;
+}
+
+QCoro::Task<void>  DeviceManager::updateAvailableAppsList() {
+    user_apps_available_list_model_.clear();
+
+    QSet<QString> installedAppsSet;
+
+    // Adiciona todos os pacotes instalados ao conjunto
+    for (size_t i = 0; i < user_apps_list_model_.size(); ++i) {
+        installedAppsSet.insert(user_apps_list_model_[i].package_name);
+    }
+
+    // Adiciona todos os pacotes disponíveis, exceto os já instalados
+    for (size_t i = 0; i < app_list_model_.size(); ++i) {
+        if (!installedAppsSet.contains(app_list_model_[i].package_name)) {
+            user_apps_available_list_model_.append(app_list_model_[i]);
+        }
+    }
     co_return;
 }
