@@ -111,6 +111,11 @@ RowLayout {
                     android_sdk_version.visible = version > 0;
                 }
 
+                function onUserInfoChanged() {
+                    oculus_runing_user.text = app.deviceManager.runningUserName;
+                    oculus_runing_user.visible = !(user === "");
+                }
+                
                 target: app.deviceManager
             }
 
@@ -277,6 +282,12 @@ RowLayout {
                         id: oculus_runtime_version
 
                         Kirigami.FormData.label: qsTr("Oculus Runtime Version:")
+                    }
+
+                    Label {
+                        id: oculus_runing_user
+
+                        Kirigami.FormData.label: qsTr("Oculus Running User:")
                     }
 
                 }

@@ -16,8 +16,8 @@
  */
 
 #include "device_manager.h"
+#include "models/game_info.h"
 
-#include "game_info.h"
 #include <QCoreApplication>
 #include <QCoroTask>
 #include <QDir>
@@ -39,6 +39,7 @@ DeviceManager::DeviceManager(QObject *parent)
 {
     connect(&auto_update_timer_, &QTimer::timeout, this, &DeviceManager::updateSerials);
     connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateDeviceInfo);
+    connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateUsers);
 }
 
 DeviceManager::~DeviceManager()
@@ -857,4 +858,81 @@ QCoro::Task<bool> DeviceManager::enableTcpMode(int port)
     qDebug() << basic_process.readAllStandardOutput();
 
     co_return true;
+}
+
+QCoro::Task<void> DeviceManager::updateUsers()
+{
+    users_list_.clear();
+    if (!hasConnectedDevice()) {
+        emit usersListChanged();
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "list", "users"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get users for device" << serial;
+        co_return;
+    }
+
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+
+    QRegularExpression re(R"(UserInfo\{(\d+):([^:]+):([^}]+)\})");
+
+    for (const QString &line : lines) {
+        auto match = re.match(line);
+        int selected_user_id = -1;
+        User running_user;
+        if (match.hasMatch()) {
+            User user = User(
+                match.captured(1).toInt(),
+                match.captured(2).trimmed(),
+                line.contains("running")
+            );
+            users_list_.append(user); 
+            
+            if (selected_user_ != nullptr && selected_user_->id == user.id) {
+                selected_user_ = &user;
+                selected_user_id = user.id;
+                emit userInfoChanged();
+            }
+            
+            if(user.running) {
+                running_user_name_ = user.name;
+                running_user = user;
+            }
+        }
+    }
+
+    // debug users
+    for (const User &user : users_list_) {
+        qDebug() << "id: " << user.id << "name: " << user.name << "active: " << user.running;
+    }
+
+    if (users_list_.isEmpty()) {
+        qWarning() << "No users found";
+        co_return;
+    } else if (selected_user_id == -1) {
+        selectUser(0);
+    }
+    
+    emit usersListChanged();
+}
+
+QCoro::Task<void> DeviceManager::selectUser(int index) {
+    if (index < 0 || index >= users_list_.size()) {
+        qWarning() << "Invalid user index";
+        co_return;
+    }
+
+    selected_user_ = &users_list_[index];
+    emit userInfoChanged();
 }

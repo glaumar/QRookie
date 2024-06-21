@@ -19,7 +19,8 @@
 #ifndef QROOKIE_DEVICE_MANAGER
 #define QROOKIE_DEVICE_MANAGER
 
-#include "game_info_model.h"
+#include "models/game_info_model.h"
+#include "models/user.h"
 #include "resource_locator.h"
 #include <QCoroProcess>
 #include <QCoroQmlTask>
@@ -44,7 +45,13 @@ class DeviceManager : public QObject
     Q_PROPERTY(QString oculusRuntimeVersion READ oculusRuntimeVersion NOTIFY oculusRuntimeVersionChanged)
     Q_PROPERTY(int androidVersion READ androidVersion NOTIFY androidVersionChanged)
     Q_PROPERTY(int androidSdkVersion READ androidSdkVersion NOTIFY androidSdkVersionChanged)
-
+    // Users
+    Q_PROPERTY(QVariantList usersList READ usersList NOTIFY usersListChanged)
+    Q_PROPERTY(QString selectedUserName READ selectedUserName NOTIFY userInfoChanged)
+    Q_PROPERTY(QString selectedUserId READ selectedUserId NOTIFY userInfoChanged)
+    Q_PROPERTY(bool selectedUserIsLogged READ selectedUserIsLogged NOTIFY userInfoChanged)
+    Q_PROPERTY(int selectedUsersInstalledApps READ selectedUsersInstalledApps NOTIFY userInfoChanged)
+    Q_PROPERTY(QString runningUserName READ runningUserName NOTIFY userInfoChanged)
 public:
     explicit DeviceManager(QObject *parent = nullptr);
     ~DeviceManager();
@@ -91,6 +98,42 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateAndroidVersion();
     Q_INVOKABLE QCoro::Task<void> updateAndroidSdkVersion();
     Q_INVOKABLE QCoro::Task<void> updateAppList();
+    Q_INVOKABLE QCoro::Task<void> updateUsers();
+    Q_INVOKABLE QCoro::Task<void> selectUser(int index);
+
+    Q_INVOKABLE QString selectedUserName() const
+    {
+        return selected_user_ ? selected_user_->name : "";
+    }
+
+    Q_INVOKABLE QString selectedUserId() const
+    {
+        return selected_user_ ? QString::number(selected_user_->id) : "";
+    }
+
+    Q_INVOKABLE bool selectedUserIsLogged() const
+    {
+        return selected_user_ ? selected_user_->running : false;
+    }
+
+    Q_INVOKABLE int selectedUsersInstalledApps() const
+    {
+        return 0;
+    }
+
+    Q_INVOKABLE QString runningUserName() const
+    {
+        return running_user_name_;
+    }
+
+    Q_INVOKABLE QVariantList usersList() const
+    {
+        QVariantList list;
+        for (auto &user : users_list_) {
+            list.append(user.name);
+        }
+        return list;
+    }
 
     Q_INVOKABLE void enableAutoUpdate(const int ms = 3000)
     {
@@ -258,6 +301,8 @@ signals:
     void oculusRuntimeVersionChanged(QString oculus_runtime_version);
     void androidVersionChanged(int android_version);
     void androidSdkVersionChanged(int android_sdk_version);
+    void usersListChanged();
+    void userInfoChanged();
 
 private:
     QStringList devices_list_;
@@ -274,6 +319,9 @@ private:
     QString oculus_runtime_version_;
     int android_version_;
     int android_sdk_version_;
+    QString running_user_name_;
+    QList<User> users_list_;
+    User* selected_user_;
 };
 
 #endif /* QROOKIE_DEVICE_MANAGER */
