@@ -2,7 +2,7 @@
 source ./projectConfig.sh
 
 WORKING_DIR="$(pwd)"
-BUILD_DIR="$(pwd)/build_${ARCH}"
+BUILD_DIR="$(pwd)/build_${ARCH_NAME}"
 
 # if --OnlySign is passed, not build and pack
 if [[ "$1" == "--OnlySign" ]]; then
@@ -26,7 +26,7 @@ rm -rf "$DMG_DIR"
 mkdir -p "$DMG_DIR"
 cp -r "$APP_PATH" "$DMG_DIR/"
 
-DMG_NAME="$WORKING_DIR/${APP_NAME}_${ARCH}.dmg"
+DMG_NAME="$WORKING_DIR/${APP_NAME}_${ARCH_NAME}.dmg"
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_DIR" -ov -format UDBZ "$DMG_NAME"
 rm -rf "$DMG_DIR"
 

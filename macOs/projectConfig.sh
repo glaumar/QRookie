@@ -6,11 +6,13 @@ if [[ "$ARCH" == "arm64" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
     echo "Apple Silicon (arm64) detected."
     echo "Using Homebrew for Apple Silicon (arm64) at /opt/homebrew/bin"
+    export Qt6_DIR="/opt/homebrew/opt/qt/lib/cmake/Qt6"
 else
     export ARCH_NAME="x86_64"
     eval "$(/usr/local/bin/brew shellenv)"
     echo "Intel (x86_64) detected."
     echo "Using Homebrew for Intel (x86_64) at /usr/local/bin"
+    export Qt6_DIR="/usr/local/opt/qt/lib/cmake/Qt6"
 fi
 
 set_android_tools() {

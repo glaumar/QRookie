@@ -1,7 +1,7 @@
 source ./projectConfig.sh
 
 WORKING_DIR="$(pwd)"
-BUILD_DIR="$(pwd)/build_${ARCH}"
+BUILD_DIR="$(pwd)/build_${ARCH_NAME}"
 
 cd "${BUILD_DIR}"
 

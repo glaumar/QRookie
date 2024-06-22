@@ -2,20 +2,12 @@
 source ./projectConfig.sh
 
 PROJECT_DIR="$(pwd)/.."
-BUILD_DIR="$(pwd)/build_${ARCH}"
-INSTALL_DIR="$(pwd)/dependencies/install_${ARCH}"
+BUILD_DIR="$(pwd)/build_${ARCH_NAME}"
+INSTALL_DIR="$(pwd)/dependencies/install_${ARCH_NAME}"
 APP_RESOURCES_DIR="$BUILD_DIR/QRookie.app/Contents/Resources"
 
 # Build dependencies
 ./installDependencies.sh
-
-if [[ "$ARCH" == "arm64" ]]; then
-    echo "Apple Silicon (arm64) detected."
-    ARCH_NAME="arm64"
-else
-    echo "Intel (x86_64) detected."
-    ARCH_NAME="x86_64"
-fi
 
 # Build the project
 mkdir -p "$BUILD_DIR"
