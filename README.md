@@ -14,6 +14,46 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
     </div>
 </details>
 
+---
+
+- [ QRookie](#-qrookie)
+- [Screenshots](#screenshots)
+- [Download](#download)
+  - [Arch Linux](#arch-linux)
+    - [Install from AUR](#install-from-aur)
+  - [NixOS](#nixos)
+    - [Install directly](#install-directly)
+    - [Use with flake (recommended)](#use-with-flake-recommended)
+  - [SteamOS And Other Linux](#steamos-and-other-linux)
+    - [Flathub](#flathub)
+    - [Flatpak Bundle](#flatpak-bundle)
+  - [MacOS](#macos)
+    - [MacOS Bundle](#macos-bundle)
+    - [Install using nix](#install-using-nix)
+    - [nix-darwin](#nix-darwin)
+- [FAQ](#faq)
+  - [1. Game installation failed?](#1-game-installation-failed)
+  - [2. Are all the games provided by QRookie? Are these games infected with viruses?](#2-are-all-the-games-provided-by-qrookie-are-these-games-infected-with-viruses)
+- [Develop](#develop)
+  - [Archlinux](#archlinux)
+    - [Install Dependencies](#install-dependencies)
+    - [Build](#build)
+  - [Flatpak](#flatpak)
+    - [Install Runtime](#install-runtime)
+    - [Build](#build-1)
+      - [Build Only](#build-only)
+      - [Build and Install](#build-and-install)
+      - [Export Flatpak Bundle](#export-flatpak-bundle)
+  - [NixOS](#nixos-1)
+    - [Enable Flakes](#enable-flakes)
+    - [Build](#build-2)
+    - [Run Without Cloning The Repository](#run-without-cloning-the-repository)
+  - [MacOS (Using Nix)](#macos-using-nix)
+    - [Install Nix](#install-nix)
+    - [Build](#build-3)
+    - [Run Without Cloning The Repository](#run-without-cloning-the-repository-1)
+
+---
 
 # Download
 
@@ -27,6 +67,43 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
 paru -S qrookie-vrp
 ```
 
+## NixOS
+### Install directly
+```shell
+nix profile install github:glaumar/nur#qrookie
+```
+### Use with flake (recommended)
+Modify your flake.nix like：
+
+```nix
+# flake.nix
+{
+  inputs.glaumar_repo = {
+    url = "github:glaumar/nur";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  # ...
+
+  outputs = {nixpkgs, ...} @ inputs: {
+    nixosConfigurations.HOSTNAME = nixpkgs.lib.nixosSystem {
+      modules = [
+        ({
+          nixpkgs.overlays = [
+            (final: prev: {
+              glaumar_repo = inputs.glaumar_repo.packages."${prev.system}";
+            })
+          ];
+        })
+
+        # ...
+      ];
+    };
+  }
+}
+```
+Then you can use `pkgs.glaumar_repo.qrookie` in your other configuration modules.
+
 ## SteamOS And Other Linux
 Now there is only a flatpak package, which can run on almost all linux distributions, including SteamOS (Steam Deck).
 
@@ -38,13 +115,50 @@ Now there is only a flatpak package, which can run on almost all linux distribut
 </a>
 
 ### Flatpak Bundle
-![GitHub Release](https://img.shields.io/github/v/release/glaumar/QRookie) ![GitHub Release Date](https://img.shields.io/github/release-date/Glaumar/QRookie)
-![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie.flatpak)
-
-
+![GitHub Release](https://img.shields.io/github/v/release/glaumar/QRookie) ![GitHub Release Date](https://img.shields.io/github/release-date/Glaumar/QRookie) ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie.flatpak)  
 
 
 See [releases](https://github.com/glaumar/QRookie/releases).
+
+## MacOS
+
+### MacOS Bundle
+![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie_MacOs_arm64.dmg) ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie_MacOs_x86_64.dmg)  
+
+See [releases](https://github.com/glaumar/QRookie/releases).
+
+### Install using nix  
+
+**⚠️ If you don’t know nix at all, we don’t recommend using this method to install it.**  
+
+We provide an installation script
+```shell
+sh <(curl -L https://raw.githubusercontent.com/glaumar/QRookie/main/macOs/installMacOSNix.sh)
+```
+
+Or you can try to install them manually:
+
+**install nix:**  
+
+I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
+
+**install QRookie using flake：** 
+
+```shell
+export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
+
+nix profile install --impure github:glaumar:nur#qrookie \
+--extra-experimental-features nix-command \
+--extra-experimental-features flakes
+
+ln -s ~/.nix-profile/Applications/QRookie.app /Applications
+```
+
+
+
+### nix-darwin
+- [ ] TODO
+
 
 
 # FAQ
