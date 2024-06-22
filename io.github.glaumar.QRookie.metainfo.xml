@@ -37,6 +37,14 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-06-22" version="0.3.1">
+            <description>
+                <ul>
+                    <li>fix: segmentation fault</li>
+                    <li>fix: can not find keystore in nix darwin installation</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-06-20" version="0.3.0">
             <description>
                 <p>Changes in version 0.3.0</p>
