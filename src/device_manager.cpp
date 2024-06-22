@@ -16,8 +16,8 @@
  */
 
 #include "device_manager.h"
+#include "models/game_info.h"
 
-#include "game_info.h"
 #include <QCoreApplication>
 #include <QCoroTask>
 #include <QDir>
@@ -39,6 +39,8 @@ DeviceManager::DeviceManager(QObject *parent)
 {
     connect(&auto_update_timer_, &QTimer::timeout, this, &DeviceManager::updateSerials);
     connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateDeviceInfo);
+    connect(this, &DeviceManager::connectedDeviceChanged, this, &DeviceManager::updateUsers);
+    connect(this, &DeviceManager::userInfoChanged, this, &DeviceManager::listPackagesForUser);
 }
 
 DeviceManager::~DeviceManager()
@@ -856,5 +858,196 @@ QCoro::Task<bool> DeviceManager::enableTcpMode(int port)
 
     qDebug() << basic_process.readAllStandardOutput();
 
+    co_return true;
+}
+
+QCoro::Task<void> DeviceManager::updateUsers()
+{
+    users_list_.clear();
+    if (!hasConnectedDevice()) {
+        emit usersListChanged();
+        co_return;
+    }
+
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "list", "users"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get users for device" << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+    Users:
+        UserInfo{0:Victor Wads:c13} running
+        UserInfo{10:Afonso Ivo Cunha:410}
+    */
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+
+    QRegularExpression re(R"(UserInfo\{(\d+):([^:]+):([^}]+)\})");
+
+    int selected_user_id = -1;
+    for (const QString &line : lines) {
+        auto match = re.match(line);
+        if (match.hasMatch()) {
+            User user = User(
+                match.captured(1).toInt(),
+                match.captured(2).trimmed(),
+                line.contains("running")
+            );
+            users_list_.append(user); 
+            
+            if (selected_user_ != nullptr && selected_user_->id == user.id) {
+                selected_user_ = &user;
+                selected_user_id = user.id;
+                emit userInfoChanged();
+            }
+            
+            if(user.running) {
+                running_user_name_ = user.name;
+            }
+        }
+    }
+
+    if (users_list_.isEmpty()) {
+        qWarning() << "No users found";
+        co_return;
+    } else if (selected_user_id == -1) {
+        selectUser(0);
+    }
+    
+    emit usersListChanged();
+}
+
+QCoro::Task<void> DeviceManager::selectUser(int index) {
+    if (index < 0 || index >= users_list_.size()) {
+        qWarning() << "Invalid user index";
+        co_return;
+    }
+
+    selected_user_ = &users_list_[index];
+    emit userInfoChanged();
+}
+
+QCoro::Task<void> DeviceManager::listPackagesForUser()
+{
+    
+    user_apps_list_model_.clear();
+    if (!hasConnectedDevice()) {
+        emit userAppsListChanged();
+        co_return;
+    }
+    auto serial = connectedDevice();
+
+    QProcess basic_process;
+    QString id = QString::number(selected_user_->id);
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "list", "packages", "--user", id, "--show-versioncode", "-3"});
+
+    co_await adb.waitForFinished();
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to get apps for device" << serial;
+        co_return;
+    }
+
+    /* EXAMPLE OUTPUT:
+        package:com.facebook.arvr.quillplayer versionCode:135
+        package:com.oculus.mobile_mrc_setup versionCode:1637173263
+    */
+    QString output = basic_process.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+    lines.removeAll("");
+    QRegularExpression re("package:(\\S+) versionCode:(\\d+)");
+
+    user_apps_list_model_.clear();
+    for (const QString &line : lines) {
+        auto match = re.match(line);
+        if (match.hasMatch()) {
+            QString package_name = match.captured(1);
+            QString version_code = match.captured(2);
+            auto app = GameInfo{.package_name = package_name, .version_code = version_code};
+
+            user_apps_list_model_.append(app);
+        }
+    }
+    selected_user_->installedApps = user_apps_list_model_.size();
+
+    updateAvailableAppsList();
+    emit userAppsListChanged();
+    co_return;
+}
+
+QCoro::Task<void>  DeviceManager::updateAvailableAppsList() {
+    user_apps_available_list_model_.clear();
+
+    QSet<QString> installedAppsSet;
+
+    // Adiciona todos os pacotes instalados ao conjunto
+    for (size_t i = 0; i < user_apps_list_model_.size(); ++i) {
+        installedAppsSet.insert(user_apps_list_model_[i].package_name);
+    }
+
+    // Adiciona todos os pacotes disponíveis, exceto os já instalados
+    for (size_t i = 0; i < app_list_model_.size(); ++i) {
+        if (!installedAppsSet.contains(app_list_model_[i].package_name)) {
+            user_apps_available_list_model_.append(app_list_model_[i]);
+        }
+    }
+    co_return;
+}
+
+QCoro::Task<bool> DeviceManager::uninstallFromUser(const QString package_name)
+{
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    auto serial = connectedDevice();
+    QString id = QString::number(selected_user_->id);
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "uninstall", "--user", id, package_name});
+    co_await adb.waitForFinished(-1);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to uninstall" << package_name << "for user" << selected_user_->name << "on device" << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    listPackagesForUser();
+    co_return true;
+}
+
+QCoro::Task<bool> DeviceManager::installToUser(const QString package_name)
+{
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    auto serial = connectedDevice();
+    QString id = QString::number(selected_user_->id);
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "install-existing", "--user", id, package_name});
+    co_await adb.waitForFinished(-1);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to install" << package_name << "for user" << selected_user_->name << "on device" << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    listPackagesForUser();
     co_return true;
 }

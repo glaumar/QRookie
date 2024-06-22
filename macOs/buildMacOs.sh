@@ -61,3 +61,12 @@ copy_binary "zipalign" "$APP_RESOURCES_DIR"
 
 # Need user brew install
 copy_binary "apktool" "$APP_RESOURCES_DIR"
+
+# Backup the local linked app bundle
+rm -rf "${APP_NAME}_local.app"
+cp -r "$APP_PATH" "${APP_NAME}_local.app"
+
+# If --open is passed, run the app binary
+if [[ "$1" == "--open" ]]; then
+    ./QRookie.app/Contents/MacOS/QRookie
+fi

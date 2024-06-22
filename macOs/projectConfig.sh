@@ -33,6 +33,8 @@ set_android_tools() {
 export ACCOUNT_PROFILE="qrookienotorytool"
 export APP_BUNDLE="io.github.glaumar.QRookie"
 export DEVELOPER_ID="Developer ID Application: ${DEVELOPER_NAME} (${TEAM_ID})"
+export APP_NAME="QRookie"
+export APP_PATH="${APP_NAME}.app"
 
 # xcrun notarytool store-credentials "$ACCOUNT_PROFILE" \
 #     --team-id "$TEAM_ID" \

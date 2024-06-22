@@ -19,7 +19,8 @@
 #ifndef QROOKIE_DEVICE_MANAGER
 #define QROOKIE_DEVICE_MANAGER
 
-#include "game_info_model.h"
+#include "models/game_info_model.h"
+#include "models/user.h"
 #include "resource_locator.h"
 #include <QCoroProcess>
 #include <QCoroQmlTask>
@@ -44,7 +45,14 @@ class DeviceManager : public QObject
     Q_PROPERTY(QString oculusRuntimeVersion READ oculusRuntimeVersion NOTIFY oculusRuntimeVersionChanged)
     Q_PROPERTY(int androidVersion READ androidVersion NOTIFY androidVersionChanged)
     Q_PROPERTY(int androidSdkVersion READ androidSdkVersion NOTIFY androidSdkVersionChanged)
-
+    // Users
+    Q_PROPERTY(QVariantList usersList READ usersList NOTIFY usersListChanged)
+    Q_PROPERTY(QString selectedUserName READ selectedUserName NOTIFY userInfoChanged)
+    Q_PROPERTY(QString selectedUserId READ selectedUserId NOTIFY userInfoChanged)
+    Q_PROPERTY(bool selectedUserIsLogged READ selectedUserIsLogged NOTIFY userInfoChanged)
+    Q_PROPERTY(int selectedUsersInstalledApps READ selectedUsersInstalledApps NOTIFY userInfoChanged)
+    Q_PROPERTY(int avaliableAppsCount READ avaliableAppsCount)
+    Q_PROPERTY(QString runningUserName READ runningUserName NOTIFY userInfoChanged)
 public:
     explicit DeviceManager(QObject *parent = nullptr);
     ~DeviceManager();
@@ -65,6 +73,16 @@ public:
         return uninstallApk(package_name, true);
     };
 
+    Q_INVOKABLE QCoro::QmlTask uninstallFromSelectedUser(const QString package_name)
+    {
+        return uninstallFromUser(package_name);
+    };
+
+    Q_INVOKABLE QCoro::QmlTask installToSelectedUser(const QString package_name)
+    {
+        return installToUser(package_name);
+    };
+
     Q_INVOKABLE QVariantList devicesList() const
     {
         QVariantList list;
@@ -79,6 +97,16 @@ public:
         return &app_list_model_;
     }
 
+    Q_INVOKABLE GameInfoModel *userAppsListModel()
+    {
+        return &user_apps_list_model_;
+    }
+
+    Q_INVOKABLE GameInfoModel *userAppsAvailableListModel()
+    {
+        return &user_apps_available_list_model_;
+    }
+
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
@@ -91,6 +119,51 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateAndroidVersion();
     Q_INVOKABLE QCoro::Task<void> updateAndroidSdkVersion();
     Q_INVOKABLE QCoro::Task<void> updateAppList();
+    Q_INVOKABLE QCoro::Task<void> updateUsers();
+    Q_INVOKABLE QCoro::Task<void> selectUser(int index);
+    Q_INVOKABLE QCoro::Task<void> listPackagesForUser();
+    Q_INVOKABLE QCoro::Task<void> updateAvailableAppsList();
+    Q_INVOKABLE QCoro::Task<bool> uninstallFromUser(const QString package_name);
+    Q_INVOKABLE QCoro::Task<bool> installToUser(const QString package_name);
+
+    Q_INVOKABLE QString selectedUserName() const
+    {
+        return selected_user_ ? selected_user_->name : "";
+    }
+
+    Q_INVOKABLE QString selectedUserId() const
+    {
+        return selected_user_ ? QString::number(selected_user_->id) : "";
+    }
+
+    Q_INVOKABLE bool selectedUserIsLogged() const
+    {
+        return selected_user_ ? selected_user_->running : false;
+    }
+
+    Q_INVOKABLE int selectedUsersInstalledApps() const
+    {
+        return selected_user_ ? selected_user_->installedApps : -1;
+    }
+
+    Q_INVOKABLE int avaliableAppsCount() const
+    {
+        return user_apps_available_list_model_.size();
+    }
+
+    Q_INVOKABLE QString runningUserName() const
+    {
+        return running_user_name_;
+    }
+
+    Q_INVOKABLE QVariantList usersList() const
+    {
+        QVariantList list;
+        for (auto &user : users_list_) {
+            list.append(user.name);
+        }
+        return list;
+    }
 
     Q_INVOKABLE void enableAutoUpdate(const int ms = 3000)
     {
@@ -258,10 +331,15 @@ signals:
     void oculusRuntimeVersionChanged(QString oculus_runtime_version);
     void androidVersionChanged(int android_version);
     void androidSdkVersionChanged(int android_sdk_version);
+    void userAppsListChanged();
+    void usersListChanged();
+    void userInfoChanged();
 
 private:
     QStringList devices_list_;
     GameInfoModel app_list_model_;
+    GameInfoModel user_apps_list_model_;
+    GameInfoModel user_apps_available_list_model_;
     QTimer auto_update_timer_;
     QString connected_device_;
     QString device_name_;
@@ -274,6 +352,9 @@ private:
     QString oculus_runtime_version_;
     int android_version_;
     int android_sdk_version_;
+    QString running_user_name_;
+    QList<User> users_list_;
+    User* selected_user_;
 };
 
 #endif /* QROOKIE_DEVICE_MANAGER */

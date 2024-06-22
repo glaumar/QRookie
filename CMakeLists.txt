@@ -63,8 +63,9 @@ qt_add_executable(${APP_BINARY_NAME}
                              src/resource_locator.cpp src/resource_locator.h
                              src/device_manager.cpp src/device_manager.h
                              src/http_downloader.cpp src/http_downloader.h
-                             src/game_info_model.cpp src/game_info_model.h
-                             src/game_info.h
+                             src/models/game_info_model.cpp src/models/game_info_model.h
+                             src/models/game_info.h
+                             src/models/user.h
     src/app_settings.cpp src/app_settings.h
 )
 
