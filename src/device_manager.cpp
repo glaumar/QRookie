@@ -16,6 +16,7 @@
  */
 
 #include "device_manager.h"
+#include "app_settings.h"
 #include "models/game_info.h"
 
 #include <QCoreApplication>
@@ -637,8 +638,7 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
     }
 
     // sign the apk
-    // TODO: get key_path from settings
-    QString key_path = QStandardPaths::locate(QStandardPaths::AppDataLocation, "qrookie.keystore");
+    QString key_path = AppSettings::instance()->keyStorePath();
     if (key_path.isEmpty()) {
         qWarning() << "Failed to locate qrookie.keystore";
         co_return false;

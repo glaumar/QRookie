@@ -30,6 +30,7 @@ AppSettings::AppSettings(QObject *parent)
     , rename_package_(false)
     , cache_path_(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
     , data_path_(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+    , keystore_path_(QString())
     , last_wireless_addr(QString())
 {
     loadAppSettings();
@@ -59,6 +60,11 @@ void AppSettings::loadAppSettings()
     data_path_ = settings_->value("data_path", data_path_).toString();
     if (!dir.exists(data_path_)) {
         dir.mkpath(data_path_);
+    }
+
+    keystore_path_ = settings_->value("keystore_path", keystore_path_).toString();
+    if (keystore_path_.isEmpty()) {
+        keystore_path_ = QStandardPaths::locate(QStandardPaths::AppDataLocation, "qrookie.keystore");
     }
 
     last_wireless_addr = settings_->value("last_wireless_addr", last_wireless_addr).toString();
@@ -105,6 +111,13 @@ void AppSettings::setDataPath(const QString &data_path)
         dir.mkpath(data_path_);
     }
     emit dataPathChanged(data_path);
+}
+
+void AppSettings::setKeyStorePath(const QString &keystore_path)
+{
+    keystore_path_ = keystore_path;
+    settings_->setValue("keystore_path", keystore_path_);
+    emit keyStorePathChanged(keystore_path);
 }
 
 void AppSettings::setLastWirelessAddr(const QString &addr)

@@ -68,6 +68,12 @@ public:
     }
     void setDataPath(const QString &data_path);
 
+    QString keyStorePath() const
+    {
+        return keystore_path_;
+    }
+    void setKeyStorePath(const QString &keystore_path);
+
     QString lastWirelessAddr() const
     {
         return last_wireless_addr;
@@ -80,6 +86,7 @@ signals:
     void renamePackageChanged(bool rename_package);
     void cachePathChanged(QString cache_path);
     void dataPathChanged(QString data_path);
+    void keyStorePathChanged(QString keystore_path);
     void lastWirelessAddrChanged(QString addr);
 
 private:
@@ -91,6 +98,7 @@ private:
     bool rename_package_;
     QString cache_path_;
     QString data_path_;
+    QString keystore_path_;
     QString last_wireless_addr;
 };
 
