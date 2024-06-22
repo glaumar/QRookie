@@ -137,11 +137,11 @@ RowLayout {
                     property int index: -1
 
                     anchors.centerIn: parent
-                    title: "Uninstall " + packageName
+                    title: "Remove " + packageName + " from user" + app.deviceManager.selectedUserName
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: {
                         installed_apps.model.remove(index);
-                        app.deviceManager.uninstallApkQml(packageName);
+                        app.deviceManager.uninstallFromUser(packageName)
                     }
                 }
 
@@ -160,11 +160,11 @@ RowLayout {
                         else
                             return "file://" + path;
                     }
-                    // onUninstallButtonClicked: {
-                    //     confirm_dialog.packageName = model.package_name;
-                    //     confirm_dialog.index = index;
-                    //     confirm_dialog.open();
-                    // }
+                    onRemoveButtonClicked: {
+                        remove_confirm_dialog.packageName = model.package_name;
+                        remove_confirm_dialog.index = index;
+                        remove_confirm_dialog.open();
+                    }
                 }
             }
             GridView {
@@ -185,11 +185,11 @@ RowLayout {
                     property int index: -1
 
                     anchors.centerIn: parent
-                    title: "Uninstall " + packageName
+                    title: "Add " + packageName + " to user" + app.deviceManager.selectedUserName
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: {
                         avaliable_apps.model.remove(index);
-                        app.deviceManager.uninstallApkQml(packageName);
+                        app.deviceManager.installToUser(packageName);
                     }
                 }
 
@@ -208,11 +208,11 @@ RowLayout {
                         else
                             return "file://" + path;
                     }
-                    // onUninstallButtonClicked: {
-                    //     confirm_dialog.packageName = model.package_name;
-                    //     confirm_dialog.index = index;
-                    //     confirm_dialog.open();
-                    // }
+                    onAddButtonClicked: {
+                        confirm_dialog.packageName = model.package_name;
+                        confirm_dialog.index = index;
+                        confirm_dialog.open();
+                    }
                 }
             }
         }

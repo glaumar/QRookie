@@ -20,7 +20,6 @@ Kirigami.Card {
         id: action_button
         icon.name: "delete"
         text: qsTr("Remove from user")
-        enabled: false
         onClicked: {
             removeButtonClicked();
         }

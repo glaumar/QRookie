@@ -73,6 +73,16 @@ public:
         return uninstallApk(package_name, true);
     };
 
+    Q_INVOKABLE QCoro::QmlTask uninstallFromSelectedUser(const QString package_name)
+    {
+        return uninstallFromUser(package_name);
+    };
+
+    Q_INVOKABLE QCoro::QmlTask installToSelectedUser(const QString package_name)
+    {
+        return installToUser(package_name);
+    };
+
     Q_INVOKABLE QVariantList devicesList() const
     {
         QVariantList list;
@@ -113,6 +123,8 @@ public:
     Q_INVOKABLE QCoro::Task<void> selectUser(int index);
     Q_INVOKABLE QCoro::Task<void> listPackagesForUser();
     Q_INVOKABLE QCoro::Task<void> updateAvailableAppsList();
+    Q_INVOKABLE QCoro::Task<bool> uninstallFromUser(const QString package_name);
+    Q_INVOKABLE QCoro::Task<bool> installToUser(const QString package_name);
 
     Q_INVOKABLE QString selectedUserName() const
     {

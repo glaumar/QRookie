@@ -1003,3 +1003,51 @@ QCoro::Task<void>  DeviceManager::updateAvailableAppsList() {
     }
     co_return;
 }
+
+QCoro::Task<bool> DeviceManager::uninstallFromUser(const QString package_name)
+{
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    auto serial = connectedDevice();
+    QString id = QString::number(selected_user_->id);
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "uninstall", "--user", id, package_name});
+    co_await adb.waitForFinished(-1);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to uninstall" << package_name << "for user" << selected_user_->name << "on device" << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    listPackagesForUser();
+    co_return true;
+}
+
+QCoro::Task<bool> DeviceManager::installToUser(const QString package_name)
+{
+    if (!hasConnectedDevice()) {
+        co_return false;
+    }
+
+    auto serial = connectedDevice();
+    QString id = QString::number(selected_user_->id);
+
+    QProcess basic_process;
+    auto adb = qCoro(basic_process);
+    adb.start(resolvePrefix(ADB_PATH), {"-s", serial, "shell", "pm", "install-existing", "--user", id, package_name});
+    co_await adb.waitForFinished(-1);
+
+    if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
+        qWarning() << "Failed to install" << package_name << "for user" << selected_user_->name << "on device" << serial;
+        qWarning() << basic_process.readAllStandardError();
+        co_return false;
+    }
+
+    listPackagesForUser();
+    co_return true;
+}
