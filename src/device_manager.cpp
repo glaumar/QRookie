@@ -94,7 +94,6 @@ void DeviceManager::updateDeviceInfo()
 
 QCoro::Task<void> DeviceManager::updateSerials()
 {
-
     QProcess basic_process;
     auto adb = qCoro(basic_process);
     adb.start(resolvePrefix(ADB_PATH), {"devices"});
@@ -644,10 +643,8 @@ QCoro::Task<bool> DeviceManager::renameApk(const QFileInfo apk_file, const QStri
         qWarning() << "Failed to locate qrookie.keystore";
         co_return false;
     }
-    adb.start(
-        resolvePrefix(APKSIGNER_PATH),
-        {"sign", "--ks", key_path, "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file}
-    );
+    adb.start(resolvePrefix(APKSIGNER_PATH),
+              {"sign", "--ks", key_path, "--ks-key-alias", "qrookie", "--ks-pass", "pass:qrookie", "--key-pass", "pass:qrookie", new_apk_file});
 
     co_await adb.waitForFinished(-1);
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
@@ -897,21 +894,17 @@ QCoro::Task<void> DeviceManager::updateUsers()
     for (const QString &line : lines) {
         auto match = re.match(line);
         if (match.hasMatch()) {
-            User user = User(
-                match.captured(1).toInt(),
-                match.captured(2).trimmed(),
-                line.contains("running")
-            );
-            users_list_.append(user); 
-            
-            if (selected_user_ != nullptr && selected_user_->id == user.id) {
-                selected_user_ = &user;
-                selected_user_id = user.id;
+            auto user = QSharedPointer<User>(new User(match.captured(1).toInt(), match.captured(2).trimmed(), line.contains("running")));
+            users_list_.append(user);
+
+            if (selected_user_ != nullptr && selected_user_->id == user->id) {
+                selected_user_ = user;
+                selected_user_id = user->id;
                 emit userInfoChanged();
             }
-            
-            if(user.running) {
-                running_user_name_ = user.name;
+
+            if (user->running) {
+                running_user_name_ = user->name;
             }
         }
     }
@@ -922,23 +915,23 @@ QCoro::Task<void> DeviceManager::updateUsers()
     } else if (selected_user_id == -1) {
         selectUser(0);
     }
-    
+
     emit usersListChanged();
 }
 
-QCoro::Task<void> DeviceManager::selectUser(int index) {
+QCoro::Task<void> DeviceManager::selectUser(int index)
+{
     if (index < 0 || index >= users_list_.size()) {
         qWarning() << "Invalid user index";
         co_return;
     }
 
-    selected_user_ = &users_list_[index];
+    selected_user_ = users_list_[index];
     emit userInfoChanged();
 }
 
 QCoro::Task<void> DeviceManager::listPackagesForUser()
 {
-    
     user_apps_list_model_.clear();
     if (!hasConnectedDevice()) {
         emit userAppsListChanged();
@@ -985,7 +978,8 @@ QCoro::Task<void> DeviceManager::listPackagesForUser()
     co_return;
 }
 
-QCoro::Task<void>  DeviceManager::updateAvailableAppsList() {
+QCoro::Task<void> DeviceManager::updateAvailableAppsList()
+{
     user_apps_available_list_model_.clear();
 
     QSet<QString> installedAppsSet;

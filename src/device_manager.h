@@ -24,6 +24,7 @@
 #include "resource_locator.h"
 #include <QCoroProcess>
 #include <QCoroQmlTask>
+#include <QSharedPointer>
 #include <QVariantList>
 
 class QFileInfo;
@@ -160,7 +161,7 @@ public:
     {
         QVariantList list;
         for (auto &user : users_list_) {
-            list.append(user.name);
+            list.append(user->name);
         }
         return list;
     }
@@ -353,8 +354,8 @@ private:
     int android_version_;
     int android_sdk_version_;
     QString running_user_name_;
-    QList<User> users_list_;
-    User* selected_user_;
+    QList<QSharedPointer<User>> users_list_;
+    QSharedPointer<User> selected_user_;
 };
 
 #endif /* QROOKIE_DEVICE_MANAGER */
