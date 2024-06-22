@@ -115,7 +115,7 @@ if(APPLE)
         )
     else()
         # for nix darwin
-        install(TARGETS ${APP_BINARY_NAME} DESTINATION Applications/QRookie.app/Contents)
+        install(TARGETS ${APP_BINARY_NAME} DESTINATION Applications/QRookie.app/Contents/MacOS)
         install(FILES macOs/Info.plist DESTINATION Applications/QRookie.app/Contents)
         install(FILES key/qrookie.keystore DESTINATION  Applications/QRookie.app/Contents/Resources)
         install(FILES icons/icon.icns DESTINATION Applications/QRookie.app/Contents/Resources) 
