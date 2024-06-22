@@ -76,7 +76,7 @@ public:
 
     QString lastWirelessAddr() const
     {
-        return last_wireless_addr;
+        return last_wireless_addr_;
     }
     void setLastWirelessAddr(const QString &addr);
 
@@ -99,7 +99,7 @@ private:
     QString cache_path_;
     QString data_path_;
     QString keystore_path_;
-    QString last_wireless_addr;
+    QString last_wireless_addr_;
 };
 
 #endif /* QROOKIE_APP_SETTINGS */

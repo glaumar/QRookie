@@ -31,7 +31,7 @@ AppSettings::AppSettings(QObject *parent)
     , cache_path_(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
     , data_path_(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
     , keystore_path_(QString())
-    , last_wireless_addr(QString())
+    , last_wireless_addr_(QString())
 {
     loadAppSettings();
 }
@@ -67,7 +67,7 @@ void AppSettings::loadAppSettings()
         keystore_path_ = QStandardPaths::locate(QStandardPaths::AppDataLocation, "qrookie.keystore");
     }
 
-    last_wireless_addr = settings_->value("last_wireless_addr", last_wireless_addr).toString();
+    last_wireless_addr_ = settings_->value("last_wireless_addr", last_wireless_addr_).toString();
 }
 
 void AppSettings::setAutoInstall(bool auto_install)
@@ -122,7 +122,7 @@ void AppSettings::setKeyStorePath(const QString &keystore_path)
 
 void AppSettings::setLastWirelessAddr(const QString &addr)
 {
-    last_wireless_addr = addr;
-    settings_->setValue("last_wireless_addr", last_wireless_addr);
+    last_wireless_addr_ = addr;
+    settings_->setValue("last_wireless_addr", last_wireless_addr_);
     emit lastWirelessAddrChanged(addr);
 }
