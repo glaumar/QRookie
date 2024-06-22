@@ -49,7 +49,7 @@ remove_qrookie
 echo "Installing QRookie.app..."
 
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
-nix profile install --impure github:glaumar/QRookie \
+nix profile install --impure github:glaumar:nur#qrookie \
 --extra-experimental-features nix-command \
 --extra-experimental-features flakes
 
