@@ -21,9 +21,9 @@
 
 #include "app_settings.h"
 #include "device_manager.h"
+#include "http_downloader.h"
 #include "models/game_info.h"
 #include "models/game_info_model.h"
-#include "http_downloader.h"
 #include "vrp_public.h"
 #include "vrp_torrent.h"
 #include <QCoroTask>
