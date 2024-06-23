@@ -1,5 +1,5 @@
 # ![](./icons/64x64/io.github.glaumar.QRookie.png) QRookie 
-Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sideloader](https://github.com/VRPirates/rookie) but for linux).
+Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sideloader](https://github.com/VRPirates/rookie) but for Linux and MacOS).
 
 # Screenshots
 
