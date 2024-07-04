@@ -44,7 +44,8 @@ modules:
     buildsystem: simple
     build-commands:
       - install -Dm0644 apktool_2.9.3.jar "/app/share/android-apktool/apktool.jar"
-      - tar xf apktool-install-linux-r04-brut1.tar.bz2
+      # https://superuser.com/questions/1435437/how-to-get-around-this-error-when-untarring-an-archive-tar-cannot-change-owner
+      - tar xf apktool-install-linux-r04-brut1.tar.bz2 --no-same-owner
       - sed -i 's/libdir=.*progdir/libdir="\/app\/share\/'android-apktool'/' apktool
       - install -pDm 0755 apktool -t "/app/bin/"
     sources:
