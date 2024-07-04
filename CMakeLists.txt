@@ -21,7 +21,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
-if(APPLE)
+if(APPLE AND MACOS_BUNDLE)
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
         set(MAC_ARCH "arm64")
         set(CMAKE_OSX_ARCHITECTURES "arm64")
@@ -86,33 +86,32 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 
-if(EXISTS "${INSTALL_DIR}")
-    message(STATUS "Directory ${INSTALL_DIR} exists. Setting INSTALL_DIR.")
-else()
-    message(WARNING "Directory ${INSTALL_DIR} does not exist. INSTALL_DIR not set.")
-    unset(INSTALL_DIR)
-endif()
-
 if(APPLE)
-    if(DEFINED INSTALL_DIR)
-        add_definitions(-DMACOS_BUNDLE)
-        set_target_properties(${APP_BINARY_NAME} PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
-        )
+    if(MACOS_BUNDLE)
+        if(EXISTS "${INSTALL_DIR}")
+            message(STATUS "Directory ${INSTALL_DIR} exists. Setting INSTALL_DIR.")
 
-        set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
-        set_target_properties(${APP_BINARY_NAME} PROPERTIES
-            INSTALL_RPATH "@loader_path/../Frameworks"
-        )
-        add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${INSTALL_DIR}/kirigami/lib/qml"
-                "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
-        )
+            add_definitions(-DMACOS_BUNDLE)
+            set_target_properties(${APP_BINARY_NAME} PROPERTIES
+                MACOSX_BUNDLE TRUE
+                MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macOs/Info.plist
+            )
+    
+            set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
+            set_target_properties(${APP_BINARY_NAME} PROPERTIES
+                INSTALL_RPATH "@loader_path/../Frameworks"
+            )
+            add_custom_command(TARGET ${APP_BINARY_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/QRookie.app/Contents/Resources"
+                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/icons/icon.icns" "${BUILD_DIR}/QRookie.app/Contents/Resources/icon.icns"
+                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/key/qrookie.keystore" "${BUILD_DIR}/QRookie.app/Contents/Resources/qrookie.keystore"
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${INSTALL_DIR}/kirigami/lib/qml"
+                    "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
+            )
+        else()
+            message(WARNING "Directory ${INSTALL_DIR} does not exist.")
+        endif()
     else()
         # for nix darwin
         install(TARGETS ${APP_BINARY_NAME} DESTINATION Applications/QRookie.app/Contents/MacOS)
@@ -121,6 +120,7 @@ if(APPLE)
         install(FILES icons/icon.icns DESTINATION Applications/QRookie.app/Contents/Resources) 
     endif()
 else()
+    # for linux
     install(TARGETS ${APP_BINARY_NAME} DESTINATION bin)
     install(FILES ${DESKTOP_FILE_NAME} DESTINATION share/applications)
     install(FILES icons/16x16/${APPLICATION_ID}.png DESTINATION share/icons/hicolor/16x16/apps)
