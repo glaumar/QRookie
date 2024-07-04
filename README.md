@@ -48,9 +48,12 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
     - [Enable Flakes](#enable-flakes)
     - [Build](#build-2)
     - [Run Without Cloning The Repository](#run-without-cloning-the-repository)
-  - [MacOS (Using Nix)](#macos-using-nix)
-    - [Install Nix](#install-nix)
+  - [MacOS](#macos-1)
+    - [Install HomeBrew](#install-homebrew)
     - [Build](#build-3)
+  - [MacOS (Nix)](#macos-nix)
+    - [Install Nix](#install-nix)
+    - [Build](#build-4)
     - [Run Without Cloning The Repository](#run-without-cloning-the-repository-1)
 
 ---
@@ -261,7 +264,20 @@ cmake --build build --target qrookie
 nix run github:glaumar/QRookie
 ```
 
-## MacOS (Using Nix)
+## MacOS
+### Install HomeBrew
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### Build
+```shell
+cd ./macOs/
+# install dependencies, build and run
+./buildMacOs.sh  --open
+```
+
+## MacOS (Nix)
 ### Install Nix
 I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation.  
 For more details, refer to [here](https://nixcademy.com/2024/01/15/nix-on-macos/)
