@@ -61,7 +61,7 @@ RowLayout {
                 thumbnailPath: {
                     let path = app.vrp.getGameThumbnailPath(model.package_name);
                     if (path === "")
-                        return "Image/matrix.png";
+                        return "qrc:/qt/qml/content/Image/matrix.png";
                     else
                         return "file://" + path;
                 }
@@ -163,7 +163,7 @@ RowLayout {
                 thumbnailPath: {
                     let path = app.vrp.getGameThumbnailPath(model.package_name);
                     if (path === "")
-                        return "Image/matrix.png";
+                        return "qrc:/qt/qml/content/Image/matrix.png";
                     else
                         return "file://" + path;
                 }
