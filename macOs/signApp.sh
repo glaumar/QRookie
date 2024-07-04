@@ -42,3 +42,6 @@ printf "\e[1;32mVerifying the app bundle...\e[0m\n"
 spctl --assess --type exec -vv "${DMG_NAME}"
 codesign --verify --deep --strict --verbose=2 "${DMG_NAME}"
 
+# Always returning true ensures that the github action will not terminate due to errors in this script.
+# You can get an unsigned dmg file even if the signing fails
+true
