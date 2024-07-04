@@ -1,0 +1,33 @@
+name: Create MacOS Bundle(arm64)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with: 
+        lfs: true
+        repository: glaumar/QRookie
+
+    - name: Install Homebrew
+      run: |
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        
+    - name: Build
+      run: |
+        cd macOs/
+        ./signApp.sh
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.TOKEN }}
+        file: macOs/QRookie_arm64.dmg
+        asset_name:  QRookie_macOs_arm64.dmg 
+        tag: ${{ github.ref }}

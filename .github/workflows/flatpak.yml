@@ -1,0 +1,36 @@
+name: Create Flatpak Bundle
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.6
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          lfs: true
+          repository: glaumar/QRookie
+    
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: QRookie.flatpak
+          upload-artifact: false
+          manifest-path: io.github.glaumar.QRookie.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+
+    
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.TOKEN }}
+          file: QRookie.flatpak
+          asset_name: QRookie.flatpak
+          tag: ${{ github.ref }}
+    
