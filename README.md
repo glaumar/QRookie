@@ -23,7 +23,7 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
     - [Install from AUR](#install-from-aur)
   - [NixOS](#nixos)
     - [Install directly](#install-directly)
-    - [Use with flake (recommended)](#use-with-flake-recommended)
+    - [Use with flake.nix (recommended)](#use-with-flakenix-recommended)
   - [SteamOS And Other Linux](#steamos-and-other-linux)
     - [Flathub](#flathub)
     - [Flatpak Bundle](#flatpak-bundle)
@@ -75,7 +75,7 @@ paru -S qrookie-vrp
 ```shell
 nix profile install github:glaumar/nur#qrookie
 ```
-### Use with flake (recommended)
+### Use with flake.nix (recommended)
 Modify your flake.nix like：
 
 ```nix
@@ -130,23 +130,23 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 
 See [releases](https://github.com/glaumar/QRookie/releases).
 
+> ⚠️ *The MacOS Bundle is currently missing icon themes*
+
+> ⚠️ *The MacOS Bundle does not include **java runtime**. If you want to use the `rename pkg` function, you need to install the java runtime additionally:*
+> ```shell
+> brew install java
+> 
+> sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+> ```
+>
+
 ### Install using nix  
 
-**⚠️ If you don’t know nix at all, we don’t recommend using this method to install it.**  
+> ⚠️ *If you don’t know nix at all, we don’t recommend using this method to install QRookie.*
 
-We provide an installation script
-```shell
-sh <(curl -L https://raw.githubusercontent.com/glaumar/QRookie/main/macOs/installMacOSNix.sh)
-```
+1. **install nix:** I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
 
-Or you can try to install them manually:
-
-**install nix:**  
-
-I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
-
-**install QRookie using flake：** 
-
+2. **install QRookie using flake:** 
 ```shell
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
 
@@ -156,8 +156,6 @@ nix profile install --impure github:glaumar:nur#qrookie \
 
 ln -s ~/.nix-profile/Applications/QRookie.app /Applications
 ```
-
-
 
 ### nix-darwin
 - [ ] TODO
@@ -273,6 +271,7 @@ nix run github:glaumar/QRookie
 ### Build
 ```shell
 cd ./macOs/
+
 # install dependencies, build and run
 ./buildMacOs.sh  --open
 ```
@@ -280,6 +279,7 @@ cd ./macOs/
 ## MacOS (Nix)
 ### Install Nix
 I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation.  
+
 For more details, refer to [here](https://nixcademy.com/2024/01/15/nix-on-macos/)
 
 ### Build
