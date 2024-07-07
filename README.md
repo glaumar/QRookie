@@ -130,6 +130,8 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 
 See [releases](https://github.com/glaumar/QRookie/releases).
 
+> ⚠️ *The MacOS Bundle is automatically build using github action and is not signed or notarized*
+
 > ⚠️ *The MacOS Bundle is currently missing icon themes*
 
 > ⚠️ *The MacOS Bundle does not include **java runtime**. If you want to use the `rename pkg` function, you need to install the java runtime additionally:*
@@ -144,13 +146,15 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 
 > ⚠️ *If you don’t know nix at all, we don’t recommend using this method to install QRookie.*
 
+> ⚠️ *More than 3GB of data may be downloaded during first installation*
+
 1. **install nix:** I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
 
 2. **install QRookie using flake:** 
 ```shell
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
 
-nix profile install --impure github:glaumar:nur#qrookie \
+nix profile install --impure github:glaumar/nur#qrookie \
 --extra-experimental-features nix-command \
 --extra-experimental-features flakes
 
@@ -158,9 +162,7 @@ ln -s ~/.nix-profile/Applications/QRookie.app /Applications
 ```
 
 ### nix-darwin
-- [ ] TODO
-
-
+Refer to [NixOS configuration](#use-with-flakenix-recommended)
 
 # FAQ
 
