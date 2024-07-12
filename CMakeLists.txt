@@ -107,6 +107,9 @@ if(APPLE)
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
                     "${INSTALL_DIR}/kirigami/lib/qml"
                     "${BUILD_DIR}/QRookie.app/Contents/Resources/kirigami"
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${INSTALL_DIR}/breeze-icons/share/icons/breeze"
+                    "${BUILD_DIR}/QRookie.app/Contents/Resources/icons/breeze"
             )
         else()
             message(WARNING "Directory ${INSTALL_DIR} does not exist.")

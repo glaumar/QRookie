@@ -49,5 +49,6 @@ brew install cmake make extra-cmake-modules qt vulkan-headers ninja vulkan-loade
 # Install cmake dependencies
 install_dependency "https://github.com/danvratil/qcoro.git" v0.10.0
 install_dependency "https://invent.kde.org/frameworks/kirigami.git" v6.2.1
+install_dependency "https://github.com/KDE/breeze-icons.git" v6.3.0
 
 echo "Todas as dependências foram instaladas com sucesso."

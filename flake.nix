@@ -43,28 +43,11 @@
               kdePackages.kirigami
               kdePackages.qtsvg
               kdePackages.qtimageformats
-            ] ++ (if (system == "x86_64-linux" || system == "aarch64-linux")
-            then [ kdePackages.qqc2-breeze-style ]
-            else [
-              (whitesur-icon-theme.overrideAttrs
-                (finalAttrs: previousAttrs: {
-                  nativeBuildInputs = [ gtk3 fdupes ];
-                  installPhase = ''
-                    runHook preInstall
-
-                    ./install.sh --dest $out/share/icons \
-                      --name WhiteSur \
-                      --theme ${builtins.toString themeVariants} \
-                      ${lib.optionalString alternativeIcons "--alternative"} \
-                      ${lib.optionalString boldPanelIcons "--bold"} \
-                      ${lib.optionalString blackPanelIcons "--black"}
-
-                    fdupes --symlinks --recurse $out/share
-
-                    runHook postInstall
-                  '';
-                }))
-            ]);
+            ] ++ lib.optionals stdenv.isLinux [ 
+              kdePackages.qqc2-breeze-style 
+            ] ++ lib.optionals stdenv.isDarwin [
+              kdePackages.breeze-icons
+            ];
 
             qtWrapperArgs = with pkgs;[
               ''
@@ -103,28 +86,11 @@
               android-tools
               apksigner
               jdk21_headless
-            ] ++ (if (system == "x86_64-linux" || system == "aarch64-linux")
-            then [ gdb kdePackages.qqc2-breeze-style ]
-            else [
-              (whitesur-icon-theme.overrideAttrs
-                (finalAttrs: previousAttrs: {
-                  nativeBuildInputs = [ gtk3 fdupes ];
-                  installPhase = ''
-                    runHook preInstall
-
-                    ./install.sh --dest $out/share/icons \
-                      --name WhiteSur \
-                      --theme ${builtins.toString themeVariants} \
-                      ${lib.optionalString alternativeIcons "--alternative"} \
-                      ${lib.optionalString boldPanelIcons "--bold"} \
-                      ${lib.optionalString blackPanelIcons "--black"}
-
-                    fdupes --symlinks --recurse $out/share
-
-                    runHook postInstall
-                  '';
-                }))
-            ]);
+            ] ++ lib.optionals stdenv.isLinux [ 
+              gdb kdePackages.qqc2-breeze-style 
+            ] ++ lib.optionals stdenv.isDarwin [
+              kdePackages.breeze-icons
+            ];
 
             shellHook = ''
               PATH="${zipAlignPath}:$PATH"

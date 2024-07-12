@@ -56,12 +56,18 @@ int main(int argc, char *argv[])
         icon_dirs += ":/icons";
         QIcon::setThemeSearchPaths(icon_dirs);
     }
-    QIcon::setThemeName("WhiteSur");
+    QIcon::setThemeName("breeze");
 
 #ifdef MACOS_BUNDLE
+    QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
+
     QStringList path = env.value("PATH").split(QDir::listSeparator());
-    path.prepend(QCoreApplication::applicationDirPath() + "/../Resources");
+    path.prepend(res_dir);
     qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
+
+    QStringList icon_dirs = QIcon::themeSearchPaths();
+    icon_dirs += res_dir + "/icons"; 
+    QIcon::setThemeSearchPaths(icon_dirs);
 #endif
 
 #endif
@@ -73,8 +79,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
 #ifdef MACOS_BUNDLE
-    QString projectDir = QCoreApplication::applicationDirPath() + "/../Resources";
-    engine.addImportPath(projectDir + "/kirigami");
+    engine.addImportPath(res_dir + "/kirigami");
 #endif
 
     const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
