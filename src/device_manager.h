@@ -21,7 +21,6 @@
 
 #include "models/game_info_model.h"
 #include "models/user.h"
-#include "resource_locator.h"
 #include <QCoroProcess>
 #include <QCoroQmlTask>
 #include <QSharedPointer>

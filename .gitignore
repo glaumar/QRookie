@@ -8,10 +8,10 @@ export/
 QRookie.flatpak
 repo/
 .VSCodeCounter/
-QRookie.flatpak
 .flatpak
 _build/
 io.github.glaumar.QRookie.flatpak
+result
 
 # MacOs Dependencies
 /macOs/dependencies

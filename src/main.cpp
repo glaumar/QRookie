@@ -53,6 +53,13 @@ int main(int argc, char *argv[])
         QIcon::setThemeSearchPaths(icon_dirs);
     }
     QIcon::setThemeName("WhiteSur");
+
+#ifdef MACOS_BUNDLE
+    QStringList path = env.value("PATH").split(QDir::listSeparator());
+    path.prepend(QCoreApplication::applicationDirPath() + "/../Resources");
+    qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
+#endif
+
 #endif
 
     qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");
@@ -61,7 +68,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-#if defined(Q_OS_MAC)
+#ifdef MACOS_BUNDLE
     QString projectDir = QCoreApplication::applicationDirPath() + "/../Resources";
     engine.addImportPath(projectDir + "/kirigami");
 #endif

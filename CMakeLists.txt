@@ -57,15 +57,14 @@ configure_file(src/qrookie.h.in qrookie.h)
 
 qt_add_executable(${APP_BINARY_NAME} 
     src/main.cpp
-                             src/vrp_public.cpp src/vrp_public.h
-                             src/vrp_torrent.cpp src/vrp_torrent.h
-                             src/vrp_manager.cpp src/vrp_manager.h
-                             src/resource_locator.cpp src/resource_locator.h
-                             src/device_manager.cpp src/device_manager.h
-                             src/http_downloader.cpp src/http_downloader.h
-                             src/models/game_info_model.cpp src/models/game_info_model.h
-                             src/models/game_info.h
-                             src/models/user.h
+    src/vrp_public.cpp src/vrp_public.h
+    src/vrp_torrent.cpp src/vrp_torrent.h
+    src/vrp_manager.cpp src/vrp_manager.h
+    src/device_manager.cpp src/device_manager.h
+    src/http_downloader.cpp src/http_downloader.h
+    src/models/game_info_model.cpp src/models/game_info_model.h
+    src/models/game_info.h
+    src/models/user.h
     src/app_settings.cpp src/app_settings.h
 )
 

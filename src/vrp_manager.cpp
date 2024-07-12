@@ -27,14 +27,14 @@
 #include <QStandardPaths>
 
 #include "qrookie.h"
-#include "resource_locator.h"
 
 #ifdef Q_OS_MAC
-#define OPEN_PATH "open"
+const QString OPEN_CMD("open");
 #else
-#define OPEN_PATH "xdg-open"
+const QString OPEN_CMD("xdg-open");
 #endif
-#define S7Z_PATH "7za"
+
+const QString P7ZA("7za");
 
 VrpManager::VrpManager(QObject *parent)
     : QObject(parent)
@@ -141,7 +141,7 @@ QCoro::Task<bool> VrpManager::downloadMetadata()
         auto p7za = qCoro(basic_process);
 
         // Decompress meta.7z
-        p7za.start(resolvePrefix(S7Z_PATH),
+        p7za.start(P7ZA,
                    QStringList() << "x" << QString("%1/meta.7z").arg(http_downloader_.downloadDirectory())
                                  << "-aoa" // Overwrite All existing files without prompt.
                                  << QString("-o%1").arg(data_path_) << QString("-p%1").arg(vrp_public_.password()));
@@ -353,7 +353,7 @@ QCoro::Task<bool> VrpManager::decompressGame(const GameInfo game)
     auto p7za = qCoro(basic_process);
 
     // Decompress
-    p7za.start(resolvePrefix(S7Z_PATH),
+    p7za.start(P7ZA,
                QStringList() << "x" << QString("%1/%2/%2.7z.001").arg(cache_path_, getGameId(game.release_name))
                              << "-aoa" // Overwrite All existing files without prompt.
                              << QString("-o%1").arg(data_path_) << QString("-p%1").arg(vrp_public_.password()));
@@ -600,7 +600,7 @@ QCoro::Task<bool> VrpManager::openGameFolder(const QString release_name)
 {
     QProcess basic_process;
     auto xdg_open = qCoro(basic_process);
-    xdg_open.start(OPEN_PATH, {getLocalGamePath(release_name)});
+    xdg_open.start(OPEN_CMD, {getLocalGamePath(release_name)});
     co_await xdg_open.waitForFinished();
 
     if (basic_process.exitStatus() != QProcess::NormalExit || basic_process.exitCode() != 0) {
