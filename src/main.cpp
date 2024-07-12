@@ -42,6 +42,22 @@ int main(int argc, char *argv[])
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(QStringLiteral("Material"));
     }
+
+#ifdef MACOS_BUNDLE
+    QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
+
+    // add ../Resources to the PATH (for adb,7za,zipalign,apktool,apksigner)
+    QStringList path = env.value("PATH").split(QDir::listSeparator());
+    path.prepend(res_dir);
+    qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
+
+    // add ../Resources/icons to the icon theme search path
+    QStringList icon_dirs = QIcon::themeSearchPaths();
+    icon_dirs += res_dir + "/icons";
+    QIcon::setThemeSearchPaths(icon_dirs);
+#endif // MACOS_BUNDLE
+
+    // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (env.contains("XDG_DATA_DIRS")) {
         QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
@@ -57,19 +73,6 @@ int main(int argc, char *argv[])
         QIcon::setThemeSearchPaths(icon_dirs);
     }
     QIcon::setThemeName("breeze");
-
-#ifdef MACOS_BUNDLE
-    QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
-
-    QStringList path = env.value("PATH").split(QDir::listSeparator());
-    path.prepend(res_dir);
-    qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
-
-    QStringList icon_dirs = QIcon::themeSearchPaths();
-    icon_dirs += res_dir + "/icons"; 
-    QIcon::setThemeSearchPaths(icon_dirs);
-#endif
-
 #endif
 
     qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");

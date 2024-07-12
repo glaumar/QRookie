@@ -124,7 +124,8 @@
         "qvariantmap": "cpp",
         "qvariantlist": "cpp",
         "qstringlistmodel": "cpp",
-        "qcoroprocess": "cpp"
+        "qcoroprocess": "cpp",
+        "qcoreapplication": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,

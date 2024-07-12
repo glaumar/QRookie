@@ -28,10 +28,10 @@
 #include <QSharedPointer>
 #include <QStandardPaths>
 
-const QString ZIPALIGN("zipalign");
 const QString ADB("adb");
 const QString APKTOOL("apktool");
 const QString APKSIGNER("apksigner");
+const QString ZIPALIGN("zipalign");
 
 DeviceManager::DeviceManager(QObject *parent)
     : QObject(parent)
