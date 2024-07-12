@@ -35,9 +35,13 @@ int main(int argc, char *argv[])
     app.setDesktopFileName(APPLICATION_ID);
 
 #ifdef Q_OS_LINUX
-    QQuickStyle::setStyle("org.kde.breeze");
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
+        QQuickStyle::setStyle(QStringLiteral("org.kde.breeze"));
+    }
 #elif defined(Q_OS_MAC)
-    QQuickStyle::setStyle("Material");
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
+        QQuickStyle::setStyle(QStringLiteral("Material"));
+    }
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (env.contains("XDG_DATA_DIRS")) {
         QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
