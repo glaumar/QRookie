@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
         QQuickStyle::setStyle(QStringLiteral("Material"));
     }
 
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 #ifdef MACOS_BUNDLE
     QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
 
@@ -58,7 +59,6 @@ int main(int argc, char *argv[])
 #endif // MACOS_BUNDLE
 
     // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (env.contains("XDG_DATA_DIRS")) {
         QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
         QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
