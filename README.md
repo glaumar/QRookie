@@ -132,8 +132,6 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 
 > ⚠️ *The MacOS Bundle is automatically build using github action and is not signed or notarized*
 
-> ⚠️ *The MacOS Bundle is currently missing icon themes*
-
 > ⚠️ *The MacOS Bundle does not include **java runtime**. If you want to use the `rename pkg` function, you need to install the java runtime additionally:*
 > ```shell
 > brew install java
