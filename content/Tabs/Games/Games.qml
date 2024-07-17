@@ -45,7 +45,6 @@ ColumnLayout {
 
                 flat: true
                 Layout.fillHeight: true
-                text: "Order"
                 icon.name: "view-sort-ascending"
                 onClicked: {
                     if (sortOrder === Qt.AscendingOrder) {
@@ -79,7 +78,6 @@ ColumnLayout {
                     height: parent.height
                     anchors.right: parent.right
                     flat: true
-                    text: "Search"
                     icon.name: "search"
                 }
 
@@ -118,7 +116,6 @@ ColumnLayout {
 
                 flat: true
                 Layout.fillHeight: true
-                text: "Settings"
                 icon.name: "settings-configure"
                 onClicked: settings_sheet.open()
             }
