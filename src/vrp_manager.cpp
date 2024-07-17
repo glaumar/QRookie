@@ -192,7 +192,7 @@ bool VrpManager::parseMetadata()
     while (!in.atEnd()) {
         QString line = in.readLine();
         QStringList parts = line.split(';');
-        if (parts.size() != 6) {
+        if (parts.size() < 6) {
             qDebug() << "Invalid line in VRP-GameList.txt: " << line;
             continue;
         } else {
