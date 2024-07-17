@@ -44,6 +44,21 @@ int main(int argc, char *argv[])
     }
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    QStringList icon_dirs = QIcon::themeSearchPaths();
+
+    // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
+    if (env.contains("XDG_DATA_DIRS")) {
+        QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
+        QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
+        // QStringList icon_dirs;
+        for (auto dir : data_dirs) {
+            auto icon_dir = dir + "/icons";
+            if (QDir(icon_dir).exists()) {
+                icon_dirs.append(icon_dir);
+            }
+        }
+    }
+
 #ifdef MACOS_BUNDLE
     QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
 
@@ -53,25 +68,10 @@ int main(int argc, char *argv[])
     qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
 
     // add ../Resources/icons to the icon theme search path
-    QStringList icon_dirs = QIcon::themeSearchPaths();
     icon_dirs += res_dir + "/icons";
-    QIcon::setThemeSearchPaths(icon_dirs);
 #endif // MACOS_BUNDLE
 
-    // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
-    if (env.contains("XDG_DATA_DIRS")) {
-        QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
-        QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
-        QStringList icon_dirs;
-        for (auto dir : data_dirs) {
-            auto icon_dir = dir + "/icons";
-            if (QDir(icon_dir).exists()) {
-                icon_dirs.append(icon_dir);
-            }
-        }
-        icon_dirs += ":/icons";
-        QIcon::setThemeSearchPaths(icon_dirs);
-    }
+    QIcon::setThemeSearchPaths(icon_dirs);
     QIcon::setThemeName("breeze");
 #endif
 
