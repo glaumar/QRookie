@@ -82,7 +82,7 @@ void DeviceManager::updateDeviceInfo()
 {
     updateDeviceName();
     updateSpaceUsage();
-    updatedeviceIp();
+    updateDeviceIp();
     updateBatteryLevel();
     updateOculusOsVersion();
     updateOculusVersion();
@@ -170,7 +170,7 @@ QCoro::Task<void> DeviceManager::updateDeviceName()
     }
 }
 
-QCoro::Task<void> DeviceManager::updatedeviceIp()
+QCoro::Task<void> DeviceManager::updateDeviceIp()
 {
     if (!hasConnectedDevice()) {
         setdeviceIp("");

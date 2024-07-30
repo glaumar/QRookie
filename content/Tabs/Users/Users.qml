@@ -42,7 +42,7 @@ RowLayout {
                         ? app.deviceManager.selectedUsersInstalledApps
                         : qsTr("loading...");
                     installed_tab.text = qsTr("Installed (") + app.deviceManager.selectedUsersInstalledApps + qsTr(")");
-                    available_tab.text = qsTr("Available (") + app.deviceManager.avaliableAppsCount + qsTr(")");
+                    available_tab.text = qsTr("Available (") + app.deviceManager.availableAppsCount + qsTr(")");
                 }
 
                 target: app.deviceManager
@@ -168,7 +168,7 @@ RowLayout {
                 }
             }
             GridView {
-                id: avaliable_apps
+                id: available_apps
 
                 Layout.fillHeight: true
                 Layout.fillWidth: true
@@ -188,7 +188,7 @@ RowLayout {
                     title: "Add " + packageName + " to user" + app.deviceManager.selectedUserName
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: {
-                        avaliable_apps.model.remove(index);
+                        available_apps.model.remove(index);
                         app.deviceManager.installToUser(packageName);
                     }
                 }
@@ -198,8 +198,8 @@ RowLayout {
                 }
 
                 delegate: UsersToAddDelegate {
-                    width: avaliable_apps.cellWidth - 10
-                    height: avaliable_apps.cellHeight - 10
+                    width: available_apps.cellWidth - 10
+                    height: available_apps.cellHeight - 10
                     name: model.package_name
                     thumbnailPath: {
                         let path = app.vrp.getGameThumbnailPath(model.package_name);
