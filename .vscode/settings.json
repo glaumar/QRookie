@@ -125,7 +125,12 @@
         "qvariantlist": "cpp",
         "qstringlistmodel": "cpp",
         "qcoroprocess": "cpp",
-        "qcoreapplication": "cpp"
+        "qcoreapplication": "cpp",
+        "qicon": "cpp",
+        "qcoroqml": "cpp",
+        "qdir": "cpp",
+        "qstack": "cpp",
+        "qsettings": "cpp"
     },
     "files.exclude": {
         "**/build_flatpak": true,
@@ -138,5 +143,38 @@
         "**/.hg/store/**": true,
         ".flatpak/**": true,
         "_build/**": true
+    },
+    "cSpell.words": [
+        "APKSIGNER",
+        "APKTOOL",
+        "arvr",
+        "AUTOMOC",
+        "Coro",
+        "DMACOS",
+        "dumpsys",
+        "hicolor",
+        "icns",
+        "INVOKABLE",
+        "metainfo",
+        "oculuswirelessadb",
+        "qcoro",
+        "qmlmodules",
+        "qputenv",
+        "qrookie",
+        "quillplayer",
+        "rclone",
+        "rmnet",
+        "RPATH",
+        "sdcard",
+        "Sideloader",
+        "STREQUAL",
+        "systemux",
+        "vrshell",
+        "ZIPALIGN"
+    ],
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#312F04",
+        "titleBar.activeBackground": "#444206",
+        "titleBar.activeForeground": "#FDFBE1"
     }
 }

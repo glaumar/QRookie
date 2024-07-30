@@ -6,10 +6,13 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
                 "/usr/include/qt6/QtCore",
-                "/usr/include/qt/QtCore"
+                "/usr/include/qt/QtCore",
+                "/nix/store/gfzp6040kmxfj7fhbgiifsmi4bcnrmqs-qcoro-0.10.0-dev/include/qcoro6/QCoro",
+                "/nix/store/gfzp6040kmxfj7fhbgiifsmi4bcnrmqs-qcoro-0.10.0-dev/include/qcoro6/qcoro",
+                "/nix/store/52di98lwpsnbwdkyls2ccfh2jv9rs45f-qtbase-6.7.2/include/QtCore",
+                "/nix/store/52di98lwpsnbwdkyls2ccfh2jv9rs45f-qtbase-6.7.2/include/QtNetwork"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "linux-clang-x64",
