@@ -14,6 +14,7 @@ Kirigami.Card {
         source: thumbnailPath
         title: name
         titleAlignment: Qt.AlignLeft | Qt.AlignBottom
+        titleWrapMode: Text.Wrap
     }
 
     footer: Button {

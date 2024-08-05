@@ -37,6 +37,13 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-08-05" version="0.3.4">
+            <description>
+                <ul>
+                    <li>fix: long game name not wraping</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-07-18" version="0.3.3">
             <description>
                 <ul>
