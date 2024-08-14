@@ -37,6 +37,13 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2024-08-05" version="0.3.5">
+            <description>
+                <ul>
+                    <li>fix: setting dialog size</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-08-05" version="0.3.4">
             <description>
                 <ul>

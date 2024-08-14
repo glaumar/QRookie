@@ -26,7 +26,7 @@
         {
           packages.default = pkgs.stdenv.mkDerivation {
             pname = "qrookie";
-            version = "0.3.4";
+            version = "0.3.5";
 
             src = ./.;
 
