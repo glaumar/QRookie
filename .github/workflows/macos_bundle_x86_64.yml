@@ -15,11 +15,10 @@ jobs:
 
     - name: Install Homebrew
       run: |
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         
     - name: Build
       run: |
-
         cd macOs/
         arch -x86_64 ./signApp.sh
 
