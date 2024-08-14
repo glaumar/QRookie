@@ -1,6 +1,8 @@
 #!/bin/bash
 export ARCH=$(arch)
-export OS_TARGET="12"
+export OS_TARGET="13"
+export APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" Info.plist)
+
 if [[ "$ARCH" == "arm64" ]]; then
     export ARCH_NAME="arm64"
     eval "$(/opt/homebrew/bin/brew shellenv)"
