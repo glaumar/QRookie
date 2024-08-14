@@ -16,7 +16,7 @@ cd "${BUILD_DIR}"
 
 printf "\e[1;32mAssign all the libraries inside the app bundle\e[0m\n"
 find "$APP_PATH" -type f -name "*.dylib" -exec \
-codesign --deep --force --verify --verbose --timestamp --options runtime --sign "$DEVELOPER_ID" {} \;
+    codesign --deep --force --verify --verbose --timestamp --options runtime --sign "$DEVELOPER_ID" {} \;
 
 printf "\e[1;32mAssign .app\e[0m\n"
 codesign --deep --force --verify --verbose --timestamp --options runtime --sign "$DEVELOPER_ID" "$APP_PATH"
@@ -26,7 +26,7 @@ rm -rf "$DMG_DIR"
 mkdir -p "$DMG_DIR"
 cp -r "$APP_PATH" "$DMG_DIR/"
 
-DMG_NAME="$WORKING_DIR/${APP_NAME}_${ARCH_NAME}.dmg"
+DMG_NAME="$WORKING_DIR/${APP_NAME}_${APP_VERSION}_${ARCH_NAME}.dmg"
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_DIR" -ov -format UDBZ "$DMG_NAME"
 rm -rf "$DMG_DIR"
 

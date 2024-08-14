@@ -26,6 +26,6 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.TOKEN }}
-        file: macOs/QRookie_arm64.dmg
-        asset_name:  QRookie_${{ github.ref }}_macOs_arm64.dmg 
+        file: macOs/QRookie_${{ github.ref }}_arm64.dmg
+        asset_name:  QRookie_${{ github.ref }}_arm64.dmg 
         tag: ${{ github.ref }}
