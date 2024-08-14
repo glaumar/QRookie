@@ -127,8 +127,14 @@ ColumnLayout {
     Kirigami.OverlaySheet {
         id: settings_sheet
 
-        title: "Settings"
-        implicitHeight: 120
+        property var headerHeight: header.height
+        property var headerPadding: header.parent.height
+
+        title: qsTr("Settings")
+        implicitHeight: headerHeight +
+                        headerPadding +
+                        auto_install_setting.height +
+                        auto_clean_cache_setting.height
         implicitWidth: 300
 
         Kirigami.FormLayout {
@@ -137,6 +143,8 @@ ColumnLayout {
             anchors.fill: parent
 
             CheckBox {
+                id: auto_install_setting
+
                 Kirigami.FormData.label: qsTr("Auto Install:")
                 Component.onCompleted: {
                     checked = app.vrp.settings.autoInstall;
@@ -150,6 +158,8 @@ ColumnLayout {
             }
 
             CheckBox {
+                id: auto_clean_cache_setting
+
                 Kirigami.FormData.label: qsTr("Auto Clean Cache:")
                 Component.onCompleted: {
                     checked = app.vrp.settings.autoCleanCache;
@@ -161,7 +171,6 @@ ColumnLayout {
                 ToolTip.text: qsTr("Automatically clean the cache when the game is decompressed.")
                 ToolTip.visible: hovered
             }
-
         }
 
     }
