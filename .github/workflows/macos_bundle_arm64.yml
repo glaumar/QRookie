@@ -27,5 +27,5 @@ jobs:
       with:
         repo_token: ${{ secrets.TOKEN }}
         file: macOs/QRookie_arm64.dmg
-        asset_name:  QRookie_macOs_arm64.dmg 
+        asset_name:  QRookie_${{ github.ref }}_macOs_arm64.dmg 
         tag: ${{ github.ref }}

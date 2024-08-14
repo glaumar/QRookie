@@ -38,8 +38,11 @@ xcrun notarytool submit "$DMG_NAME" \
     --keychain-profile "$ACCOUNT_PROFILE" \
     --wait
 
+xcrun stapler staple "$DMG_NAME"
+
 printf "\e[1;32mVerifying the app bundle...\e[0m\n"
-spctl --assess --type exec -vv "${DMG_NAME}"
+# spctl --assess --type exec -vv "${DMG_NAME}"
+codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 codesign --verify --deep --strict --verbose=2 "${DMG_NAME}"
 
 # Always returning true ensures that the github action will not terminate due to errors in this script.
