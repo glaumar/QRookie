@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     }
 #elif defined(Q_OS_MAC)
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
-        QQuickStyle::setStyle(QStringLiteral("Material"));
+        QQuickStyle::setStyle(QStringLiteral("Universal"));
     }
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
