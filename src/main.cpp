@@ -23,87 +23,90 @@
 #include <QQuickStyle>
 #include <QRegularExpression>
 
+#include "app_settings.h"
 #include "device_manager.h"
 #include "qrookie.h"
 #include "vrp_manager.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
-    app.setApplicationName(APPLICATION_NAME);
-    app.setApplicationVersion(APPLICATION_VERSION);
-    app.setDesktopFileName(APPLICATION_ID);
+    int currentExitCode = 0;
 
-#ifdef Q_OS_LINUX
-    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
-        QQuickStyle::setStyle(QStringLiteral("org.kde.breeze"));
-    }
-#elif defined(Q_OS_MAC)
-    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
-        QQuickStyle::setStyle(QStringLiteral("Universal"));
-    }
+    do {
+        QGuiApplication app(argc, argv);
+        app.setApplicationName(APPLICATION_NAME);
+        app.setApplicationVersion(APPLICATION_VERSION);
+        app.setDesktopFileName(APPLICATION_ID);
 
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QStringList icon_dirs = QIcon::themeSearchPaths();
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+        if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
+            const QString theme = AppSettings::instance()->theme();
+            QQuickStyle::setStyle(theme);
+        }
+#endif
+#if defined(Q_OS_MAC)
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        QStringList icon_dirs = QIcon::themeSearchPaths();
 
-    // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
-    if (env.contains("XDG_DATA_DIRS")) {
-        QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
-        QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
-        // QStringList icon_dirs;
-        for (auto dir : data_dirs) {
-            auto icon_dir = dir + "/icons";
-            if (QDir(icon_dir).exists()) {
-                icon_dirs.append(icon_dir);
+        // add XDG_DATA_DIRS/icons to the icon theme search path (for nix-darwin)
+        if (env.contains("XDG_DATA_DIRS")) {
+            QString xdg_data_dirs = env.value("XDG_DATA_DIRS");
+            QStringList data_dirs = xdg_data_dirs.split(QDir::listSeparator());
+            // QStringList icon_dirs;
+            for (auto dir : data_dirs) {
+                auto icon_dir = dir + "/icons";
+                if (QDir(icon_dir).exists()) {
+                    icon_dirs.append(icon_dir);
+                }
             }
         }
-    }
 
 #ifdef MACOS_BUNDLE
-    QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
+        QString res_dir = QCoreApplication::applicationDirPath() + "/../Resources";
 
-    // add ../Resources to the PATH (for adb,7za,zipalign,apktool,apksigner)
-    QStringList path = env.value("PATH").split(QDir::listSeparator());
-    path.prepend(res_dir);
-    qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
+        // add ../Resources to the PATH (for adb,7za,zipalign,apktool,apksigner)
+        QStringList path = env.value("PATH").split(QDir::listSeparator());
+        path.prepend(res_dir);
+        qputenv("PATH", path.join(QDir::listSeparator()).toUtf8());
 
-    // add ../Resources/icons to the icon theme search path
-    icon_dirs += res_dir + "/icons";
+        // add ../Resources/icons to the icon theme search path
+        icon_dirs += res_dir + "/icons";
 #endif // MACOS_BUNDLE
 
-    QIcon::setThemeSearchPaths(icon_dirs);
-    QIcon::setThemeName("breeze");
-#endif
+        QIcon::setThemeSearchPaths(icon_dirs);
+        QIcon::setThemeName("breeze");
+#endif // Q_OS_MAC
 
-    qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");
-    qmlRegisterType<DeviceManager>("DeviceManager", 1, 0, "DeviceManager");
-    QCoro::Qml::registerTypes();
+        qmlRegisterType<VrpManager>("VrpManager", 1, 0, "VrpManager");
+        qmlRegisterType<DeviceManager>("DeviceManager", 1, 0, "DeviceManager");
+        QCoro::Qml::registerTypes();
 
-    QQmlApplicationEngine engine;
+        QQmlApplicationEngine engine;
 
 #ifdef MACOS_BUNDLE
-    engine.addImportPath(res_dir + "/kirigami");
+        engine.addImportPath(res_dir + "/kirigami");
 #endif
 
-    const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreated,
-        &app,
-        [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl)
-                QCoreApplication::exit(-1);
-        },
-        Qt::QueuedConnection);
+        const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
+        QObject::connect(
+            &engine,
+            &QQmlApplicationEngine::objectCreated,
+            &app,
+            [url](QObject *obj, const QUrl &objUrl) {
+                if (!obj && url == objUrl)
+                    QCoreApplication::exit(-1);
+            },
+            Qt::QueuedConnection);
 
-    engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
-    engine.addImportPath(":/");
+        engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
+        engine.addImportPath(":/");
 
-    engine.load(url);
+        engine.load(url);
 
-    if (engine.rootObjects().isEmpty()) {
-        return -1;
-    }
+        if (engine.rootObjects().isEmpty()) {
+            return -1;
+        }
 
-    return app.exec();
+        return currentExitCode = app.exec();
+    } while (currentExitCode == AppSettings::EXIT_RESTART);
 }
