@@ -51,7 +51,7 @@ class DeviceManager : public QObject
     Q_PROPERTY(QString selectedUserId READ selectedUserId NOTIFY userInfoChanged)
     Q_PROPERTY(bool selectedUserIsLogged READ selectedUserIsLogged NOTIFY userInfoChanged)
     Q_PROPERTY(int selectedUsersInstalledApps READ selectedUsersInstalledApps NOTIFY userInfoChanged)
-    Q_PROPERTY(int avaliableAppsCount READ avaliableAppsCount)
+    Q_PROPERTY(int availableAppsCount READ availableAppsCount)
     Q_PROPERTY(QString runningUserName READ runningUserName NOTIFY userInfoChanged)
 public:
     explicit DeviceManager(QObject *parent = nullptr);
@@ -110,7 +110,7 @@ public:
     Q_INVOKABLE QCoro::Task<void> updateSerials();
     Q_INVOKABLE void updateDeviceInfo();
     Q_INVOKABLE QCoro::Task<void> updateDeviceName();
-    Q_INVOKABLE QCoro::Task<void> updatedeviceIp();
+    Q_INVOKABLE QCoro::Task<void> updateDeviceIp();
     Q_INVOKABLE QCoro::Task<void> updateSpaceUsage();
     Q_INVOKABLE QCoro::Task<void> updateBatteryLevel();
     Q_INVOKABLE QCoro::Task<void> updateOculusOsVersion();
@@ -146,7 +146,7 @@ public:
         return selected_user_ ? selected_user_->installedApps : -1;
     }
 
-    Q_INVOKABLE int avaliableAppsCount() const
+    Q_INVOKABLE int availableAppsCount() const
     {
         return user_apps_available_list_model_.size();
     }

@@ -1,17 +1,31 @@
 build/
+_build/
 builddir/
 CmakeLists.txt.user
 .directory
+.VSCodeCounter/
+
+# flatpak
+io.github.glaumar.QRookie.flatpak
+QRookie.flatpak
+.flatpak
 build_flatpak/
 .flatpak-builder/
 export/
-QRookie.flatpak
 repo/
-.VSCodeCounter/
-.flatpak
-_build/
-io.github.glaumar.QRookie.flatpak
+
+# nix
 result
+
+# direnv
+.envrc
+.direnv
+
+# ccls
+.ccls-cache
+
+# lvim
+.cache
 
 # MacOs Dependencies
 /macOs/dependencies

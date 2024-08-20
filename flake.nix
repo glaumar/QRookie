@@ -4,7 +4,7 @@
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, utils, ... }:
+  outputs = { nixpkgs, utils, ... }:
     utils.lib.eachDefaultSystem
       (system:
         let
@@ -18,10 +18,6 @@
             buildToolsVersions = [ buildToolsVersion ];
           };
           zipAlignPath = "${androidComposition.androidsdk}/libexec/android-sdk/build-tools/${buildToolsVersion}";
-          boldPanelIcons = false;
-          blackPanelIcons = false;
-          alternativeIcons = false;
-          themeVariants = [];
         in
         {
           packages.default = pkgs.stdenv.mkDerivation {
@@ -43,8 +39,8 @@
               kdePackages.kirigami
               kdePackages.qtsvg
               kdePackages.qtimageformats
-            ] ++ lib.optionals stdenv.isLinux [ 
-              kdePackages.qqc2-breeze-style 
+            ] ++ lib.optionals stdenv.isLinux [
+              kdePackages.qqc2-breeze-style
             ] ++ lib.optionals stdenv.isDarwin [
               kdePackages.breeze-icons
             ];
@@ -71,8 +67,10 @@
           devShells.default = pkgs.mkShell rec {
             buildInputs = with pkgs; [
               stdenv.cc.cc
-              clang-tools
+              clang-tools # c/c++ lsp and formater
+              libclang.python # git-clang-format 
               cmake
+              ninja
               kdePackages.extra-cmake-modules
               kdePackages.qtbase
               kdePackages.qtdeclarative
@@ -86,8 +84,9 @@
               android-tools
               apksigner
               jdk21_headless
-            ] ++ lib.optionals stdenv.isLinux [ 
-              gdb kdePackages.qqc2-breeze-style 
+            ] ++ lib.optionals stdenv.isLinux [
+              gdb
+              kdePackages.qqc2-breeze-style
             ] ++ lib.optionals stdenv.isDarwin [
               kdePackages.breeze-icons
             ];

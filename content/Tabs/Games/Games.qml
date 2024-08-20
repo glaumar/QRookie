@@ -23,105 +23,113 @@ import org.kde.kirigami as Kirigami
 
 ColumnLayout {
     Kirigami.Card {
-        //TODO: use Kirigami.ActionToolBar
-
-        id: toolbar
-
-        Layout.fillWidth: true
         Layout.rightMargin: 10
         Layout.bottomMargin: 10
         height: 50
-        Component.onCompleted: {
-            filter_field.forceActiveFocus();
-        }
 
-        RowLayout {
-            anchors.fill: parent
+        Kirigami.ActionToolBar {
+            id: toolbar
 
-            Button {
-                id: sort_button
+            anchors.left: parent.left
+            anchors.right: parent.right
+            Layout.rightMargin: 10
+            Layout.bottomMargin: 10
+            height: 50
 
-                property int sortOrder: Qt.AscendingOrder
+            actions: [
+                Kirigami.Action {
+                    id: sort_button
 
-                flat: true
-                Layout.fillHeight: true
-                icon.name: "view-sort-ascending"
-                onClicked: {
-                    if (sortOrder === Qt.AscendingOrder) {
-                        icon.name = "view-sort-descending";
-                        sortOrder = Qt.DescendingOrder;
-                    } else {
-                        icon.name = "view-sort-ascending";
-                        sortOrder = Qt.AscendingOrder;
+                    property int sortOrder: Qt.AscendingOrder
+
+                    icon.name: "view-sort-ascending"
+                    onTriggered: {
+                        if (sortOrder === Qt.AscendingOrder) {
+                            icon.name = "view-sort-descending";
+                            sortOrder = Qt.DescendingOrder;
+                        } else {
+                            icon.name = "view-sort-ascending";
+                            sortOrder = Qt.AscendingOrder;
+                        }
+                        app.vrp.sortGames(sort_field.currentIndex, sortOrder);
                     }
-                    app.vrp.sortGames(sort_field.currentIndex, sortOrder);
+                },
+
+                Kirigami.Action {
+                    id: sort_field
+
+                    displayComponent: ComboBox {
+                        onActivated: app.vrp.sortGames(currentIndex, sort_button.sortOrder)
+                        model: ["Update Date", "Name", "Size"]
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: Kirigami.SearchField {
+                        id: filter_field
+
+                        placeholderText: qsTr("Filter by name...")
+                        implicitWidth: Math.max(200, toolbar.width / 3)
+                        focusSequence: StandardKey.Find
+                        onAccepted: app.vrp.filterGamesByName(text)
+                        Component.onCompleted: {
+                            forceActiveFocus();
+                        }
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: RadioButton {
+                        checked: true
+                        text: qsTr("All")
+                        onClicked: app.vrp.filterGamesByStatus(VrpManager.Unknown)
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: RadioButton {
+                        text: qsTr("Downloading")
+                        onClicked: app.vrp.filterGamesByStatus(VrpManager.Downloading | VrpManager.Queued | VrpManager.DownloadError | VrpManager.Decompressing | VrpManager.DecompressionError)
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: RadioButton {
+                        text: qsTr("Local")
+                        onClicked: app.vrp.filterGamesByStatus(VrpManager.Local | VrpManager.Installable | VrpManager.UpdatableLocally | VrpManager.Installing | VrpManager.InstallError | VrpManager.InstalledAndLocally)
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: RadioButton {
+                        text: qsTr("Updatable")
+                        onClicked: app.vrp.filterGamesByStatus(VrpManager.UpdatableLocally | VrpManager.UpdatableRemotely)
+                        enabled: app.deviceManager.connectedDevice.length > 0
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: RadioButton {
+                        text: qsTr("Installed")
+
+                        onClicked: app.vrp.filterGamesByStatus(VrpManager.InstalledAndLocally | VrpManager.InstalledAndRemotely)
+                        enabled: app.deviceManager.connectedDevice.length > 0
+                    }
+                },
+
+                Kirigami.Action {
+                    displayComponent: Button {
+                        id: settings_button
+
+                        flat: true
+                        anchors.right: parent.right
+                        icon.name: "settings-configure"
+                        onClicked: settings_sheet.open()
+                    }
                 }
-            }
-
-            ComboBox {
-                id: sort_field
-
-                flat: true
-                Layout.fillHeight: true
-                onActivated: app.vrp.sortGames(currentIndex, sort_button.sortOrder)
-                model: ["Update Date", "Name", "Size"]
-            }
-
-            TextField {
-                id: filter_field
-
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                placeholderText: qsTr("Filter by name...")
-                onTextChanged: app.vrp.filterGamesByName(text)
-                Button {
-                    height: parent.height
-                    anchors.right: parent.right
-                    flat: true
-                    icon.name: "search"
-                }
-
-            }
-
-            RadioButton {
-                checked: true
-                text: qsTr("All")
-                onClicked: app.vrp.filterGamesByStatus(VrpManager.Unknown)
-            }
-
-            RadioButton {
-                text: qsTr("Downloading")
-                onClicked: app.vrp.filterGamesByStatus(VrpManager.Downloading | VrpManager.Queued | VrpManager.DownloadError | VrpManager.Decompressing | VrpManager.DecompressionError)
-            }
-
-            RadioButton {
-                text: qsTr("Local")
-                onClicked: app.vrp.filterGamesByStatus(VrpManager.Local | VrpManager.Installable | VrpManager.UpdatableLocally | VrpManager.Installing | VrpManager.InstallError | VrpManager.InstalledAndLocally)
-            }
-
-            RadioButton {
-                text: qsTr("Updatable")
-                onClicked: app.vrp.filterGamesByStatus(VrpManager.UpdatableLocally | VrpManager.UpdatableRemotely)
-                enabled: app.deviceManager.connectedDevice.length > 0
-            }
-
-            RadioButton {
-                text: qsTr("Installed")
-                onClicked: app.vrp.filterGamesByStatus(VrpManager.InstalledAndLocally | VrpManager.InstalledAndRemotely)
-                enabled: app.deviceManager.connectedDevice.length > 0
-            }
-
-            Button {
-                id: settings_button
-
-                flat: true
-                Layout.fillHeight: true
-                icon.name: "settings-configure"
-                onClicked: settings_sheet.open()
-            }
+            ]
 
         }
-
     }
 
     Kirigami.OverlaySheet {
@@ -235,5 +243,4 @@ ColumnLayout {
         }
 
     }
-
 }
