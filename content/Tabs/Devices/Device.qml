@@ -237,6 +237,8 @@ RowLayout {
                 Kirigami.FormLayout {
                     id: device_info_layout
 
+                    wideMode: true
+
                     Layout.alignment: Qt.AlignBottom
                     Layout.fillWidth: true
                     visible: app.deviceManager.hasConnectedDevice

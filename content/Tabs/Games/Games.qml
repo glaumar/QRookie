@@ -139,11 +139,11 @@ ColumnLayout {
         property var headerPadding: header.parent.height
 
         title: qsTr("Settings")
+
+        implicitWidth: 300
         implicitHeight: headerHeight +
                         headerPadding +
-                        auto_install_setting.height +
-                        auto_clean_cache_setting.height
-        implicitWidth: 300
+                        settings_form.height
 
         Kirigami.FormLayout {
             id: settings_form
@@ -178,6 +178,29 @@ ColumnLayout {
                 text: qsTr("Enable")
                 ToolTip.text: qsTr("Automatically clean the cache when the game is decompressed.")
                 ToolTip.visible: hovered
+            }
+
+            ComboBox {
+                id: theme_setting
+
+                width: 200
+                Kirigami.FormData.label: qsTr("Select Theme *:")
+                onActivated: {
+                    app.vrp.settings.theme = currentValue;
+
+                    settings_sheet.close();
+                    restart_dialog.open();
+                }
+                Component.onCompleted: currentIndex = indexOfValue(app.vrp.settings.theme)
+
+                model: app.vrp.compatibleThemes
+            }
+
+            Item {
+                id: restart_label
+
+                height: 30
+                Kirigami.FormData.label: qsTr("* Requires restart")
             }
         }
 
@@ -243,4 +266,44 @@ ColumnLayout {
         }
 
     }
+
+    Dialog {
+        id: restart_dialog
+
+        title: "Restart Required"
+        modal: true
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+
+        ColumnLayout {
+            width: parent.width
+
+            Label {
+                text: qsTr("QRookie needs to be restarted in order to apply the new theme.")
+            }
+
+            DialogButtonBox {
+                Layout.alignment: Qt.AlignRight
+                Layout.topMargin: 10
+
+                Button {
+                    text: qsTr("Later")
+                    DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+                }
+                Button {
+                    text: qsTr("Restart")
+                    DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+                }
+                onRejected: {
+                    restart_dialog.close();
+                    settings_sheet.open();
+                }
+                onAccepted: {
+                    restart_dialog.close();
+                    app.vrp.restartMainApp();
+                }
+            }
+        }
+    }
+
 }

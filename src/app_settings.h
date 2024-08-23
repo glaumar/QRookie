@@ -31,12 +31,14 @@ class AppSettings : public QObject
     Q_PROPERTY(QString cachePath READ cachePath WRITE setCachePath NOTIFY cachePathChanged)
     Q_PROPERTY(QString dataPath READ dataPath WRITE setDataPath NOTIFY dataPathChanged)
     Q_PROPERTY(QString lastWirelessAddr READ lastWirelessAddr WRITE setLastWirelessAddr NOTIFY lastWirelessAddrChanged)
+    Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
 
 public:
     explicit AppSettings(QObject *parent = nullptr);
     ~AppSettings();
 
     static AppSettings *instance();
+    static int const EXIT_RESTART = 1000;
 
     bool autoInstall() const
     {
@@ -80,6 +82,12 @@ public:
     }
     void setLastWirelessAddr(const QString &addr);
 
+    QString theme() const
+    {
+        return theme_;
+    }
+    void setTheme(const QString &theme);
+
 signals:
     void autoInstallChanged(bool auto_install);
     void autoCleanCacheChanged(bool auto_clean_cache);
@@ -88,6 +96,7 @@ signals:
     void dataPathChanged(QString data_path);
     void keyStorePathChanged(QString keystore_path);
     void lastWirelessAddrChanged(QString addr);
+    void themeChanged(QString theme);
 
 private:
     void loadAppSettings();
@@ -100,6 +109,7 @@ private:
     QString data_path_;
     QString keystore_path_;
     QString last_wireless_addr_;
+    QString theme_;
 };
 
 #endif /* QROOKIE_APP_SETTINGS */

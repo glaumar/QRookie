@@ -19,6 +19,7 @@
 
 #include <QCoroTimer>
 #include <QDir>
+#include <QGUIApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -608,4 +609,25 @@ QCoro::Task<bool> VrpManager::openGameFolder(const QString release_name)
         co_return false;
     }
     co_return true;
+}
+
+QStringList VrpManager::compatibleThemes() const
+{
+#ifdef Q_OS_LINUX
+    return {"org.kde.breeze", "Universal"};
+#elif defined(Q_OS_MAC)
+    return {"Material", "Universal"};
+#elif defined(Q_OS_WIN)
+    return {"WindowsVista", "Universal"};
+#else
+    return {"Universal"};
+#endif
+}
+
+void VrpManager::restartMainApp()
+{
+    QString program = qApp->arguments()[0];
+    QStringList arguments = qApp->arguments().mid(1);
+    qApp->exit(AppSettings::EXIT_RESTART);
+    QProcess::startDetached(program, arguments);
 }

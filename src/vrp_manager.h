@@ -41,6 +41,7 @@ class VrpManager : public QObject
     Q_ENUMS(SortType)
 
     Q_PROPERTY(QVariantList gamesInfo READ gamesInfo NOTIFY gamesInfoChanged)
+    Q_PROPERTY(QStringList compatibleThemes READ compatibleThemes CONSTANT)
     Q_PROPERTY(AppSettings *settings READ settings)
 
 public:
@@ -151,6 +152,10 @@ public:
     {
         return openGameFolder(release_name);
     }
+
+    QStringList compatibleThemes() const;
+
+    Q_INVOKABLE void restartMainApp();
 
 signals:
     void gamesInfoChanged();

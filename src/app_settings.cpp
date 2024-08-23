@@ -32,6 +32,7 @@ AppSettings::AppSettings(QObject *parent)
     , data_path_(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
     , keystore_path_(QString())
     , last_wireless_addr_(QString())
+    , theme_(QString())
 {
     loadAppSettings();
 }
@@ -68,6 +69,19 @@ void AppSettings::loadAppSettings()
     }
 
     last_wireless_addr_ = settings_->value("last_wireless_addr", last_wireless_addr_).toString();
+
+    theme_ = settings_->value("theme", theme_).toString();
+    if (theme_.isEmpty()) {
+#ifdef Q_OS_LINUX
+        theme_ = "org.kde.breeze";
+#elif defined(Q_OS_MAC)
+        theme_ = "Material";
+#elif defined(Q_OS_WIN)
+        theme_ = "WindowsVista";
+#else
+        theme_ = "Universal";
+#endif
+    }
 }
 
 void AppSettings::setAutoInstall(bool auto_install)
@@ -125,4 +139,11 @@ void AppSettings::setLastWirelessAddr(const QString &addr)
     last_wireless_addr_ = addr;
     settings_->setValue("last_wireless_addr", last_wireless_addr_);
     emit lastWirelessAddrChanged(addr);
+}
+
+void AppSettings::setTheme(const QString &theme)
+{
+    theme_ = theme;
+    settings_->setValue("theme", theme_);
+    emit themeChanged(theme);
 }
