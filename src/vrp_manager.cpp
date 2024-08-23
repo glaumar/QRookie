@@ -17,9 +17,9 @@
 
 #include "vrp_manager.h"
 
+#include <QApplication>
 #include <QCoroTimer>
 #include <QDir>
-#include <QGUIApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>

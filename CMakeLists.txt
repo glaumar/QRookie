@@ -41,7 +41,7 @@ if(APPLE AND MACOS_BUNDLE)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Network Xml QuickControls2)
-find_package(Qt6 REQUIRED COMPONENTS Qml QmlWorkerScript)
+find_package(Qt6 REQUIRED COMPONENTS Qml QmlWorkerScript Widgets)
 find_package(QCoro6 REQUIRED COMPONENTS Core Qml Network)
 find_package(KF6Kirigami)
 
@@ -78,6 +78,7 @@ target_link_libraries(${APP_BINARY_NAME} PRIVATE
     Qt6::DBus
     Qt6::QuickControls2
     Qt6::QmlWorkerScript
+    Qt6::Widgets
     QCoro6::Core
     QCoro6::Qml
     QCoro6::Network
