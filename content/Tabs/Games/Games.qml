@@ -140,7 +140,7 @@ ColumnLayout {
 
         title: qsTr("Settings")
 
-        implicitWidth: 300
+        implicitWidth: 400
         implicitHeight: headerHeight +
                         headerPadding +
                         settings_form.height
