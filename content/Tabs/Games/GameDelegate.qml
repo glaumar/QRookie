@@ -161,6 +161,7 @@ Kirigami.Card {
                 id: magnet_button
 
                 icon.name: "kt-magnet"
+                hoverEnabled: true
                 onClicked: {
                     textEdit.text = app.vrp.getMagnetURI(releaseName);
                     textEdit.selectAll();
@@ -181,8 +182,9 @@ Kirigami.Card {
             Button {
                 id: action_button
 
-                Layout.fillWidth: true
                 text: qsTr("Downlad")
+                Layout.fillWidth: true
+                hoverEnabled: true
                 onClicked: {
                     if (status === VrpManager.Installable || status === VrpManager.UpdatableLocally || status === VrpManager.InstallError)
                         installButtonClicked();
