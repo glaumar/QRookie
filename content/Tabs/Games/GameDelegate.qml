@@ -68,7 +68,7 @@ Kirigami.Card {
             break;
         case VrpManager.Downloading:
             if (isNaN(progress) || progress <= 0) {
-                action_button.text = qsTr("Starting Downloading");
+                action_button.text = qsTr("Starting Download");
                 progress_bar.indeterminate = true;
                 progress_bar.visible = true;
                 action_button.icon.name = "download";
@@ -143,7 +143,7 @@ Kirigami.Card {
 
         Label {
             Layout.alignment: Qt.AlignRight
-            text: "Version: " + versionCode
+            text: qsTr("Version: %1").arg(versionCode)
         }
 
         Label {
@@ -182,9 +182,9 @@ Kirigami.Card {
             Button {
                 id: action_button
 
-                text: qsTr("Downlad")
-                Layout.fillWidth: true
                 hoverEnabled: true
+                Layout.fillWidth: true
+                text: qsTr("Download")
                 onClicked: {
                     if (status === VrpManager.Installable || status === VrpManager.UpdatableLocally || status === VrpManager.InstallError)
                         installButtonClicked();

@@ -56,7 +56,7 @@ Kirigami.Card {
             status_label.color = Kirigami.Theme.textColor;
             if (isNaN(progress) || progress <= 0) {
                 progress_bar.indeterminate = true;
-                status_label.text = qsTr("Starting Downloading");
+                status_label.text = qsTr("Starting Download");
             }
         } else if (status === VrpManager.DownloadError) {
             delete_button.enabled = true;
@@ -116,7 +116,7 @@ Kirigami.Card {
         anchors.margins: 10
         anchors.right: progress_bar.right
         anchors.bottom: progress_bar.top
-        text: "Unknown Status"
+        text: qsTr("Unknown Status")
     }
 
     Button {
@@ -126,7 +126,7 @@ Kirigami.Card {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 10
-        text: "delete"
+        text: qsTr("Delete")
         icon.name: "delete"
         onClicked: {
             deleteButtonClicked();

@@ -192,7 +192,7 @@ RowLayout {
                                         app.vrp.settings.lastWirelessAddr = wireless_adress.text;
                                     } else {
                                         wireless_error_message.visible = true;
-                                        wireless_error_message.text = qsTr("Failed to connect to " + wireless_adress.text);
+                                        wireless_error_message.text = qsTr("Failed to connect to %1").arg(wireless_adress.text);
                                     }
                                 });
                             }
@@ -222,7 +222,7 @@ RowLayout {
                                     app.deviceManager.connectToWirelessDeviceQml(address).then((connected) => {
                                         if (!connected) {
                                             wireless_error_message.visible = true;
-                                            wireless_error_message.text = qsTr("Failed to connect to " + address);
+                                            wireless_error_message.text = qsTr("Failed to connect to %1").arg(address);
                                         }
                                         device_card.autoConnect = true;
                                     });
