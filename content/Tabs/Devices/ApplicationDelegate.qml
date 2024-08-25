@@ -36,6 +36,8 @@ Kirigami.Card {
 
     footer: Button {
         id: action_button
+
+        hoverEnabled: true
         icon.name: "uninstall"
         text: qsTr("Uninstall For All Users")
         onClicked: {

@@ -19,6 +19,8 @@ Kirigami.Card {
 
     footer: Button {
         id: action_button
+
+        hoverEnabled: true
         icon.name: "delete"
         text: qsTr("Remove from user")
         onClicked: {

@@ -20,6 +20,8 @@ Kirigami.Card {
 
     footer: Button {
         id: action_button
+
+        hoverEnabled: true
         icon.name: "install"
         text: qsTr("Add to User")
         onClicked: {

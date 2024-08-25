@@ -122,6 +122,7 @@ Kirigami.Card {
     Button {
         id: delete_button
 
+        hoverEnabled: true
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 10

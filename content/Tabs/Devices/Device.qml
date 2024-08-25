@@ -183,6 +183,8 @@ RowLayout {
 
                         Button {
                             text: qsTr("Connect")
+
+                            hoverEnabled: true
                             enabled: wireless_adress.text !== ""
                             onClicked: {
                                 app.deviceManager.connectToWirelessDeviceQml(wireless_adress.text).then((connected) => {
@@ -202,6 +204,7 @@ RowLayout {
                         id: wireless_mode_button
 
                         text: qsTr("Enable Wireless Mode")
+                        hoverEnabled: true
                         width: parent.width
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("adb tcpip 5555")

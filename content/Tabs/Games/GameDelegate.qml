@@ -161,6 +161,7 @@ Kirigami.Card {
                 id: magnet_button
 
                 icon.name: "kt-magnet"
+                hoverEnabled: true
                 onClicked: {
                     textEdit.text = app.vrp.getMagnetURI(releaseName);
                     textEdit.selectAll();
@@ -181,6 +182,7 @@ Kirigami.Card {
             Button {
                 id: action_button
 
+                hoverEnabled: true
                 Layout.fillWidth: true
                 text: qsTr("Download")
                 onClicked: {
