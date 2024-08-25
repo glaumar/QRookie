@@ -29,7 +29,7 @@ RowLayout {
         Label {
             id: download_title
 
-            text: qsTr("Downloading") + " (" + downloading_list.count + ")"
+            text: qsTr("Downloading (%1)").arg(downloading_list.count)
             font.bold: true
             font.pointSize: Qt.application.font.pointSize * 2
         }
@@ -109,7 +109,7 @@ RowLayout {
                 id: local_title
 
                 Layout.alignment: Qt.AlignLeft
-                text: qsTr("Local") + " (" + local_list.count + ")"
+                text: qsTr("Local (%1)").arg(local_list.count)
                 font.bold: true
                 font.pointSize: Qt.application.font.pointSize * 2
             }
@@ -128,7 +128,7 @@ RowLayout {
                         app.vrp.settings.renamePackage = checked;
                     }
                     text: qsTr("Rename pkg")
-                    ToolTip.text: qsTr("Rename the package before installing the game.This is useful when Quest prevents you from launching an game whose free trial has expired.")
+                    ToolTip.text: qsTr("Rename the package before installing the game. This is useful when a Quest prevents you from launching a game whose free trial has expired.")
                     ToolTip.visible: hovered
                 }
 
