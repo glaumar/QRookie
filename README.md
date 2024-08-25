@@ -16,7 +16,7 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
 
 ---
 
-- [ QRookie](#-qrookie)
+- [QRookie](#-qrookie)
 - [Screenshots](#screenshots)
 - [Download](#download)
   - [Arch Linux](#arch-linux)
@@ -131,7 +131,7 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 See [releases](https://github.com/glaumar/QRookie/releases).
 
 > [!WARNING]
-> *The MacOS Bundle is automatically build using github action and is not signed or notarized*
+> *The MacOS Bundle is automatically built using a github action and is not signed or notarized*
 
 > [!WARNING]
 > *The MacOS Bundle does not include **java runtime**. If you want to use the `rename pkg` function, you need to install the java runtime additionally:*
@@ -148,11 +148,11 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 > *If you don’t know nix at all, we don’t recommend using this method to install QRookie.*
 
 > [!WARNING]
-> *More than 3GB of data may be downloaded during first installation*
+> *More than 3GB of data may be downloaded during the first installation*
 
-1. **install nix:** I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
+1. **Install nix:** We recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation. （From [here](https://nixcademy.com/2024/01/15/nix-on-macos/) you can find more ways to install nix on MacOS）
 
-2. **install QRookie using flake:** 
+2. **Install QRookie using flake:** 
 ```shell
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
 
@@ -174,7 +174,7 @@ QRookie currently does not support `install.txt`. Some games may fail to install
 - `~/.var/app/io.github.glaumar.QRookie/data/QRookie/` （Flatpak）
 - `~/Library/Application Support/QRookie` (MacOS)  
 
-and manually install them ([ Howto: Sideload Manually](https://vrpirates.wiki/en/Howto/Manual-Sideloading)).
+and manually install them ([Howto: Sideload Manually](https://vrpirates.wiki/en/Howto/Manual-Sideloading)).
 
 ## 2. Are all the games provided by QRookie? Are these games infected with viruses?
 
@@ -195,10 +195,10 @@ paru -S android-sdk-build-tools android-apktool
 ```shell
 # build
 cmake -B build -S . -DCMAKE_BUILD_TYPE='Release' -DCMAKE_INSTALL_PREFIX='/usr'
-cmake --build build --target qrookie
+cmake --build build --target QRookie
 
 # run
-./build/qrookie
+./build/QRookie
 
 # install (not recommended)
 cmake --install build
@@ -282,9 +282,9 @@ cd ./macOs/
 
 ## MacOS (Nix)
 ### Install Nix
-I recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation.  
+We recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation.  
 
-For more details, refer to [here](https://nixcademy.com/2024/01/15/nix-on-macos/)
+For more details, see [here](https://nixcademy.com/2024/01/15/nix-on-macos/)
 
 ### Build
 Some dependencies in Nix are not supported on Darwin, but they can actually run if you force them to compile.  

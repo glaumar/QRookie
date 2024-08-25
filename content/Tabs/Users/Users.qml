@@ -41,8 +41,8 @@ RowLayout {
                     installed_apps_number.text = app.deviceManager.selectedUsersInstalledApps > -1
                         ? app.deviceManager.selectedUsersInstalledApps
                         : qsTr("loading...");
-                    installed_tab.text = qsTr("Installed (") + app.deviceManager.selectedUsersInstalledApps + qsTr(")");
-                    available_tab.text = qsTr("Available (") + app.deviceManager.availableAppsCount + qsTr(")");
+                    installed_tab.text = qsTr("Installed (%1)").arg(app.deviceManager.selectedUsersInstalledApps);
+                    available_tab.text = qsTr("Available (%1)").arg(app.deviceManager.availableAppsCount);
                 }
 
                 target: app.deviceManager
@@ -51,7 +51,7 @@ RowLayout {
             header: Label {
                 id: users_title
 
-                text: "Users"
+                text: qsTr("Users")
                 font.bold: true
                 font.pointSize: Qt.application.font.pointSize * 2
             }
@@ -76,7 +76,7 @@ RowLayout {
                     Label {
                         id: users_info_label
 
-                        text: "User Info"
+                        text: qsTr("User Info")
                         font.bold: true
                         font.pointSize: Qt.application.font.pointSize * 1.5
                     }
