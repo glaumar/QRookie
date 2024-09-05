@@ -1,6 +1,6 @@
 #!/bin/bash
 export ARCH=$(arch)
-export OS_TARGET="13"
+export OS_TARGET="10.15"
 export APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" Info.plist)
 
 if [[ "$ARCH" == "arm64" ]]; then

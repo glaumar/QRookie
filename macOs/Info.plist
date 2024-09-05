@@ -15,6 +15,6 @@
     <key>CFBundleIconFile</key>
     <string>icon</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13</string>
+    <string>10.15</string>
 </dict>
 </plist>
