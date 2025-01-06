@@ -32,7 +32,7 @@ HttpDownloader::HttpDownloader(QObject *parent)
     : QObject(parent)
     , manager_(nullptr)
     , download_directory_("./")
-    , base_url_("https://theapp.vrrookie.xyz/")
+    , base_url_("https://go.vrpyourself.online/")
 {
 }
 
