@@ -58,7 +58,6 @@ QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(const QString url)
 {
     QNetworkRequest request(url);
     auto *reply = manager_.get(request);
-    reply->ignoreSslErrors();
     co_await qCoro(reply, &QNetworkReply::finished);
 
     if (reply->error() != QNetworkReply::NoError) {
