@@ -26,16 +26,15 @@
 
 VrpPublic::VrpPublic(QObject *parent)
     : QObject(parent)
-    , base_url_("https://theapp.vrrookie.xyz/")
-    , password_("gL59VfgPxoHR")
+    , base_url_("")
+    , password_("")
     , manager_(nullptr)
 {
 }
 
 QCoro::Task<bool> VrpPublic::update()
 {
-    static const QVector<QString> urls = {"https://raw.githubusercontent.com/vrpyou/quest/main/vrp-public.json",
-                                          "https://vrpirates.wiki/downloads/vrp-public.json"};
+    static const QVector<QString> urls = {"https://vrpirates.wiki/downloads/vrp-public.json"};
 
     for (auto url : urls) {
         qDebug() << "Downloading vrp-public.json from " << url;
@@ -59,7 +58,6 @@ QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(const QString url)
 {
     QNetworkRequest request(url);
     auto *reply = manager_.get(request);
-    reply->ignoreSslErrors();
     co_await qCoro(reply, &QNetworkReply::finished);
 
     if (reply->error() != QNetworkReply::NoError) {
@@ -73,14 +71,6 @@ QCoro::Task<QPair<bool, QByteArray>> VrpPublic::downloadJson(const QString url)
 
 QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json)
 {
-    /*
-    vrp-public.json example:
-    {
-        "baseUri":"https://theapp.vrrookie.xyz/",
-        "password":"Z0w1OVZmZ1B4b0hS"
-    }
-    */
-
     QJsonDocument doc = QJsonDocument::fromJson(json);
     if (doc.isNull()) {
         qDebug() << "Parsing vrp-public.json Error: invalid json: " << json;
@@ -98,6 +88,6 @@ QPair<QString, QString> VrpPublic::parseJson(const QByteArray &json)
     // password is base64 encoded
     QString password = QString(QByteArray::fromBase64(obj["password"].toString().toUtf8()));
 
-    qDebug() << "Parsed vrp-public.json: baseUri=" << base_url << ", password=" << password;
+    qDebug() << "Parsed vrp-public.json";
     return QPair<QString, QString>(base_url, password);
 }

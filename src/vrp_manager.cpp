@@ -116,8 +116,10 @@ QCoro::Task<bool> VrpManager::updateMetadata()
 {
     vrp_torrent_.update();
     if (!co_await vrp_public_.update()) {
-        qWarning() << "Update metadata failed";
+        qWarning() << "Update config failed";
         co_return false;
+    } else {
+        http_downloader_.setBaseUrl(vrp_public_.baseUrl());
     }
 
     if (!co_await downloadMetadata()) {
