@@ -37,6 +37,14 @@
     </provides>
     <content_rating type="oars-1.1" />
     <releases>
+        <release date="2025-08-31" version="0.4.2">
+            <description>
+                <ul>
+                    <li>* fix: hard-coding of config, store url upon config-fetch, not meta-fetch</li>
+                    <li>* fix: removed ignoring ssl errors (fixed on server-end)</li>
+                </ul>
+            </description>
+        </release>
         <release date="2024-08-31" version="0.4.1">
             <description>
                 <ul>

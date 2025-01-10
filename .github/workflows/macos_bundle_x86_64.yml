@@ -1,8 +1,11 @@
 name: Create MacOS Bundle(x86_64)
 
 on:
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
+  push:
+    branches:
+      - branch_inexistente
     
 jobs:
   build:
