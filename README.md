@@ -1,7 +1,14 @@
-# ![](./icons/64x64/io.github.glaumar.QRookie.png) QRookie 
+# Public Archive
+
+This repository is a public archive of the QRookie project. The QRookie project is not being actively maintained. If you are interested in maintaining the project, please fork the repository and continue the development.
+
+For now you can use **QRookie Node** project available for Linux, Windows, MacOS and Android Termux at:
+https://github.com/victorwads/QRookieNode/releases/
+
+## ![](./icons/64x64/io.github.glaumar.QRookie.png) QRookie 
 Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sideloader](https://github.com/VRPirates/rookie) but for Linux and MacOS).
 
-# Screenshots
+## Screenshots
 
 <div align="center">
   <img src="screenshots/Screenshot1.png" width="640"/>
@@ -58,24 +65,24 @@ Download and install Quest games from ROOKIE Public Mirror (like [VRP Rookie Sid
 
 ---
 
-# Download
+## Download
 
-## Arch Linux 
+### Arch Linux 
 
 ![AUR Version](https://img.shields.io/aur/version/qrookie-vrp) ![AUR Last Modified](https://img.shields.io/aur/last-modified/qrookie-vrp)
 
 
-### Install from AUR
+#### Install from AUR
 ```shell
 paru -S qrookie-vrp
 ```
 
-## NixOS
-### Install directly
+### NixOS
+#### Install directly
 ```shell
 nix profile install github:glaumar/nur#qrookie
 ```
-### Use with flake.nix (recommended)
+#### Use with flake.nix (recommended)
 Modify your flake.nix like：
 
 ```nix
@@ -107,25 +114,25 @@ Modify your flake.nix like：
 ```
 Then you can use `pkgs.glaumar_repo.qrookie` in your other configuration modules.
 
-## SteamOS And Other Linux
+### SteamOS And Other Linux
 Now there is only a flatpak package, which can run on almost all linux distributions, including SteamOS (Steam Deck).
 
-### Flathub
+#### Flathub
 ![Flathub Version](https://img.shields.io/flathub/v/io.github.glaumar.QRookie) ![Flathub Downloads](https://img.shields.io/flathub/downloads/io.github.glaumar.QRookie)
 
 <a href='https://flathub.org/apps/io.github.glaumar.QRookie'>
     <img width='240' alt='Download on Flathub' src='https://flathub.org/api/badge?locale=en'/>
 </a>
 
-### Flatpak Bundle
+#### Flatpak Bundle
 ![GitHub Release](https://img.shields.io/github/v/release/glaumar/QRookie) ![GitHub Release Date](https://img.shields.io/github/release-date/Glaumar/QRookie) ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie.flatpak)  
 
 
 See [releases](https://github.com/glaumar/QRookie/releases).
 
-## MacOS
+### MacOS
 
-### MacOS Bundle
+#### MacOS Bundle
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie_MacOs_arm64.dmg) ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/Glaumar/QRookie/QRookie_MacOs_x86_64.dmg)  
 
 See [releases](https://github.com/glaumar/QRookie/releases).
@@ -142,7 +149,7 @@ See [releases](https://github.com/glaumar/QRookie/releases).
 > ```
 >
 
-### Install using nix  
+#### Install using nix  
 
 > [!WARNING]
 > *If you don’t know nix at all, we don’t recommend using this method to install QRookie.*
@@ -163,12 +170,12 @@ nix profile install --impure github:glaumar/nur#qrookie \
 ln -s ~/.nix-profile/Applications/QRookie.app /Applications
 ```
 
-### nix-darwin
+#### nix-darwin
 Refer to [NixOS configuration](#use-with-flakenix-recommended)
 
-# FAQ
+## FAQ
 
-## 1. Game installation failed?
+### 1. Game installation failed?
 QRookie currently does not support `install.txt`. Some games may fail to install or may not run after installation. You can find the downloaded games in:
 - `~/.local/share/QRookie/` (ArchLinux、 NixOS)
 - `~/.var/app/io.github.glaumar.QRookie/data/QRookie/` （Flatpak）
@@ -176,13 +183,13 @@ QRookie currently does not support `install.txt`. Some games may fail to install
 
 and manually install them ([Howto: Sideload Manually](https://vrpirates.wiki/en/Howto/Manual-Sideloading)).
 
-## 2. Are all the games provided by QRookie? Are these games infected with viruses?
+### 2. Are all the games provided by QRookie? Are these games infected with viruses?
 
 No, QRookie does not provide any games. It is just a downloader that downloads games from public servers. QRookie does not know what it is downloading, and it does not check whether the downloaded content is a legitimate game or a virus. **To ensure the safety of your VR device, please do not use QRookie** .
 
-# Develop
-## Archlinux
-### Install Dependencies
+## Develop
+### Archlinux
+#### Install Dependencies
 ```shell
 sudo pacman -S gcc cmake qt6-base qt6-declarative qcoro-qt6 kirigami extra-cmake-modules qqc2-breeze-style xdg-utils p7zip android-tools 
 ```
@@ -191,7 +198,7 @@ Some packages need to be downloaded from AUR
 paru -S android-sdk-build-tools android-apktool
 ```
 
-### Build
+#### Build
 ```shell
 # build
 cmake -B build -S . -DCMAKE_BUILD_TYPE='Release' -DCMAKE_INSTALL_PREFIX='/usr'
@@ -204,8 +211,8 @@ cmake --build build --target QRookie
 cmake --install build
 ```
 
-## Flatpak
-### Install Runtime
+### Flatpak
+#### Install Runtime
 ```shell
 flatpak install \
     runtime/org.kde.Platform/x86_64/6.6\
@@ -213,24 +220,24 @@ flatpak install \
     runtime/org.freedesktop.Sdk.Extension.openjdk21/x86_64/23.08
 ```
 
-### Build
-#### Build Only
+#### Build
+##### Build Only
 ```shell
 flatpak-builder build_flatpak  io.github.glaumar.QRookie.yml --force-clean
 ```
 
-#### Build and Install
+##### Build and Install
 ```shell
 flatpak-builder build_flatpak  io.github.glaumar.QRookie.yml --force-clean --install --user
 ```
 
-#### Export Flatpak Bundle
+##### Export Flatpak Bundle
 ```shell
 flatpak build-export export build_flatpak && flatpak build-bundle export QRookie.flatpak io.github.glaumar.QRookie --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 ```
 
-## NixOS
-### Enable Flakes 
+### NixOS
+#### Enable Flakes 
 Add 
 ```nix
 nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -241,7 +248,7 @@ sudo nixos-rebuild switch
 ``` 
 for more details, please refer to [here](https://nixos-and-flakes.thiscute.world/nixos-with-flakes/nixos-with-flakes-enabled)
 
-### Build
+#### Build
 ```shell
 nix build
 
@@ -261,18 +268,18 @@ cmake --build build --target qrookie
 ./build/qrookie
 ```
 
-### Run Without Cloning The Repository
+#### Run Without Cloning The Repository
 ```shell
 nix run github:glaumar/QRookie
 ```
 
-## MacOS
-### Install HomeBrew
+### MacOS
+#### Install HomeBrew
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### Build
+#### Build
 ```shell
 cd ./macOs/
 
@@ -280,13 +287,13 @@ cd ./macOs/
 ./buildMacOs.sh  --open
 ```
 
-## MacOS (Nix)
-### Install Nix
+### MacOS (Nix)
+#### Install Nix
 We recommend using the [graphical installer](https://determinate.systems/posts/graphical-nix-installer/) for installation.  
 
 For more details, see [here](https://nixcademy.com/2024/01/15/nix-on-macos/)
 
-### Build
+#### Build
 Some dependencies in Nix are not supported on Darwin, but they can actually run if you force them to compile.  
 ```shell
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
@@ -310,7 +317,7 @@ cmake --build build --target qrookie
 ./build/qrookie
 ```
 
-### Run Without Cloning The Repository
+#### Run Without Cloning The Repository
 ```shell
 export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
 
