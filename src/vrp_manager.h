@@ -65,7 +65,11 @@ public:
     Q_DECLARE_FLAGS(StatusFlags, Status)
     Q_FLAG(Status)
 
-    enum SortType { SortByDate, SortByName, SortBySize };
+    enum SortType {
+        SortByDate,
+        SortByName,
+        SortBySize
+    };
 
     explicit VrpManager(QObject *parent = nullptr);
     ~VrpManager();

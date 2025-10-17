@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         engine.addImportPath(res_dir + "/kirigami");
 #endif
 
-        const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
+        const QUrl url("qrc:/qt/qml/Main/main.qml");
         QObject::connect(
             &engine,
             &QQmlApplicationEngine::objectCreated,
