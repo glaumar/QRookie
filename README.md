@@ -208,9 +208,9 @@ cmake --install build
 ### Install Runtime
 ```shell
 flatpak install \
-    runtime/org.kde.Platform/x86_64/6.6\
-    runtime/org.kde.Sdk/x86_64/6.6\
-    runtime/org.freedesktop.Sdk.Extension.openjdk21/x86_64/23.08
+    runtime/org.kde.Platform/x86_64/6.9\
+    runtime/org.kde.Sdk/x86_64/6.9\
+    runtime/org.freedesktop.Sdk.Extension.openjdk21/x86_64/25.08
 ```
 
 ### Build
