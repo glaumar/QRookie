@@ -22,7 +22,7 @@
 #include <QAbstractListModel>
 #include <QList>
 
-class GameInfo;
+#include "game_info.h"
 
 class GameInfoModel : public QAbstractListModel
 {
