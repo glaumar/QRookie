@@ -118,8 +118,16 @@ QCoro::Task<bool> VrpManager::updateMetadata()
 
     auto *settings = AppSettings::instance();
     if (!settings->customBaseUrl().isEmpty()) {
-        vrp_public_.setBaseUrl(settings->customBaseUrl());
-        vrp_public_.setPassword(settings->customPassword());
+        QString base_url = settings->customBaseUrl();
+        if (!base_url.startsWith("http://") && !base_url.startsWith("https://")) {
+            base_url = "https://" + base_url;
+        }
+        if (!base_url.endsWith("/")) {
+            base_url += "/";
+        }
+        QString password = QString(QByteArray::fromBase64(settings->customPassword().toUtf8()));
+        vrp_public_.setBaseUrl(base_url);
+        vrp_public_.setPassword(password);
         qDebug() << "Using custom mirror: " << vrp_public_.baseUrl();
     } else {
         if (!co_await vrp_public_.update()) {
