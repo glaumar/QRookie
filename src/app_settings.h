@@ -32,6 +32,8 @@ class AppSettings : public QObject
     Q_PROPERTY(QString dataPath READ dataPath WRITE setDataPath NOTIFY dataPathChanged)
     Q_PROPERTY(QString lastWirelessAddr READ lastWirelessAddr WRITE setLastWirelessAddr NOTIFY lastWirelessAddrChanged)
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
+    Q_PROPERTY(QString customBaseUrl READ customBaseUrl WRITE setCustomBaseUrl NOTIFY customBaseUrlChanged)
+    Q_PROPERTY(QString customPassword READ customPassword WRITE setCustomPassword NOTIFY customPasswordChanged)
 
 public:
     explicit AppSettings(QObject *parent = nullptr);
@@ -88,6 +90,18 @@ public:
     }
     void setTheme(const QString &theme);
 
+    QString customBaseUrl() const
+    {
+        return custom_base_url_;
+    }
+    void setCustomBaseUrl(const QString &url);
+
+    QString customPassword() const
+    {
+        return custom_password_;
+    }
+    void setCustomPassword(const QString &password);
+
 signals:
     void autoInstallChanged(bool auto_install);
     void autoCleanCacheChanged(bool auto_clean_cache);
@@ -97,6 +111,8 @@ signals:
     void keyStorePathChanged(QString keystore_path);
     void lastWirelessAddrChanged(QString addr);
     void themeChanged(QString theme);
+    void customBaseUrlChanged(QString url);
+    void customPasswordChanged(QString password);
 
 private:
     void loadAppSettings();
@@ -110,6 +126,8 @@ private:
     QString keystore_path_;
     QString last_wireless_addr_;
     QString theme_;
+    QString custom_base_url_;
+    QString custom_password_;
 };
 
 #endif /* QROOKIE_APP_SETTINGS */

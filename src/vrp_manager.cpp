@@ -115,12 +115,27 @@ QVariantList VrpManager::gamesInfo() const
 QCoro::Task<bool> VrpManager::updateMetadata()
 {
     vrp_torrent_.update();
-    if (!co_await vrp_public_.update()) {
-        qWarning() << "Update config failed";
-        co_return false;
+
+    auto *settings = AppSettings::instance();
+    if (!settings->customBaseUrl().isEmpty()) {
+        QString base_url = settings->customBaseUrl();
+        if (!base_url.startsWith("http://") && !base_url.startsWith("https://")) {
+            base_url = "https://" + base_url;
+        }
+        if (!base_url.endsWith("/")) {
+            base_url += "/";
+        }
+        QString password = QString(QByteArray::fromBase64(settings->customPassword().toUtf8()));
+        vrp_public_.setBaseUrl(base_url);
+        vrp_public_.setPassword(password);
+        qDebug() << "Using custom mirror: " << vrp_public_.baseUrl();
     } else {
-        http_downloader_.setBaseUrl(vrp_public_.baseUrl());
+        if (!co_await vrp_public_.update()) {
+            qWarning() << "Update config failed";
+            co_return false;
+        }
     }
+    http_downloader_.setBaseUrl(vrp_public_.baseUrl());
 
     if (!co_await downloadMetadata()) {
         qWarning() << "Update metadata failed";

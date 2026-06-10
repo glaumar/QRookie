@@ -33,9 +33,17 @@ public:
     {
         return base_url_;
     }
+    void setBaseUrl(const QString &url)
+    {
+        base_url_ = url;
+    }
     QString password() const
     {
         return password_;
+    }
+    void setPassword(const QString &password)
+    {
+        password_ = password;
     }
 
 private:

@@ -82,6 +82,9 @@ void AppSettings::loadAppSettings()
         theme_ = "Universal";
 #endif
     }
+
+    custom_base_url_ = settings_->value("custom_base_url", custom_base_url_).toString();
+    custom_password_ = settings_->value("custom_password", custom_password_).toString();
 }
 
 void AppSettings::setAutoInstall(bool auto_install)
@@ -146,4 +149,18 @@ void AppSettings::setTheme(const QString &theme)
     theme_ = theme;
     settings_->setValue("theme", theme_);
     emit themeChanged(theme);
+}
+
+void AppSettings::setCustomBaseUrl(const QString &url)
+{
+    custom_base_url_ = url;
+    settings_->setValue("custom_base_url", custom_base_url_);
+    emit customBaseUrlChanged(url);
+}
+
+void AppSettings::setCustomPassword(const QString &password)
+{
+    custom_password_ = password;
+    settings_->setValue("custom_password", custom_password_);
+    emit customPasswordChanged(password);
 }

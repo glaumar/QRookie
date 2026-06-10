@@ -196,6 +196,29 @@ ColumnLayout {
                 model: app.vrp.compatibleThemes
             }
 
+            TextField {
+                id: custom_base_url_setting
+
+                Kirigami.FormData.label: qsTr("Custom Mirror URL:")
+                placeholderText: qsTr("https://example.com/")
+                text: app.vrp.settings.customBaseUrl
+                onEditingFinished: {
+                    app.vrp.settings.customBaseUrl = text;
+                }
+            }
+
+            TextField {
+                id: custom_password_setting
+
+                Kirigami.FormData.label: qsTr("Custom Mirror Password:")
+                placeholderText: qsTr("Leave empty if not needed")
+                text: app.vrp.settings.customPassword
+                echoMode: TextInput.Password
+                onEditingFinished: {
+                    app.vrp.settings.customPassword = text;
+                }
+            }
+
             Item {
                 id: restart_label
 
